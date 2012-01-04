@@ -8,7 +8,7 @@ class VideoGlScene : public QGraphicsScene
     Q_OBJECT
 public:
     explicit VideoGlScene(QObject *parent = 0);
-//    void drawBackground(QPainter *painter, const QRectF &);
+    void drawBackground(QPainter *painter, const QRectF &);
 
 
 signals:

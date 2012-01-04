@@ -7,8 +7,8 @@ VideoGlScene::VideoGlScene(QObject *parent) :
     QGraphicsScene(parent)
 {
 }
-/*
-void VideoGlScene::VideoGLScene::drawBackground(QPainter *painter, const QRectF &)
+
+void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 {
     if (painter->paintEngine()->type() != QPaintEngine::OpenGL
             && painter->paintEngine()->type() != QPaintEngine::OpenGL2)
@@ -18,6 +18,8 @@ void VideoGlScene::VideoGLScene::drawBackground(QPainter *painter, const QRectF 
     }
 
     painter->beginNativePainting();
+
+    QColor m_backgroundColor("lightGray");
 
     glClearColor(m_backgroundColor.redF(), m_backgroundColor.greenF(), m_backgroundColor.blueF(), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -30,7 +32,7 @@ void VideoGlScene::VideoGLScene::drawBackground(QPainter *painter, const QRectF 
 
     painter->endNativePainting();
 
-    QTimer::singleShot(20, this, SLOT(update()));
+//    QTimer::singleShot(20, this, SLOT(update()));
 
 }
-*/
+
