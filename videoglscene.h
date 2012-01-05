@@ -2,7 +2,8 @@
 #define VIDEOGLSCENE_H
 
 #include <QGraphicsScene>
-#include "opencv2/core/core.hpp"
+//#include "opencv2/core/core.hpp"
+#include "opencv2/opencv.hpp"
 
 class VideoGlScene : public QGraphicsScene
 {
@@ -19,6 +20,7 @@ public slots:
     void loadImage(QString imName);
 
 private:
+    cv::VideoCapture cam;
 
 };
 

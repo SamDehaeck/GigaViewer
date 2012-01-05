@@ -3,9 +3,6 @@
 
 #include "videoglscene.h"
 
-#include "opencv2/core/core.hpp"
-#include <opencv2/highgui/highgui.hpp>
-
 
 class GraphicsView : public QGraphicsView
 {
@@ -34,7 +31,7 @@ int main(int argc, char *argv[])
     view.setScene(new VideoGlScene);
     view.show();
 
-    view.resize(1024, 768);
+    view.showMaximized();
 
 
 

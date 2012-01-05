@@ -1,5 +1,5 @@
 #include "videoglscene.h"
-#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/opencv.hpp"
 #include "fileinputdialog.h"
 
 #include <QtGui>
@@ -11,9 +11,9 @@ VideoGlScene::VideoGlScene(QObject *parent) :
 //    imageBuff=cv::imread("/home/sam/ULB/Fotos/Interf+bel.bmp",0);
 //    imageBuff=cv::imread("/home/sam/GridCentralZone.png"); // color images seem to work to
 
+    cam=cv::VideoCapture(0);
+
     //now make the control dialogues
-
-
     FileInputDialog* fileDialog = new FileInputDialog;
 
     connect(fileDialog,SIGNAL(buttonPressed(QString)),this,SLOT(loadImage(QString)));
@@ -36,6 +36,10 @@ VideoGlScene::VideoGlScene(QObject *parent) :
 
 void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 {
+    if (cam.isOpened()) {
+        cam >> imageBuff;
+    }
+
     if (painter->paintEngine()->type() != QPaintEngine::OpenGL
             && painter->paintEngine()->type() != QPaintEngine::OpenGL2)
     {
@@ -105,7 +109,7 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
     painter->endNativePainting();
 
-    //    QTimer::singleShot(20, this, SLOT(update()));
+    QTimer::singleShot(20, this, SLOT(update()));
 
 }
 
