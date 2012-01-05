@@ -25,3 +25,6 @@ HEADERS  += \
 
 FORMS += \
     fileinputdialog.ui
+
+OTHER_FILES += \
+    README.txt

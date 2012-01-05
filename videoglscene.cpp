@@ -7,9 +7,6 @@
 VideoGlScene::VideoGlScene(QObject *parent) :
     QGraphicsScene(parent)
 {
-//    imageBuff=cv::imread("/home/sam/ULB/Fotos/Interf+bel.bmp",0);
-//    imageBuff=cv::imread("/home/sam/GridCentralZone.png"); // color images seem to work to
-
     cam=cv::VideoCapture(0);
 
     //now make the control dialogues
