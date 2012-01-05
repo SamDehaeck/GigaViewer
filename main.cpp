@@ -3,6 +3,9 @@
 
 #include "videoglscene.h"
 
+#include "opencv2/core/core.hpp"
+#include <opencv2/highgui/highgui.hpp>
+
 
 class GraphicsView : public QGraphicsView
 {
@@ -25,12 +28,15 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     GraphicsView view;
-    view.setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+//    view.setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
+    view.setViewport(new QGLWidget);
     view.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     view.setScene(new VideoGlScene);
     view.show();
 
     view.resize(1024, 768);
+
+
 
     return a.exec();
 }
