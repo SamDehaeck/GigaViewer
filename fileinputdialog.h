@@ -15,6 +15,12 @@ public:
     explicit FileInputDialog(QWidget *parent = 0);
     ~FileInputDialog();
 
+signals:
+    void buttonPressed(QString namegiven);
+
+private slots:
+    void on_filePushButton_clicked();
+
 private:
     Ui::FileInputDialog *ui;
 };

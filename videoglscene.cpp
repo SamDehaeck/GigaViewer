@@ -8,7 +8,7 @@
 VideoGlScene::VideoGlScene(QObject *parent) :
     QGraphicsScene(parent)
 {
-    imageBuff=cv::imread("/home/sam/ULB/Fotos/Interf+bel.bmp",0);
+//    imageBuff=cv::imread("/home/sam/ULB/Fotos/Interf+bel.bmp",0);
 //    imageBuff=cv::imread("/home/sam/GridCentralZone.png"); // color images seem to work to
 
     //now make the control dialogues
@@ -20,6 +20,7 @@ VideoGlScene::VideoGlScene(QObject *parent) :
 
     FileInputDialog* file2 = new FileInputDialog;
 
+    connect(file2,SIGNAL(buttonPressed(QString)),this,SLOT(loadImage(QString)));
 
     QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
     proxy->setWidget(file2);
@@ -87,6 +88,12 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
     //    QTimer::singleShot(20, this, SLOT(update()));
 
+}
+
+void VideoGlScene::loadImage(QString imName)
+{
+    imageBuff=cv::imread(imName.toStdString(),0);
+    update();
 }
 
 

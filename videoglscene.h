@@ -16,6 +16,7 @@ public:
 signals:
 
 public slots:
+    void loadImage(QString imName);
 
 private:
 

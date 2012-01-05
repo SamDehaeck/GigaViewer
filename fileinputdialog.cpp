@@ -12,3 +12,9 @@ FileInputDialog::~FileInputDialog()
 {
     delete ui;
 }
+
+void FileInputDialog::on_filePushButton_clicked()
+{
+    QString resp=ui->fileNameInput->text();
+    emit buttonPressed(resp);
+}
