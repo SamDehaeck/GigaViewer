@@ -17,6 +17,9 @@ signals:
 
 public slots:
 
+private:
+    QDialog *createDialog(const QString &windowTitle) const;
+
 };
 
 #endif // VIDEOGLSCENE_H
