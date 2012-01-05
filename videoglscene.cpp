@@ -1,5 +1,4 @@
 #include "videoglscene.h"
-#include "opencv2/opencv.hpp"
 #include "fileinputdialog.h"
 
 #include <QtGui>
@@ -96,12 +95,7 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     glTexCoord2f(1.0,0.0); glVertex2f(maxX,0.0);
     glTexCoord2f(1.0,1.0); glVertex2f(maxX,maxY);
     glTexCoord2f(0.0,1.0); glVertex2f(0.0,maxY);
-    /*
-    glTexCoord2f(0.0,0.0); glVertex2f(0,0);
-    glTexCoord2f(1.0,0.0); glVertex2f(imageBuff.cols,0.0);
-    glTexCoord2f(1.0,1.0); glVertex2f(imageBuff.cols,imageBuff.rows);
-    glTexCoord2f(0.0,1.0); glVertex2f(0.0,imageBuff.rows);
-    */
+
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glDeleteTextures(1,&mytex);

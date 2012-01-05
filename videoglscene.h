@@ -2,7 +2,6 @@
 #define VIDEOGLSCENE_H
 
 #include <QGraphicsScene>
-//#include "opencv2/core/core.hpp"
 #include "opencv2/opencv.hpp"
 
 class VideoGlScene : public QGraphicsScene
@@ -12,8 +11,6 @@ public:
     explicit VideoGlScene(QObject *parent = 0);
     void drawBackground(QPainter *painter, const QRectF &);
 
-    cv::Mat imageBuff;
-
 signals:
 
 public slots:
@@ -21,6 +18,7 @@ public slots:
 
 private:
     cv::VideoCapture cam;
+    cv::Mat imageBuff;
 
 };
 
