@@ -14,16 +14,12 @@ VideoGlScene::VideoGlScene(QObject *parent) :
     //now make the control dialogues
 
 
-//    QWidget * m_fileButton = new QPushButton(tr("Load model"));
-//    connect(m_modelButton, SIGNAL(clicked()), this, SLOT(loadModel()));
+    FileInputDialog* fileDialog = new FileInputDialog;
 
-
-    FileInputDialog* file2 = new FileInputDialog;
-
-    connect(file2,SIGNAL(buttonPressed(QString)),this,SLOT(loadImage(QString)));
+    connect(fileDialog,SIGNAL(buttonPressed(QString)),this,SLOT(loadImage(QString)));
 
     QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
-    proxy->setWidget(file2);
+    proxy->setWidget(fileDialog);
     addItem(proxy);
 
     QPointF pos(10, 10);
@@ -74,11 +70,34 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     if (imageBuff.isContinuous()) glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glTexImage2D(GL_TEXTURE_2D,0,cn,imageBuff.cols,imageBuff.rows,0,format,gldepth,imageBuff.data);
 
+    //calculate projected size in order to keep aspect ratio intact
+    int maxX=1024;
+    int maxY=768;
+    if (imageBuff.rows!=0) {
+        double aspRatio=imageBuff.rows/(double)imageBuff.cols;
+        double windowAspRatio=this->height()/(double)this->width();
+        if (aspRatio>windowAspRatio) {
+            // amount of rows is limiting factor
+            maxY=this->height();
+            maxX=maxY/aspRatio;
+        } else {
+            maxX=this->width();
+            maxY=maxX*aspRatio;
+        }
+    }
+
     glBegin(GL_QUADS);
+
+    glTexCoord2f(0.0,0.0); glVertex2f(0,0);
+    glTexCoord2f(1.0,0.0); glVertex2f(maxX,0.0);
+    glTexCoord2f(1.0,1.0); glVertex2f(maxX,maxY);
+    glTexCoord2f(0.0,1.0); glVertex2f(0.0,maxY);
+    /*
     glTexCoord2f(0.0,0.0); glVertex2f(0,0);
     glTexCoord2f(1.0,0.0); glVertex2f(imageBuff.cols,0.0);
     glTexCoord2f(1.0,1.0); glVertex2f(imageBuff.cols,imageBuff.rows);
     glTexCoord2f(0.0,1.0); glVertex2f(0.0,imageBuff.rows);
+    */
     glEnd();
     glDisable(GL_TEXTURE_2D);
     glDeleteTextures(1,&mytex);
