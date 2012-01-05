@@ -18,7 +18,6 @@ signals:
 public slots:
 
 private:
-    QDialog *createDialog(const QString &windowTitle) const;
 
 };
 

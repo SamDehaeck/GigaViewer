@@ -1,19 +1,9 @@
 #include "videoglscene.h"
 #include <opencv2/highgui/highgui.hpp>
+#include "fileinputdialog.h"
 
 #include <QtGui>
 #include <QtOpenGL>
-
-QDialog * VideoGlScene::createDialog(const QString &windowTitle) const
-{
-    QDialog *dialog = new QDialog(0, Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-
-    dialog->setWindowOpacity(0.5);
-    dialog->setWindowTitle(windowTitle);
-    dialog->setLayout(new QVBoxLayout);
-
-    return dialog;
-}
 
 VideoGlScene::VideoGlScene(QObject *parent) :
     QGraphicsScene(parent)
@@ -22,14 +12,17 @@ VideoGlScene::VideoGlScene(QObject *parent) :
 //    imageBuff=cv::imread("/home/sam/GridCentralZone.png"); // color images seem to work to
 
     //now make the control dialogues
-    QWidget *fileInput = createDialog(tr("File input"));
 
-    QWidget * m_fileButton = new QPushButton(tr("Load model"));
+
+//    QWidget * m_fileButton = new QPushButton(tr("Load model"));
 //    connect(m_modelButton, SIGNAL(clicked()), this, SLOT(loadModel()));
-    fileInput->layout()->addWidget(m_fileButton);
+
+
+    FileInputDialog* file2 = new FileInputDialog;
+
 
     QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
-    proxy->setWidget(fileInput);
+    proxy->setWidget(file2);
     addItem(proxy);
 
     QPointF pos(10, 10);
