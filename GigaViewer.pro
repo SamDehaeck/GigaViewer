@@ -25,14 +25,16 @@ SOURCES += main.cpp \
     fileinputdialog.cpp \
     coordinator.cpp \
     maingui.cpp \
-    picbackend.cpp
+    picbackend.cpp \
+    cambackend.cpp
 
 HEADERS  += \
     videoglscene.h \
     fileinputdialog.h \
     coordinator.h \
     maingui.h \
-    picbackend.h
+    picbackend.h \
+    cambackend.h
 
 FORMS += \
     fileinputdialog.ui

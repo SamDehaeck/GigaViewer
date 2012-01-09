@@ -4,6 +4,7 @@
 #include <QObject>
 #include "maingui.h"
 #include "picbackend.h"
+#include "cambackend.h"
 
 class Coordinator : public QObject
 {
@@ -19,6 +20,7 @@ private:
     MainGui* theGui;
     bool guiMode;
     PicBackend picBack;
+    CamBackend camBack;
 
 };
 

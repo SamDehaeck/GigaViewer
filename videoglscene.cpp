@@ -7,8 +7,6 @@
 VideoGlScene::VideoGlScene(FileInputDialog *fDialog, QObject *parent) :
     QGraphicsScene(parent)
 {
-    cam=cv::VideoCapture(0);
-
     //now make the control dialogues
     QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
     proxy->setWidget(fDialog);
@@ -28,10 +26,6 @@ VideoGlScene::VideoGlScene(FileInputDialog *fDialog, QObject *parent) :
 
 void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 {
-    if (cam.isOpened()) {
-        cam >> imageBuff;
-    }
-
     if (painter->paintEngine()->type() != QPaintEngine::OpenGL
             && painter->paintEngine()->type() != QPaintEngine::OpenGL2)
     {
@@ -96,7 +90,7 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
     painter->endNativePainting();
 
-    QTimer::singleShot(20, this, SLOT(update()));
+//    QTimer::singleShot(20, this, SLOT(update()));
 
 }
 

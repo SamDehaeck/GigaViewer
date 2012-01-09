@@ -19,7 +19,6 @@ signals:
 public slots:
 
 private:
-    cv::VideoCapture cam;
 
 
 };
