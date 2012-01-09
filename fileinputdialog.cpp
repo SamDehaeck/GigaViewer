@@ -16,5 +16,10 @@ FileInputDialog::~FileInputDialog()
 void FileInputDialog::on_filePushButton_clicked()
 {
     QString resp=ui->fileNameInput->text();
-    emit buttonPressed(resp);
+    emit StaticPicPressed(resp);
+}
+
+void FileInputDialog::on_camButton_clicked()
+{
+    emit OpencvFeedPressed();
 }

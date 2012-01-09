@@ -17,7 +17,9 @@ MainGui::MainGui(QWidget *parent) :
     theScene= new VideoGlScene(fileDialog);
 
 
-    connect(fileDialog,SIGNAL(buttonPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
+    connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
+//    connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SIGNAL(newOpencvFeedNeeded()));
+    connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(startingOpenCVFeedTimer()));
 
     setScene(theScene);
 }
@@ -29,8 +31,14 @@ void MainGui::resizeEvent(QResizeEvent *event)
     QGraphicsView::resizeEvent(event);
 }
 
-void MainGui::newPicReceived(cv::Mat theMatrix)
+void MainGui::newImageReceived(cv::Mat theMatrix)
 {
     theScene->imageBuff=theMatrix.clone();
     theScene->update();
+}
+
+void MainGui::startingOpenCVFeedTimer()
+{
+    emit newOpencvFeedNeeded();
+    QTimer::singleShot(20, this, SLOT(startingOpenCVFeedTimer()));
 }

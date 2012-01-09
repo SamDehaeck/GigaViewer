@@ -17,9 +17,11 @@ public:
 
 signals:
     void newPicNeeded(QString theString);
+    void newOpencvFeedNeeded();
 
 public slots:
-    void newPicReceived(cv::Mat theMatrix);
+    void newImageReceived(cv::Mat theMatrix);
+    void startingOpenCVFeedTimer();
 
 protected:
     void resizeEvent(QResizeEvent *event);

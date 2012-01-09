@@ -15,7 +15,7 @@ signals:
     void NewImageReady(cv::Mat im);
 
 public slots:
-    void StartAcquisition(QString camNumber);
+    void StartAcquisition();
     void StopAcquisition();
 
 private:

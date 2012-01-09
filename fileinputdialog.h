@@ -16,10 +16,13 @@ public:
     ~FileInputDialog();
 
 signals:
-    void buttonPressed(QString namegiven);
+    void StaticPicPressed(QString namegiven);
+    void OpencvFeedPressed();
 
 private slots:
     void on_filePushButton_clicked();
+
+    void on_camButton_clicked();
 
 private:
     Ui::FileInputDialog *ui;

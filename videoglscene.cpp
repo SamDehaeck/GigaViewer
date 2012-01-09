@@ -90,8 +90,6 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
     painter->endNativePainting();
 
-//    QTimer::singleShot(20, this, SLOT(update()));
-
 }
 
 

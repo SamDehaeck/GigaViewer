@@ -1,7 +1,7 @@
 #include "cambackend.h"
 
 CamBackend::CamBackend(QObject *parent) :
-    QObject(parent),camera(0)
+    QObject(parent)
 {
 }
 
@@ -14,13 +14,17 @@ bool CamBackend::IsLive() {
     return FALSE;
 }
 
-void CamBackend::StartAcquisition(QString camString)
+void CamBackend::StartAcquisition()
 {
+    if (!camera.isOpened()) {
+        camera=cv::VideoCapture(0);
+    }
     liveMode=TRUE;
     if (camera.isOpened()) {
         camera >> currImage;
+        emit NewImageReady(currImage);
     }
-    emit NewImageReady(currImage);
+
 }
 
 void CamBackend::StopAcquisition()
