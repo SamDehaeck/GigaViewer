@@ -2,25 +2,31 @@
 #define CAMBACKEND_H
 
 #include <QObject>
+#include <QtGui>
 #include "opencv2/opencv.hpp"
+#include "imagepacket.h"
 
-class CamBackend : public QObject
+class CamBackend : public QThread
 {
     Q_OBJECT
 public:
     explicit CamBackend(QObject *parent = 0);
+    void StopAcquisition();
+
     bool IsLive();
 
 signals:
-    void NewImageReady(cv::Mat im);
+    void NewImageReady(ImagePacket im);
 
 public slots:
     void StartAcquisition();
-    void StopAcquisition();
+    void GrabFrame();
 
 private:
+    void run();
+
     cv::VideoCapture camera;
-    cv::Mat currImage;
+    ImagePacket currImage;
     bool liveMode;
 
 };

@@ -2,7 +2,7 @@
 #define PICBACKEND_H
 
 #include <QObject>
-#include "opencv2/opencv.hpp"
+#include "imagepacket.h"
 
 class PicBackend : public QObject
 {
@@ -11,13 +11,13 @@ public:
     explicit PicBackend(QObject *parent = 0);
 
 signals:
-    void NewImageReady(cv::Mat im);
+    void NewImageReady(ImagePacket im);
 
 public slots:
     void LoadNewImage(QString theName);
 
 private:
-    cv::Mat Image;
+    ImagePacket Image;
 
 };
 

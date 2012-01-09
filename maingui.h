@@ -4,7 +4,7 @@
 #include <QGraphicsView>
 #include <QtGui>
 #include <QGLWidget>
-#include "opencv2/opencv.hpp"
+#include "imagepacket.h"
 #include "videoglscene.h"
 
 
@@ -17,11 +17,10 @@ public:
 
 signals:
     void newPicNeeded(QString theString);
-    void newOpencvFeedNeeded();
+    void newOpencvFeedNeeded(bool start);
 
 public slots:
-    void newImageReceived(cv::Mat theMatrix);
-    void startingOpenCVFeedTimer();
+    void newImageReceived(ImagePacket theMatrix);
 
 protected:
     void resizeEvent(QResizeEvent *event);

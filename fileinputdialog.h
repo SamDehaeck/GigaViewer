@@ -17,12 +17,12 @@ public:
 
 signals:
     void StaticPicPressed(QString namegiven);
-    void OpencvFeedPressed();
+    void OpencvFeedPressed(bool start);
 
 private slots:
     void on_filePushButton_clicked();
 
-    void on_camButton_clicked();
+    void on_camButton_toggled(bool checked);
 
 private:
     Ui::FileInputDialog *ui;

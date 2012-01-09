@@ -21,6 +21,7 @@ win32 {
 }
 
 SOURCES += main.cpp \
+    imagepacket.cpp \
     videoglscene.cpp \
     fileinputdialog.cpp \
     coordinator.cpp \
@@ -34,7 +35,8 @@ HEADERS  += \
     coordinator.h \
     maingui.h \
     picbackend.h \
-    cambackend.h
+    cambackend.h \
+    imagepacket.h
 
 FORMS += \
     fileinputdialog.ui

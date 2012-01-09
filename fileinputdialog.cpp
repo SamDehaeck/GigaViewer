@@ -19,7 +19,7 @@ void FileInputDialog::on_filePushButton_clicked()
     emit StaticPicPressed(resp);
 }
 
-void FileInputDialog::on_camButton_clicked()
+void FileInputDialog::on_camButton_toggled(bool checked)
 {
-    emit OpencvFeedPressed();
+    emit OpencvFeedPressed(checked);
 }
