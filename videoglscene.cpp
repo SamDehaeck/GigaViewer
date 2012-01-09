@@ -4,18 +4,14 @@
 #include <QtGui>
 #include <QtOpenGL>
 
-VideoGlScene::VideoGlScene(QObject *parent) :
+VideoGlScene::VideoGlScene(FileInputDialog *fDialog, QObject *parent) :
     QGraphicsScene(parent)
 {
     cam=cv::VideoCapture(0);
 
     //now make the control dialogues
-    FileInputDialog* fileDialog = new FileInputDialog;
-
-    connect(fileDialog,SIGNAL(buttonPressed(QString)),this,SLOT(loadImage(QString)));
-
     QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
-    proxy->setWidget(fileDialog);
+    proxy->setWidget(fDialog);
     addItem(proxy);
 
     QPointF pos(10, 10);
@@ -104,11 +100,6 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
 }
 
-void VideoGlScene::loadImage(QString imName)
-{
-    imageBuff=cv::imread(imName.toStdString(),0);
-    update();
-}
 
 
 

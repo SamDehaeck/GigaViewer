@@ -22,11 +22,17 @@ win32 {
 
 SOURCES += main.cpp \
     videoglscene.cpp \
-    fileinputdialog.cpp
+    fileinputdialog.cpp \
+    coordinator.cpp \
+    maingui.cpp \
+    picbackend.cpp
 
 HEADERS  += \
     videoglscene.h \
-    fileinputdialog.h
+    fileinputdialog.h \
+    coordinator.h \
+    maingui.h \
+    picbackend.h
 
 FORMS += \
     fileinputdialog.ui
