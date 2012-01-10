@@ -42,6 +42,7 @@ void CamBackend::GrabFrame()
 
 bool CamBackend::StartAcquisition()
 {
+//    camera = new cv::VideoCapture("/home/sam/ULB/Movies/VapourCloudDynamics.mp4");
     camera = new cv::VideoCapture(0);
     if (camera->isOpened()) {
         liveMode=TRUE;
