@@ -11,7 +11,8 @@ class CamBackend : public QThread
     Q_OBJECT
 public:
     explicit CamBackend(QObject *parent = 0);
-    void StopAcquisition();
+    bool Init();
+    bool StartAcquisition();
 
     bool IsLive();
 
@@ -19,15 +20,17 @@ signals:
     void NewImageReady(ImagePacket im);
 
 public slots:
-    void StartAcquisition();
+    void StopAcquisition();
     void GrabFrame();
 
 private:
     void run();
+    void ReleaseCamera();
 
-    cv::VideoCapture camera;
+    cv::VideoCapture* camera;
     ImagePacket currImage;
     bool liveMode;
+    QTimer timer;
 
 };
 

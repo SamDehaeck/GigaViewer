@@ -9,17 +9,32 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
 //        connect(theGui,SIGNAL(newOpencvFeedNeeded()),&camBack,SLOT(StartAcquisition()));
         connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(startOpenCvThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
+        connect(this,SIGNAL(stopFeed()),&camBack,SLOT(StopAcquisition()));
     }
 }
 
 void Coordinator::startOpenCvThread(bool startNew)
 {
     if (startNew) {
-        camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
+        if (camBack.Init()) {
+            camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
+        } else {
+//            theGui-> //reset button
+        }
     } else {
-        camBack.quit();
-        camBack.wait();
-        camBack.StopAcquisition();
+        if (camBack.isRunning()) {
+            qDebug()<<"Stopping the thread";
+            emit stopFeed();
+            if (!camBack.wait(5000)) {
+                qDebug()<<"Had to kill the thread";
+                camBack.terminate();
+            } else {
+                qDebug()<<"Thread stopped successfully";
+            }
+        } else {
+            qDebug()<<"Thread not running";
+        }
     }
 }
+
 

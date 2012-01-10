@@ -13,6 +13,7 @@ public:
     Coordinator(MainGui* theGui, QObject *parent = 0);
 
 signals:
+    void stopFeed();
 
 public slots:
     void startOpenCvThread(bool startNew);
