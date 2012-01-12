@@ -15,7 +15,9 @@ FileInputDialog::~FileInputDialog()
 
 void FileInputDialog::on_filePushButton_clicked()
 {
-    QString resp=ui->fileNameInput->text();
+    QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
+    QDir::currentPath(), tr("All files (*.*)") );
+
     emit StaticPicPressed(resp);
 }
 

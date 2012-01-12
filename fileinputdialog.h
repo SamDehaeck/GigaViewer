@@ -2,6 +2,7 @@
 #define FILEINPUTDIALOG_H
 
 #include <QDialog>
+#include <QtGui>
 
 namespace Ui {
     class FileInputDialog;
