@@ -13,6 +13,7 @@ public:
     explicit CamBackend(QObject *parent = 0);
     bool Init();
     bool StartAcquisition();
+    void ReleaseCamera();
 
     bool IsLive();
 
@@ -25,7 +26,6 @@ public slots:
 
 private:
     void run();
-    void ReleaseCamera();
 
     cv::VideoCapture* camera;
     ImagePacket currImage;

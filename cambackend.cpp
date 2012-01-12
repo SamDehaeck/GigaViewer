@@ -19,13 +19,12 @@ bool CamBackend::IsLive() {
 void CamBackend::run()
 {
     qDebug() <<"Starting new thread";
-    if (StartAcquisition()) {
+    if (camera->isOpened()) {
         qDebug()<<"Launching the timer";
         timer.setInterval(20);
         timer.start();   // puts one event in the threads event queue
         exec(); //will go beyond this point when quit() is send from within this thread
         timer.stop();
-        ReleaseCamera();
     } else {
         qDebug()<<"Could not open camera";
     }
@@ -57,6 +56,7 @@ bool CamBackend::StartAcquisition()
 void CamBackend::StopAcquisition()
 {
     quit();
+//    sleep(2);
     liveMode=FALSE;
 }
 

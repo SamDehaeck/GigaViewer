@@ -16,7 +16,7 @@ signals:
     void stopFeed();
 
 public slots:
-    void startOpenCvThread(bool startNew);
+    void controlOpenCvThread(bool startNew);
 
 private:
     MainGui* theGui;

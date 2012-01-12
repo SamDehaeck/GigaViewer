@@ -40,9 +40,18 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     int cn = imageBuff.channels();
     GLenum format = GL_LUMINANCE;
     if (cn==3) {
+#ifdef _WINDOWS
         format = GL_RGB;
+#else
+        format = GL_BGR;
+#endif
+
     } else if (cn==4) {
+#ifdef _WINDOWS
         format = GL_RGBA;
+#else
+        format = GL_BGRA;
+#endif
     }
     GLenum gldepth = GL_UNSIGNED_BYTE;
     if (depth==CV_16U) gldepth=GL_UNSIGNED_SHORT;
