@@ -6,7 +6,6 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
     if (guiMode) {
         connect(theGui,SIGNAL(newPicNeeded(QString)),&picBack,SLOT(LoadNewImage(QString)));
         connect(&picBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
-//        connect(theGui,SIGNAL(newOpencvFeedNeeded()),&camBack,SLOT(StartAcquisition()));
         connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlOpenCvThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(this,SIGNAL(stopFeed()),&camBack,SLOT(StopAcquisition()));
@@ -25,13 +24,10 @@ void Coordinator::controlOpenCvThread(bool startNew)
         }
     } else {
         if (camBack.isRunning()) {
-            qDebug()<<"Stopping the thread";
             emit stopFeed();
             if (!camBack.wait(5000)) {
                 qDebug()<<"Had to kill the thread";
                 camBack.terminate();
-            } else {
-                qDebug()<<"Thread stopped successfully";
             }
             camBack.ReleaseCamera();
         } else {

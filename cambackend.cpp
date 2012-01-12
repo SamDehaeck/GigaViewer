@@ -18,11 +18,9 @@ bool CamBackend::IsLive() {
 
 void CamBackend::run()
 {
-    qDebug() <<"Starting new thread";
     if (camera->isOpened()) {
-        qDebug()<<"Launching the timer";
         timer.setInterval(20);
-        timer.start();   // puts one event in the threads event queue
+        timer.start();
         exec(); //will go beyond this point when quit() is send from within this thread
         timer.stop();
     } else {
@@ -56,7 +54,6 @@ bool CamBackend::StartAcquisition()
 void CamBackend::StopAcquisition()
 {
     quit();
-//    sleep(2);
     liveMode=FALSE;
 }
 
@@ -67,6 +64,6 @@ void CamBackend::ReleaseCamera()
 
 bool CamBackend::Init()
 {
-    qDebug()<<"No real need to init opencv separately";
+    //No real need to init opencv separately
     return TRUE;
 }
