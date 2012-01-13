@@ -44,14 +44,22 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 
 void MainGui::openCvFeedPressed()
 {
-    if (!theScene->items()[1]->isVisible()) {
-        theScene->items()[1]->setVisible(TRUE);
-        emit newOpencvFeedNeeded(TRUE);
+    foreach (QGraphicsItem *item,theScene->items()) {
+        if (item->data(0)=="PLAYBACK") {
+            if (!item->isVisible()) {
+                item->setVisible(TRUE);
+                emit newOpencvFeedNeeded(TRUE);
+            }
+        }
     }
 }
 
 void MainGui::stopButtonPressed()
 {
-    theScene->items()[0]->setVisible(FALSE);
-    emit newOpencvFeedNeeded(FALSE);
+    foreach (QGraphicsItem *item,theScene->items()) {
+        if (item->data(0)=="PLAYBACK") {
+            item->setVisible(FALSE);
+            emit newOpencvFeedNeeded(FALSE);
+        }
+    }
 }

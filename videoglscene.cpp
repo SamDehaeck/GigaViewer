@@ -21,6 +21,16 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     foreach (QGraphicsItem *item, items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);
         item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+        switch (i) {
+            case 0:
+                item->setData(0,"INPUT");
+                break;
+            case 1:
+                item->setData(0,"PLAYBACK");
+                break;
+        }
+
+
         if (i!=0) item->setVisible(FALSE);
         const QRectF rect = item->boundingRect();
         item->setPos(pos.x() - rect.x(), pos.y() - rect.y());
