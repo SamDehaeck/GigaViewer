@@ -2,7 +2,7 @@
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent)
+    QThread(parent),timerInterval(20)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
 }
@@ -19,7 +19,7 @@ bool CamBackend::IsLive() {
 void CamBackend::run()
 {
     if (camera->isOpened()) {
-        timer.setInterval(20);
+        timer.setInterval(timerInterval);
         timer.start();
         exec(); //will go beyond this point when quit() is send from within this thread
         timer.stop();

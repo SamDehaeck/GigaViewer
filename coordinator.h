@@ -17,6 +17,7 @@ signals:
 
 public slots:
     void controlOpenCvThread(bool startNew);
+    void changeFps(int newFps);
 
 private:
     MainGui* theGui;

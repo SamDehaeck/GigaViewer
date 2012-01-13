@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>402</width>
     <height>42</height>
    </rect>
   </property>
@@ -128,7 +128,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Fps</string>
+        <string>Frame Delay (ms)</string>
        </property>
       </widget>
      </item>

@@ -18,11 +18,13 @@ public:
 signals:
     void newPicNeeded(QString theString);
     void newOpencvFeedNeeded(bool start);
+    void implementNewFps(int fps);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);
     void openCvFeedPressed();
     void stopButtonPressed();
+    void gotNewFps(int fps);
 
 protected:
     void resizeEvent(QResizeEvent *event);

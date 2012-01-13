@@ -17,9 +17,12 @@ public:
 
 signals:
     void stopPlayback();
+    void newFps(int fps);
 
 private slots:
     void on_stopButton_clicked();
+
+    void on_fpsEdit_editingFinished();
 
 private:
     Ui::PlaybackDialog *ui;

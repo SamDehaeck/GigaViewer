@@ -15,6 +15,7 @@ public:
     bool StartAcquisition();
     void ReleaseCamera();
 
+    QTimer timer;
     bool IsLive();
 
 signals:
@@ -30,7 +31,7 @@ private:
     cv::VideoCapture* camera;
     ImagePacket currImage;
     bool liveMode;
-    QTimer timer;
+    double timerInterval;
 
 };
 
