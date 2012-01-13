@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     coordinator.cpp \
     maingui.cpp \
     picbackend.cpp \
-    cambackend.cpp
+    cambackend.cpp \
+    playbackdialog.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -36,10 +37,15 @@ HEADERS  += \
     maingui.h \
     picbackend.h \
     cambackend.h \
-    imagepacket.h
+    imagepacket.h \
+    playbackdialog.h
 
 FORMS += \
-    fileinputdialog.ui
+    fileinputdialog.ui \
+    playbackdialog.ui
 
 OTHER_FILES += \
     README.txt
+
+RESOURCES += \
+    icons.qrc

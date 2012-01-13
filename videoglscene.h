@@ -9,7 +9,7 @@ class VideoGlScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    VideoGlScene(FileInputDialog *fdialog,QObject *parent = 0);
+    VideoGlScene(QList<QDialog*> controlDialogs,QObject *parent = 0);
     void drawBackground(QPainter *painter, const QRectF &);
 
     cv::Mat imageBuff;

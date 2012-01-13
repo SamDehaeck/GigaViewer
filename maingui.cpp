@@ -1,6 +1,8 @@
 #include "maingui.h"
 #include "videoglscene.h"
 #include "fileinputdialog.h"
+#include "playbackdialog.h"
+#include <QList>
 
 MainGui::MainGui(QWidget *parent) :
     QGraphicsView(parent)
@@ -11,16 +13,19 @@ MainGui::MainGui(QWidget *parent) :
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     FileInputDialog* fileDialog = new FileInputDialog;
+    PlaybackDialog* playDialog = new PlaybackDialog;
 
+    QList<QDialog*> controlDialogs;
+    controlDialogs.append(playDialog);
 
+    controlDialogs.append(fileDialog);
 
-    theScene= new VideoGlScene(fileDialog,parent);
+    theScene= new VideoGlScene(controlDialogs,parent);
 
 
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
-    connect(fileDialog,SIGNAL(OpencvFeedPressed(bool)),this,SIGNAL(newOpencvFeedNeeded(bool)));
-//    connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(startingOpenCVFeedTimer()));
-
+    connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
+    connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     setScene(theScene);
 }
 
@@ -35,4 +40,18 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 {
     theScene->imageBuff=theMatrix.image;
     theScene->update();
+}
+
+void MainGui::openCvFeedPressed()
+{
+    if (!theScene->items()[1]->isVisible()) {
+        theScene->items()[1]->setVisible(TRUE);
+        emit newOpencvFeedNeeded(TRUE);
+    }
+}
+
+void MainGui::stopButtonPressed()
+{
+    theScene->items()[0]->setVisible(FALSE);
+    emit newOpencvFeedNeeded(FALSE);
 }

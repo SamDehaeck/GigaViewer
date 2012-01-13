@@ -21,6 +21,8 @@ signals:
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);
+    void openCvFeedPressed();
+    void stopButtonPressed();
 
 protected:
     void resizeEvent(QResizeEvent *event);

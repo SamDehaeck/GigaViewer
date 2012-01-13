@@ -1,25 +1,31 @@
 #include "videoglscene.h"
-#include "fileinputdialog.h"
 
 #include <QtGui>
 #include <QtOpenGL>
 
-VideoGlScene::VideoGlScene(FileInputDialog *fDialog, QObject *parent) :
+VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     QGraphicsScene(parent)
 {
-    //now make the control dialogues
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
-    proxy->setWidget(fDialog);
-    addItem(proxy);
+    QDialog* dial;
+
+    foreach (dial, controlDialogs) {
+        //now make the control dialogues
+        QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+        proxy->setWidget(dial);
+        addItem(proxy);
+    }
 
     QPointF pos(10, 10);
+    int i(0);
+
     foreach (QGraphicsItem *item, items()) {
         item->setFlag(QGraphicsItem::ItemIsMovable);
         item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-
+        if (i!=0) item->setVisible(FALSE);
         const QRectF rect = item->boundingRect();
         item->setPos(pos.x() - rect.x(), pos.y() - rect.y());
         pos += QPointF(0, 10 + rect.height());
+        i++;
     }
 
 }
