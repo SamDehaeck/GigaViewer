@@ -8,7 +8,7 @@ VideoGlScene::VideoGlScene(FileInputDialog *fDialog, QObject *parent) :
     QGraphicsScene(parent)
 {
     //now make the control dialogues
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog);
+    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
     proxy->setWidget(fDialog);
     addItem(proxy);
 
