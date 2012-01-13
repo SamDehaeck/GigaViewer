@@ -14,7 +14,7 @@ MainGui::MainGui(QWidget *parent) :
 
 
 
-    theScene= new VideoGlScene(fileDialog);
+    theScene= new VideoGlScene(fileDialog,parent);
 
 
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));

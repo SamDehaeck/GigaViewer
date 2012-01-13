@@ -12,17 +12,11 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<ImagePacket>("ImagePacket");
 
-
+    QMainWindow win;
     MainGui view;
-
     Coordinator theBoss(&view);
+    win.setCentralWidget(&view);
 
-
-
-
-
-
-    view.showMaximized();
-
+    win.showMaximized();
     return a.exec();
 }
