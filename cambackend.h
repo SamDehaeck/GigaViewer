@@ -12,7 +12,7 @@ class CamBackend : public QThread
 public:
     explicit CamBackend(QObject *parent = 0);
     bool Init();
-    bool StartAcquisition();
+    bool StartAcquisition(QString dev="0");
     void ReleaseCamera();
 
     QTimer timer;

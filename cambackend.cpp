@@ -37,10 +37,14 @@ void CamBackend::GrabFrame()
     }
 }
 
-bool CamBackend::StartAcquisition()
+bool CamBackend::StartAcquisition(QString dev)
 {
 //    camera = new cv::VideoCapture("/home/sam/ULB/Movies/VapourCloudDynamics.mp4");
-    camera.open(0);
+    if (dev=="0") {
+        camera.open(0);
+    } else {
+        camera.open(dev.toStdString());
+    }
     if (camera.isOpened()) {
         liveMode=TRUE;
         return TRUE;

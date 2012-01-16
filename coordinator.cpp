@@ -20,7 +20,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
 {
     if (startNew) {
         if (camBack.Init()) {
-            if (camBack.StartAcquisition()) {
+            if (camBack.StartAcquisition(dev)) {
                 camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
                 opencvRunning=TRUE;
             }
@@ -51,7 +51,7 @@ void Coordinator::changeFps(int newFps)
 
 void Coordinator::LoadNewMovie(QString theMovie)
 {
-    qDebug() <<"Will do the movie"<<theMovie;
+    controlOpenCvThread(TRUE,theMovie);
 }
 
 void Coordinator::stopAcquisition()

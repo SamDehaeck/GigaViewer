@@ -24,7 +24,7 @@ MainGui::MainGui(QWidget *parent) :
 
 
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
-    connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SIGNAL(newMovieNeeded(QString)));
+    connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SLOT(newMoviePressed(QString)));
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
@@ -50,10 +50,10 @@ void MainGui::openCvFeedPressed()
         if (item->data(0)=="PLAYBACK") {
             if (!item->isVisible()) {
                 item->setVisible(TRUE);
-                emit newOpencvFeedNeeded(TRUE);
             }
         }
     }
+    emit newOpencvFeedNeeded(TRUE);
 }
 
 void MainGui::stopButtonPressed()
@@ -61,12 +61,24 @@ void MainGui::stopButtonPressed()
     foreach (QGraphicsItem *item,theScene->items()) {
         if (item->data(0)=="PLAYBACK") {
             item->setVisible(FALSE);
-            emit newOpencvFeedNeeded(FALSE);
         }
     }
+    emit newOpencvFeedNeeded(FALSE);
 }
 
 void MainGui::gotNewFps(int fps)
 {
     emit implementNewFps(fps);
+}
+
+void MainGui::newMoviePressed(QString theString)
+{
+    foreach (QGraphicsItem *item,theScene->items()) {
+        if (item->data(0)=="PLAYBACK") {
+            if (!item->isVisible()) {
+                item->setVisible(TRUE);
+            }
+        }
+    }
+    emit newMovieNeeded(theString);
 }

@@ -24,6 +24,7 @@ signals:
 public slots:
     void newImageReceived(ImagePacket theMatrix);
     void openCvFeedPressed();
+    void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);
 
