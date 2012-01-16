@@ -24,3 +24,12 @@ void FileInputDialog::on_filePushButton_clicked()
 void FileInputDialog::on_camButton_clicked() {
     emit OpencvFeedPressed();
 }
+
+// load movie button
+void FileInputDialog::on_MovieButton_clicked()
+{
+    QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
+    QDir::currentPath(), tr("All files (*.*)") );
+
+    emit MoviePressed(resp);
+}

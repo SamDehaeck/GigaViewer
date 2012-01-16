@@ -17,6 +17,7 @@ public:
 
 signals:
     void newPicNeeded(QString theString);
+    void newMovieNeeded(QString theString);
     void newOpencvFeedNeeded(bool start);
     void implementNewFps(int fps);
 

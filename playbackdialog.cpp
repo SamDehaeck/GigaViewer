@@ -24,3 +24,10 @@ void PlaybackDialog::on_fpsEdit_editingFinished()
 {
     emit newFps(ui->fpsEdit->text().toInt());
 }
+
+void PlaybackDialog::on_ffwdButton_clicked()
+{
+    int newFpsVal=2*(ui->fpsEdit->text().toInt());
+//    ui->fpsEdit->setText(newFpsVal);
+//    emit newFps(newFpsVal);
+}

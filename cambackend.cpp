@@ -9,7 +9,7 @@ CamBackend::CamBackend(QObject *parent) :
 
 bool CamBackend::IsLive() {
     if (liveMode) {
-        if (camera->isOpened()) {
+        if (camera.isOpened()) {
             return TRUE;
         }
     }
@@ -18,7 +18,7 @@ bool CamBackend::IsLive() {
 
 void CamBackend::run()
 {
-    if (camera->isOpened()) {
+    if (camera.isOpened()) {
         timer.setInterval(timerInterval);
         timer.start();
         exec(); //will go beyond this point when quit() is send from within this thread
@@ -30,9 +30,9 @@ void CamBackend::run()
 
 void CamBackend::GrabFrame()
 {
-    if (!camera->isOpened()) quit();
+    if (!camera.isOpened()) quit();
     if (liveMode) {
-        *camera >> currImage.image;
+        camera >> currImage.image;
         emit NewImageReady(currImage);
     }
 }
@@ -40,8 +40,8 @@ void CamBackend::GrabFrame()
 bool CamBackend::StartAcquisition()
 {
 //    camera = new cv::VideoCapture("/home/sam/ULB/Movies/VapourCloudDynamics.mp4");
-    camera = new cv::VideoCapture(0);
-    if (camera->isOpened()) {
+    camera.open(0);
+    if (camera.isOpened()) {
         liveMode=TRUE;
         return TRUE;
     } else {
@@ -59,7 +59,7 @@ void CamBackend::StopAcquisition()
 
 void CamBackend::ReleaseCamera()
 {
-    delete camera;
+    camera.release();
 }
 
 bool CamBackend::Init()

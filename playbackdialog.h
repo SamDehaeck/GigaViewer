@@ -24,6 +24,8 @@ private slots:
 
     void on_fpsEdit_editingFinished();
 
+    void on_ffwdButton_clicked();
+
 private:
     Ui::PlaybackDialog *ui;
 };

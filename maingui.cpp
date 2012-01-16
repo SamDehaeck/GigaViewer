@@ -24,6 +24,7 @@ MainGui::MainGui(QWidget *parent) :
 
 
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
+    connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SIGNAL(newMovieNeeded(QString)));
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));

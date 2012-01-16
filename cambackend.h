@@ -28,7 +28,7 @@ public slots:
 private:
     void run();
 
-    cv::VideoCapture* camera;
+    cv::VideoCapture camera;
     ImagePacket currImage;
     bool liveMode;
     double timerInterval;

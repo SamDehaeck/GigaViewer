@@ -1,13 +1,16 @@
 <RCC>
-    <qresource prefix="/new/svg">
-        <file>icons/media-eject.svg</file>
-        <file>icons/media-playback-pause.svg</file>
-        <file>icons/media-playback-start.svg</file>
-        <file>icons/media-playback-stop.svg</file>
-        <file>icons/media-record.svg</file>
-        <file>icons/media-seek-backward.svg</file>
-        <file>icons/media-seek-forward.svg</file>
-        <file>icons/media-skip-backward.svg</file>
-        <file>icons/media-skip-forward.svg</file>
+    <qresource prefix="/new/png">
+        <file>icons/gtk-media-forward-ltr.png</file>
+        <file>icons/gtk-media-forward-rtl.png</file>
+        <file>icons/gtk-media-next-ltr.png</file>
+        <file>icons/gtk-media-next-rtl.png</file>
+        <file>icons/gtk-media-pause.png</file>
+        <file>icons/gtk-media-play-ltr.png</file>
+        <file>icons/gtk-media-previous-ltr.png</file>
+        <file>icons/gtk-media-previous-rtl.png</file>
+        <file>icons/gtk-media-record.png</file>
+        <file>icons/gtk-media-rewind-ltr.png</file>
+        <file>icons/gtk-media-rewind-rtl.png</file>
+        <file>icons/gtk-media-stop.png</file>
     </qresource>
 </RCC>

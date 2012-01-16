@@ -6,6 +6,8 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
     if (guiMode) {
         connect(theGui,SIGNAL(newPicNeeded(QString)),&picBack,SLOT(LoadNewImage(QString)));
         connect(&picBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
+        connect(theGui,SIGNAL(newMovieNeeded(QString)),this,SLOT(LoadNewMovie(QString)));
+
         connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlOpenCvThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(this,SIGNAL(stopFeed()),&camBack,SLOT(StopAcquisition()));
@@ -13,7 +15,7 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
     }
 }
 
-void Coordinator::controlOpenCvThread(bool startNew)
+void Coordinator::controlOpenCvThread(bool startNew,QString dev)
 {
     if (startNew) {
         if (camBack.Init()) {
@@ -42,6 +44,11 @@ void Coordinator::changeFps(int newFps)
     if (camBack.isRunning()) {
         camBack.timer.setInterval(newFps);
     }
+}
+
+void Coordinator::LoadNewMovie(QString theMovie)
+{
+    qDebug() <<"Will do the movie"<<theMovie;
 }
 
 
