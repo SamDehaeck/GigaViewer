@@ -26,6 +26,8 @@ private slots:
 
     void on_ffwdButton_clicked();
 
+    void on_rwdButton_clicked();
+
 private:
     Ui::PlaybackDialog *ui;
 };

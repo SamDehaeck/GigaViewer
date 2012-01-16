@@ -28,7 +28,10 @@
      <item>
       <widget class="QToolButton" name="rwdButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Slow down playback/acquisition</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -47,6 +50,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="stopButton">
+       <property name="toolTip">
+        <string>Stop playback/acquisition</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -92,6 +98,9 @@
       <widget class="QToolButton" name="ffwdButton">
        <property name="enabled">
         <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>Speed up playback/acquisition</string>
        </property>
        <property name="text">
         <string>...</string>

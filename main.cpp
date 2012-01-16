@@ -1,10 +1,10 @@
 #include <QtGui>
 #include <QGLWidget>
 
+#include "mainwindow.h"
 #include "maingui.h"
 #include "coordinator.h"
 #include "imagepacket.h"
-
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
     qRegisterMetaType<ImagePacket>("ImagePacket");
 
-    QMainWindow win;
+    MainWindow win;
     MainGui view;
     Coordinator theBoss(&view);
     win.setCentralWidget(&view);

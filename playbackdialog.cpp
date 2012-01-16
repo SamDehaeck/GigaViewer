@@ -27,7 +27,16 @@ void PlaybackDialog::on_fpsEdit_editingFinished()
 
 void PlaybackDialog::on_ffwdButton_clicked()
 {
-    int newFpsVal=2*(ui->fpsEdit->text().toInt());
-//    ui->fpsEdit->setText(newFpsVal);
-//    emit newFps(newFpsVal);
+    int delayVal=(ui->fpsEdit->text().toInt())/2;
+    QString delayTxt=QString("%1").arg(delayVal);
+    ui->fpsEdit->setText(delayTxt);
+    emit newFps(delayVal);
+}
+
+void PlaybackDialog::on_rwdButton_clicked()
+{
+    int delayVal=2*(ui->fpsEdit->text().toInt());
+    QString delayTxt=QString("%1").arg(delayVal);
+    ui->fpsEdit->setText(delayTxt);
+    emit newFps(delayVal);
 }

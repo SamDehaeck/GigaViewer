@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     maingui.cpp \
     picbackend.cpp \
     cambackend.cpp \
-    playbackdialog.cpp
+    playbackdialog.cpp \
+    mainwindow.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     picbackend.h \
     cambackend.h \
     imagepacket.h \
-    playbackdialog.h
+    playbackdialog.h \
+    mainwindow.h
 
 FORMS += \
     fileinputdialog.ui \
