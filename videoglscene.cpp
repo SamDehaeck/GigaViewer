@@ -34,7 +34,7 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
         if (i!=0) item->setVisible(FALSE);
         const QRectF rect = item->boundingRect();
         item->setPos(pos.x() - rect.x(), pos.y() - rect.y());
-        pos += QPointF(0, 10 + rect.height());
+        pos += QPointF(10 + rect.width(),0);
         i++;
     }
 

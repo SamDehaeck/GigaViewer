@@ -10,6 +10,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
 
 signals:
+    void windowClosed();
 
 public slots:
 

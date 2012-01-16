@@ -19,12 +19,15 @@ public slots:
     void controlOpenCvThread(bool startNew,QString dev="0");
     void LoadNewMovie(QString);
     void changeFps(int newFps);
+    void stopAcquisition();
 
 private:
     MainGui* theGui;
     bool guiMode;
     PicBackend picBack;
     CamBackend camBack;
+    bool opencvRunning;
+    bool avtRunning;
 
 };
 

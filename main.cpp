@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
     Coordinator theBoss(&view);
     win.setCentralWidget(&view);
 
+    QObject::connect(&win,SIGNAL(windowClosed()),&theBoss,SLOT(stopAcquisition()));
+
     win.showMaximized();
     return a.exec();
 }

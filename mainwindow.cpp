@@ -9,6 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    qDebug()<<"Inside main close";
+    emit windowClosed();
     event->accept();
 }

@@ -2,6 +2,7 @@
 
 Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
     QObject(parent),theGui(theGivenGui),guiMode(TRUE),picBack(parent),camBack(parent)
+  ,opencvRunning(FALSE),avtRunning(FALSE)
 {
     if (guiMode) {
         connect(theGui,SIGNAL(newPicNeeded(QString)),&picBack,SLOT(LoadNewImage(QString)));
@@ -21,6 +22,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
         if (camBack.Init()) {
             if (camBack.StartAcquisition()) {
                 camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
+                opencvRunning=TRUE;
             }
         } else {
 //            theGui-> //reset button
@@ -33,6 +35,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
                 camBack.terminate();
             }
             camBack.ReleaseCamera();
+            opencvRunning=FALSE;
         } else {
             qDebug()<<"Thread not running";
         }
@@ -49,6 +52,13 @@ void Coordinator::changeFps(int newFps)
 void Coordinator::LoadNewMovie(QString theMovie)
 {
     qDebug() <<"Will do the movie"<<theMovie;
+}
+
+void Coordinator::stopAcquisition()
+{
+    if (opencvRunning) {
+        controlOpenCvThread(FALSE);
+    }
 }
 
 
