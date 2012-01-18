@@ -33,6 +33,9 @@ void CamBackend::GrabFrame()
     if (!camera.isOpened()) quit();
     if (liveMode) {
         camera >> currImage.image;
+        if (currImage.image.rows==0) {
+            StopAcquisition();
+        }
         emit NewImageReady(currImage);
     }
 }
@@ -63,7 +66,7 @@ void CamBackend::StopAcquisition()
 
 void CamBackend::ReleaseCamera()
 {
-    camera.release();
+    if (camera.isOpened()) camera.release();
 }
 
 bool CamBackend::Init()

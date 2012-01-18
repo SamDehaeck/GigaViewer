@@ -34,11 +34,11 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
                 qDebug()<<"Had to kill the thread";
                 camBack.terminate();
             }
-            camBack.ReleaseCamera();
             opencvRunning=FALSE;
         } else {
             qDebug()<<"Thread not running";
         }
+        camBack.ReleaseCamera(); //this checks first if it is opened.
     }
 }
 
