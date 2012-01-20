@@ -46,24 +46,16 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 
 void MainGui::openCvFeedPressed()
 {
-    foreach (QGraphicsItem *item,theScene->items()) {
-        if (item->data(0)=="PLAYBACK") {
-            if (!item->isVisible()) {
-                item->setVisible(TRUE);
-            }
-        }
-    }
     emit newOpencvFeedNeeded(TRUE);
+    showPlaybackControls(TRUE);
+    showInputControls(FALSE);
 }
 
 void MainGui::stopButtonPressed()
 {
-    foreach (QGraphicsItem *item,theScene->items()) {
-        if (item->data(0)=="PLAYBACK") {
-            item->setVisible(FALSE);
-        }
-    }
     emit newOpencvFeedNeeded(FALSE);
+    showPlaybackControls(FALSE);
+    showInputControls(TRUE);
 }
 
 void MainGui::gotNewFps(int fps)
@@ -73,12 +65,27 @@ void MainGui::gotNewFps(int fps)
 
 void MainGui::newMoviePressed(QString theString)
 {
+    emit newMovieNeeded(theString);
+    showPlaybackControls(TRUE);
+    showInputControls(FALSE);
+}
+
+void MainGui::showPlaybackControls(bool visible)
+{
     foreach (QGraphicsItem *item,theScene->items()) {
         if (item->data(0)=="PLAYBACK") {
-            if (!item->isVisible()) {
-                item->setVisible(TRUE);
-            }
+            item->setVisible(visible);
         }
     }
-    emit newMovieNeeded(theString);
 }
+
+void MainGui::showInputControls(bool visible)
+{
+    foreach (QGraphicsItem *item,theScene->items()) {
+        if (item->data(0)=="INPUT") {
+            item->setVisible(visible);
+        }
+    }
+}
+
+

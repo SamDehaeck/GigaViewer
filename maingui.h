@@ -30,6 +30,8 @@ public slots:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void showPlaybackControls(bool visible);
+    void showInputControls(bool visible);
 
 private:
     VideoGlScene* theScene;
