@@ -28,8 +28,11 @@ private slots:
 
     void on_rwdButton_clicked();
 
+    void on_playButton_toggled(bool checked);
+
 private:
     Ui::PlaybackDialog *ui;
+    int currentTimer;
 };
 
 #endif // PLAYBACKDIALOG_H

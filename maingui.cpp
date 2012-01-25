@@ -65,9 +65,11 @@ void MainGui::gotNewFps(int fps)
 
 void MainGui::newMoviePressed(QString theString)
 {
-    emit newMovieNeeded(theString);
-    showPlaybackControls(TRUE);
-    showInputControls(FALSE);
+    if (theString!="") {
+        emit newMovieNeeded(theString);
+        showPlaybackControls(TRUE);
+        showInputControls(FALSE);
+    }
 }
 
 void MainGui::showPlaybackControls(bool visible)

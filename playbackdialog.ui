@@ -71,7 +71,7 @@
      <item>
       <widget class="QToolButton" name="playButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -84,13 +84,20 @@
        </property>
        <property name="icon">
         <iconset resource="icons.qrc">
-         <normaloff>:/new/png/icons/gtk-media-play-ltr.png</normaloff>:/new/png/icons/gtk-media-play-ltr.png</iconset>
+         <normaloff>:/new/png/icons/gtk-media-play-ltr.png</normaloff>
+         <normalon>:/new/png/icons/gtk-media-pause.png</normalon>:/new/png/icons/gtk-media-play-ltr.png</iconset>
        </property>
        <property name="iconSize">
         <size>
          <width>32</width>
          <height>32</height>
         </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

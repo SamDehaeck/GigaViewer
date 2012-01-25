@@ -51,7 +51,7 @@ void Coordinator::changeFps(int newFps)
 
 void Coordinator::LoadNewMovie(QString theMovie)
 {
-    controlOpenCvThread(TRUE,theMovie);
+     controlOpenCvThread(TRUE,theMovie);
 }
 
 void Coordinator::stopAcquisition()

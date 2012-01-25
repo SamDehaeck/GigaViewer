@@ -8,6 +8,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->fpsEdit->setValidator(new QIntValidator(0,3600000,this));
+    currentTimer=20;
 }
 
 PlaybackDialog::~PlaybackDialog()
@@ -22,21 +23,31 @@ void PlaybackDialog::on_stopButton_clicked()
 
 void PlaybackDialog::on_fpsEdit_editingFinished()
 {
-    emit newFps(ui->fpsEdit->text().toInt());
+    currentTimer=ui->fpsEdit->text().toInt();
+    emit newFps(currentTimer);
 }
 
 void PlaybackDialog::on_ffwdButton_clicked()
 {
-    int delayVal=(ui->fpsEdit->text().toInt())/2;
-    QString delayTxt=QString("%1").arg(delayVal);
+    currentTimer=currentTimer/2;
+    QString delayTxt=QString("%1").arg(currentTimer);
     ui->fpsEdit->setText(delayTxt);
-    emit newFps(delayVal);
+    emit newFps(currentTimer);
 }
 
 void PlaybackDialog::on_rwdButton_clicked()
 {
-    int delayVal=2*(ui->fpsEdit->text().toInt());
-    QString delayTxt=QString("%1").arg(delayVal);
+    currentTimer=2*currentTimer;
+    QString delayTxt=QString("%1").arg(currentTimer);
     ui->fpsEdit->setText(delayTxt);
-    emit newFps(delayVal);
+    emit newFps(currentTimer);
+}
+
+void PlaybackDialog::on_playButton_toggled(bool checked)
+{
+    if (checked) {
+         emit newFps(currentTimer);
+    } else {
+        emit newFps(3600000);
+    }
 }
