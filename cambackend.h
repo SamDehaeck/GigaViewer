@@ -13,25 +13,31 @@ public:
     explicit CamBackend(QObject *parent = 0);
     bool Init();
     bool StartAcquisition(QString dev="0");
+    void StopAcquisition();
     void ReleaseCamera();
+    void setInterval(int newInt);
 
-    QTimer timer;
+
     bool IsLive();
 
 signals:
     void NewImageReady(ImagePacket im);
 
 public slots:
-    void StopAcquisition();
     void GrabFrame();
 
 private:
     void run();
+    void record();
 
     cv::VideoCapture camera;
+    cv::VideoWriter recFile;
+
     ImagePacket currImage;
     bool liveMode;
+    bool recording;
     double timerInterval;
+    QTimer timer;
 
 };
 

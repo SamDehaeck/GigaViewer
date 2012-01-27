@@ -5,6 +5,8 @@ CamBackend::CamBackend(QObject *parent) :
     QThread(parent),timerInterval(20)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
+    recFile=cv::VideoWriter("/home/sam/writetest.avi",0,10,cv::Size(640,480));
+    recording=FALSE;
 }
 
 bool CamBackend::IsLive() {
@@ -28,6 +30,11 @@ void CamBackend::run()
     }
 }
 
+void CamBackend::record()
+{
+    recFile<<currImage.image;
+}
+
 void CamBackend::GrabFrame()
 {
     if (!camera.isOpened()) quit();
@@ -36,6 +43,7 @@ void CamBackend::GrabFrame()
         if (currImage.image.rows==0) {
             StopAcquisition();
         }
+        if (recording) record();
         emit NewImageReady(currImage);
     }
 }
@@ -67,6 +75,11 @@ void CamBackend::StopAcquisition()
 void CamBackend::ReleaseCamera()
 {
     if (camera.isOpened()) camera.release();
+}
+
+void CamBackend::setInterval(int newInt)
+{
+    timer.setInterval(newInt);
 }
 
 bool CamBackend::Init()

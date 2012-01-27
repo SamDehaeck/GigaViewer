@@ -11,7 +11,6 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
 
         connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlOpenCvThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
-        connect(this,SIGNAL(stopFeed()),&camBack,SLOT(StopAcquisition()));
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
     }
 }
@@ -29,7 +28,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
         }
     } else {
         if (camBack.isRunning()) {
-            emit stopFeed();
+            camBack.StopAcquisition();
             if (!camBack.wait(5000)) {
                 qDebug()<<"Had to kill the thread";
                 camBack.terminate();
@@ -45,7 +44,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
 void Coordinator::changeFps(int newFps)
 {
     if (camBack.isRunning()) {
-        camBack.timer.setInterval(newFps);
+        camBack.setInterval(newFps);
     }
 }
 
