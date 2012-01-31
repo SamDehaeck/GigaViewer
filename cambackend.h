@@ -15,8 +15,7 @@ public:
     bool StartAcquisition(QString dev="0");
     void StopAcquisition();
     void ReleaseCamera();
-    void setInterval(int newInt);
-
+    void SetInterval(int newInt);
 
     bool IsLive();
 
@@ -25,6 +24,7 @@ signals:
 
 public slots:
     void GrabFrame();
+    void StartRecording(bool start);
 
 private:
     void run();

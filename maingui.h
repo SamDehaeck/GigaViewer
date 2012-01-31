@@ -20,6 +20,7 @@ signals:
     void newMovieNeeded(QString theString);
     void newOpencvFeedNeeded(bool start);
     void implementNewFps(int fps);
+    void startRecording(bool start);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);

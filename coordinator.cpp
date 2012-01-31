@@ -12,6 +12,7 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlOpenCvThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
+        connect(theGui,SIGNAL(startRecording(bool)),&camBack,SLOT(StartRecording(bool)));
     }
 }
 
@@ -35,7 +36,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
             }
             opencvRunning=FALSE;
         } else {
-            qDebug()<<"Thread not running";
+//            qDebug()<<"Thread not running";
         }
         camBack.ReleaseCamera(); //this checks first if it is opened.
     }
@@ -44,7 +45,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
 void Coordinator::changeFps(int newFps)
 {
     if (camBack.isRunning()) {
-        camBack.setInterval(newFps);
+        camBack.SetInterval(newFps);
     }
 }
 

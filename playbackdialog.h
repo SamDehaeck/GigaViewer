@@ -18,6 +18,7 @@ public:
 signals:
     void stopPlayback();
     void newFps(int fps);
+    void recordNow(bool checked);
 
 private slots:
     void on_stopButton_clicked();
@@ -29,6 +30,8 @@ private slots:
     void on_rwdButton_clicked();
 
     void on_playButton_toggled(bool checked);
+
+    void on_recButton_toggled(bool checked);
 
 private:
     Ui::PlaybackDialog *ui;

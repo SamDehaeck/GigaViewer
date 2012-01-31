@@ -2,11 +2,9 @@
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),timerInterval(20)
+    QThread(parent),recording(FALSE),timerInterval(20)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
-    recFile=cv::VideoWriter("/home/sam/writetest.avi",0,10,cv::Size(640,480));
-    recording=FALSE;
 }
 
 bool CamBackend::IsLive() {
@@ -42,6 +40,7 @@ void CamBackend::GrabFrame()
         camera >> currImage.image;
         if (currImage.image.rows==0) {
             StopAcquisition();
+            return;
         }
         if (recording) record();
         emit NewImageReady(currImage);
@@ -50,7 +49,6 @@ void CamBackend::GrabFrame()
 
 bool CamBackend::StartAcquisition(QString dev)
 {
-//    camera = new cv::VideoCapture("/home/sam/ULB/Movies/VapourCloudDynamics.mp4");
     if (dev=="0") {
         camera.open(0);
     } else {
@@ -77,10 +75,24 @@ void CamBackend::ReleaseCamera()
     if (camera.isOpened()) camera.release();
 }
 
-void CamBackend::setInterval(int newInt)
+void CamBackend::SetInterval(int newInt)
 {
     timer.setInterval(newInt);
 }
+
+void CamBackend::StartRecording(bool startRec)
+{
+    if (startRec) {
+        QDateTime mom = QDateTime::currentDateTime();
+        QString filenam="/home/sam/"+mom.toString("yyyyMMdd-hh:mm:ss")+".avi";
+        int fps=timer.interval()/10;
+        recFile=cv::VideoWriter(filenam.toStdString(),CV_FOURCC('F','M','P','4'),fps,cv::Size(currImage.image.cols,currImage.image.rows));
+    } else {
+        //should close file here
+    }
+    recording=startRec;
+}
+
 
 bool CamBackend::Init()
 {

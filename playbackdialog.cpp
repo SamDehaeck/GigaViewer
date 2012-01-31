@@ -51,3 +51,8 @@ void PlaybackDialog::on_playButton_toggled(bool checked)
         emit newFps(3600000);
     }
 }
+
+void PlaybackDialog::on_recButton_toggled(bool checked)
+{
+    emit recordNow(checked);
+}
