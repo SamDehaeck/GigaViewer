@@ -56,3 +56,13 @@ void PlaybackDialog::on_recButton_toggled(bool checked)
 {
     emit recordNow(checked);
 }
+
+void PlaybackDialog::on_RecSettings_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+void PlaybackDialog::on_backButton_clicked()
+{
+    ui->stackedWidget->setCurrentIndex(0);
+}

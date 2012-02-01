@@ -33,6 +33,10 @@ private slots:
 
     void on_recButton_toggled(bool checked);
 
+    void on_RecSettings_clicked();
+
+    void on_backButton_clicked();
+
 private:
     Ui::PlaybackDialog *ui;
     int currentTimer;

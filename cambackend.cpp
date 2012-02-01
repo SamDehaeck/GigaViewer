@@ -87,8 +87,6 @@ void CamBackend::StartRecording(bool startRec)
         QString filenam="/home/sam/"+mom.toString("yyyyMMdd-hh:mm:ss")+".avi";
         int fps=timer.interval()/10;
         recFile=cv::VideoWriter(filenam.toStdString(),CV_FOURCC('F','M','P','4'),fps,cv::Size(currImage.image.cols,currImage.image.rows));
-    } else {
-        //should close file here
     }
     recording=startRec;
 }
