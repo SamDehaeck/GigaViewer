@@ -12,5 +12,8 @@
         <file>icons/gtk-media-rewind-ltr.png</file>
         <file>icons/gtk-media-rewind-rtl.png</file>
         <file>icons/gtk-media-stop.png</file>
+        <file>icons/gtk-properties.png</file>
+        <file>icons/gtk-go-back-ltr.png</file>
+        <file>icons/gtk-open.png</file>
     </qresource>
 </RCC>
