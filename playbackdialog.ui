@@ -244,7 +244,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="RecFolder"/>
+          <widget class="QLineEdit" name="RecFolder">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="toolButton">
@@ -264,7 +268,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox">
+          <widget class="QComboBox" name="codecBox">
            <property name="minimumSize">
             <size>
              <width>110</width>
@@ -284,6 +288,11 @@
            <item>
             <property name="text">
              <string>XVID</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RAW</string>
             </property>
            </item>
           </widget>

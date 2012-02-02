@@ -28,7 +28,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
-    connect(playDialog,SIGNAL(recordNow(bool)),this,SIGNAL(startRecording(bool)));
+    connect(playDialog,SIGNAL(recordNow(bool,QString,QString)),this,SIGNAL(startRecording(bool,QString,QString)));
     setScene(theScene);
 }
 

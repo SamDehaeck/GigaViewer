@@ -80,13 +80,21 @@ void CamBackend::SetInterval(int newInt)
     timer.setInterval(newInt);
 }
 
-void CamBackend::StartRecording(bool startRec)
+void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 {
     if (startRec) {
         QDateTime mom = QDateTime::currentDateTime();
-        QString filenam="/home/sam/"+mom.toString("yyyyMMdd-hh:mm:ss")+".avi";
+        QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".avi";
+        int fourcc=0;
+        if (codec=="MSMPEG4V2") {
+            fourcc=CV_FOURCC('M','P','4','2'); // for mpeg4 from windows
+        } else if (codec=="XVID") {
+            fourcc=CV_FOURCC('F','M','P','4'); //for xvid
+        } else {
+            fourcc=0;// uncompressed raw format
+        }
         int fps=timer.interval()/10;
-        recFile=cv::VideoWriter(filenam.toStdString(),CV_FOURCC('F','M','P','4'),fps,cv::Size(currImage.image.cols,currImage.image.rows));
+        recFile=cv::VideoWriter(filenam.toStdString(),fourcc,fps,cv::Size(currImage.image.cols,currImage.image.rows));
     }
     recording=startRec;
 }

@@ -24,7 +24,7 @@ signals:
 
 public slots:
     void GrabFrame();
-    void StartRecording(bool start);
+    void StartRecording(bool start, QString recFold, QString codec);
 
 private:
     void run();

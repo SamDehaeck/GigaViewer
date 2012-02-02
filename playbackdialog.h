@@ -2,6 +2,7 @@
 #define PLAYBACKDIALOG_H
 
 #include <QDialog>
+#include <QtGui>
 
 namespace Ui {
     class PlaybackDialog;
@@ -18,7 +19,7 @@ public:
 signals:
     void stopPlayback();
     void newFps(int fps);
-    void recordNow(bool checked);
+    void recordNow(bool checked,QString recFold, QString codec);
 
 private slots:
     void on_stopButton_clicked();
@@ -36,6 +37,8 @@ private slots:
     void on_RecSettings_clicked();
 
     void on_backButton_clicked();
+
+    void on_toolButton_clicked();
 
 private:
     Ui::PlaybackDialog *ui;

@@ -9,6 +9,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui->setupUi(this);
     ui->fpsEdit->setValidator(new QIntValidator(0,3600000,this));
     currentTimer=20;
+    ui->RecFolder->setText(QDir::homePath());
 }
 
 PlaybackDialog::~PlaybackDialog()
@@ -54,7 +55,9 @@ void PlaybackDialog::on_playButton_toggled(bool checked)
 
 void PlaybackDialog::on_recButton_toggled(bool checked)
 {
-    emit recordNow(checked);
+    QString recf=ui->RecFolder->text();
+    QString cod=ui->codecBox->currentText();
+    emit recordNow(checked,recf,cod);
 }
 
 void PlaybackDialog::on_RecSettings_clicked()
@@ -65,4 +68,10 @@ void PlaybackDialog::on_RecSettings_clicked()
 void PlaybackDialog::on_backButton_clicked()
 {
     ui->stackedWidget->setCurrentIndex(0);
+}
+
+void PlaybackDialog::on_toolButton_clicked()
+{
+    QString fold= QFileDialog::getExistingDirectory(this,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
+    ui->RecFolder->setText(fold);
 }
