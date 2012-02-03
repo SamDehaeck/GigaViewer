@@ -2,18 +2,13 @@
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),recording(FALSE),timerInterval(20)
+    QThread(parent),recording(FALSE),timerInterval(20),reversePlay(FALSE)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
 }
 
 bool CamBackend::IsLive() {
-    if (liveMode) {
-        if (camera.isOpened()) {
-            return TRUE;
-        }
-    }
-    return FALSE;
+    return liveMode;
 }
 
 void CamBackend::run()
@@ -36,38 +31,40 @@ void CamBackend::record()
 void CamBackend::GrabFrame()
 {
     if (!camera.isOpened()) quit();
-    if (liveMode) {
-        camera >> currImage.image;
-        if (currImage.image.rows==0) {
-            StopAcquisition();
-            return;
+    if ((!liveMode)&&reversePlay) { // looking at movie
+        double newpos=camera.get(CV_CAP_PROP_POS_FRAMES)-2;
+//        qDebug()<<"calculated:"<<newpos;
+        if (newpos>=0) {
+            camera.set(CV_CAP_PROP_POS_FRAMES,newpos);
         }
-        if (recording) record();
-        emit NewImageReady(currImage);
     }
+//    qDebug()<<camera.get(CV_CAP_PROP_POS_FRAMES);
+    camera >> currImage.image;
+
+    if (currImage.image.rows==0) {
+        StopAcquisition();
+        return;
+    }
+    if (recording) record();
+    emit NewImageReady(currImage);
+
 }
 
 bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev=="0") {
         camera.open(0);
+        liveMode=TRUE;
     } else {
         camera.open(dev.toStdString());
-    }
-    if (camera.isOpened()) {
-        liveMode=TRUE;
-        return TRUE;
-    } else {
         liveMode=FALSE;
-        return FALSE;
     }
-    return FALSE;
+    return camera.isOpened();
 }
 
 void CamBackend::StopAcquisition()
 {
     quit();
-    liveMode=FALSE;
 }
 
 void CamBackend::ReleaseCamera()
@@ -77,7 +74,8 @@ void CamBackend::ReleaseCamera()
 
 void CamBackend::SetInterval(int newInt)
 {
-    timer.setInterval(newInt);
+    reversePlay=newInt<0;
+    timer.setInterval(abs(newInt));
 }
 
 void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)

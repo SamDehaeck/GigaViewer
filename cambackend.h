@@ -38,6 +38,7 @@ private:
     bool recording;
     double timerInterval;
     QTimer timer;
+    bool reversePlay;
 
 };
 

@@ -28,7 +28,7 @@ void FileInputDialog::on_camButton_clicked() {
 // load movie button
 void FileInputDialog::on_MovieButton_clicked()
 {
-    QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
+    QString resp = QFileDialog::getOpenFileName(this,tr("Open Movie"),
     QDir::currentPath(), tr("All files (*.*)") );
 
     emit MoviePressed(resp);
