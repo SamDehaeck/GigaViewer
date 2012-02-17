@@ -9,23 +9,21 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(&picBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(theGui,SIGNAL(newMovieNeeded(QString)),this,SLOT(LoadNewMovie(QString)));
 
-        connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlOpenCvThread(bool)));
+        connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlCameraThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
         connect(theGui,SIGNAL(startRecording(bool,QString,QString)),&camBack,SLOT(StartRecording(bool,QString,QString)));
     }
 }
 
-void Coordinator::controlOpenCvThread(bool startNew,QString dev)
+void Coordinator::controlCameraThread(bool startNew,QString dev)
 {
     if (startNew) {
-        if (camBack.Init()) {
-            if (camBack.StartAcquisition(dev)) {
-                camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
-                opencvRunning=TRUE;
-            }
+        if (camBack.StartAcquisition(dev)) {
+            camBack.start(QThread::HighPriority); // max is QThread::TimeCriticalPriority
+            opencvRunning=TRUE;
         } else {
-//            theGui-> //reset button
+            //reset gui buttons
         }
     } else {
         if (camBack.isRunning()) {
@@ -38,7 +36,7 @@ void Coordinator::controlOpenCvThread(bool startNew,QString dev)
         } else {
 //            qDebug()<<"Thread not running";
         }
-        camBack.ReleaseCamera(); //this checks first if it is opened.
+        camBack.ReleaseCamera(); //this checks first if it is opened. Needs to be called in same thread as camera.open
     }
 }
 
@@ -51,13 +49,13 @@ void Coordinator::changeFps(int newFps)
 
 void Coordinator::LoadNewMovie(QString theMovie)
 {
-     controlOpenCvThread(TRUE,theMovie);
+     controlCameraThread(TRUE,theMovie);
 }
 
 void Coordinator::stopAcquisition()
 {
     if (opencvRunning) {
-        controlOpenCvThread(FALSE);
+        controlCameraThread(FALSE);
     }
 }
 

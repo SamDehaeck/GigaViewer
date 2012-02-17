@@ -8,7 +8,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->fpsEdit->setValidator(new QIntValidator(-3600000,3600000,this));
-    currentTimer=20;
+    currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
 }
 

@@ -16,8 +16,7 @@ FileInputDialog::~FileInputDialog()
 void FileInputDialog::on_filePushButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
-    QDir::currentPath(), tr("All files (*.*)") );
-
+    QDir::homePath(), tr("All files (*.*)") );
     emit StaticPicPressed(resp);
 }
 
@@ -29,7 +28,6 @@ void FileInputDialog::on_camButton_clicked() {
 void FileInputDialog::on_MovieButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Movie"),
-    QDir::currentPath(), tr("All files (*.*)") );
-
+    QDir::homePath(), tr("All files (*.*)") );
     emit MoviePressed(resp);
 }

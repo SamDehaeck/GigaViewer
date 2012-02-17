@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>435</width>
-    <height>44</height>
+    <height>46</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -196,7 +196,7 @@
             <enum>Qt::LeftToRight</enum>
            </property>
            <property name="text">
-            <string>20</string>
+            <string>100</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

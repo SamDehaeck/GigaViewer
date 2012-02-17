@@ -15,7 +15,7 @@ public:
 signals:
 
 public slots:
-    void controlOpenCvThread(bool startNew,QString dev="0");
+    void controlCameraThread(bool startNew,QString dev="0");
     void LoadNewMovie(QString);
     void changeFps(int newFps);
     void stopAcquisition();

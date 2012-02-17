@@ -29,7 +29,9 @@ SOURCES += main.cpp \
     picbackend.cpp \
     cambackend.cpp \
     playbackdialog.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    opencvsourcesink.cpp \
+    fmfsourcesink.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -40,7 +42,10 @@ HEADERS  += \
     cambackend.h \
     imagepacket.h \
     playbackdialog.h \
-    mainwindow.h
+    mainwindow.h \
+    opencvsourcesink.h \
+    fmfsourcesink.h \
+    imagesourcesink.h
 
 FORMS += \
     fileinputdialog.ui \
