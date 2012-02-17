@@ -4,7 +4,7 @@
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(100),reversePlay(FALSE)
+    QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(3600000),reversePlay(FALSE)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
 }

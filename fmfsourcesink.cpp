@@ -75,7 +75,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
         exit(1);
     }
     headersize = ftell(fmf);
-    currPos=headersize;
+    currPos=0;
     nFrames=nRead;
 
 //		cout<<rows<<" "<<cols<<" "<<n<<endl;
@@ -95,11 +95,9 @@ bool FmfSourceSink::ReleaseCamera()
 
 bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    currPos+=indexIncrement;
-    qDebug()<<currPos;
-    if ((currPos > nFrames)||(currPos <0)) {
-//        qDebug()<<"position beyond nFrames";
-//        return FALSE;
+//    if ((currPos+indexIncrement > nFrames)||(currPos+indexIncrement <0)) {
+    if (currPos+indexIncrement <0) {
+        return FALSE;
     }
     if (indexIncrement!=1) {
                 fseek(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
@@ -112,6 +110,7 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         cv::Mat temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
         if (fread(temp.data, 1, rows*cols, fmf)) {
             target.image=temp;
+            currPos+=indexIncrement;
             target.seqNumber=currPos;
             return TRUE;
         }

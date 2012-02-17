@@ -19,6 +19,8 @@ PlaybackDialog::~PlaybackDialog()
 
 void PlaybackDialog::on_stopButton_clicked()
 {
+    ui->playButton->setChecked(FALSE);
+    ui->fpsEdit->setText("100");
     emit stopPlayback();
 }
 
