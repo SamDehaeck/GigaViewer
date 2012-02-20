@@ -21,6 +21,7 @@ signals:
     void newOpencvFeedNeeded(bool start);
     void implementNewFps(int fps);
     void startRecording(bool start,QString recfold,QString codec);
+    void CloseApplic();
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);
@@ -28,6 +29,7 @@ public slots:
     void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);
+
 
 protected:
     void resizeEvent(QResizeEvent *event);

@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
     win.setCentralWidget(&view);
 
     QObject::connect(&win,SIGNAL(windowClosed()),&theBoss,SLOT(stopAcquisition()));
+    QObject::connect(&view,SIGNAL(CloseApplic()),&win,SLOT(close()));
 
-    win.showMaximized();
+    win.showFullScreen();
     return a.exec();
 }

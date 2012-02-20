@@ -31,3 +31,8 @@ void FileInputDialog::on_MovieButton_clicked()
     QDir::homePath(), tr("All files (*.*)") );
     emit MoviePressed(resp);
 }
+
+void FileInputDialog::on_pushButton_2_clicked()
+{
+    emit CloseApp();
+}

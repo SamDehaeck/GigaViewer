@@ -20,12 +20,15 @@ signals:
     void StaticPicPressed(QString namegiven);
     void OpencvFeedPressed();
     void MoviePressed(QString namegiven);
+    void CloseApp();
 
 private slots:
     void on_filePushButton_clicked();
     void on_camButton_clicked();
 
     void on_MovieButton_clicked();
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::FileInputDialog *ui;
