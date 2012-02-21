@@ -12,3 +12,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
     emit windowClosed();
     event->accept();
 }
+
+void MainWindow::toggleFullscreen()
+{
+    if (isFullScreen()) {
+        showMaximized();
+    } else {
+        showFullScreen();
+    }
+}

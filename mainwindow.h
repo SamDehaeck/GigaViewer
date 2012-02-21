@@ -13,6 +13,7 @@ signals:
     void windowClosed();
 
 public slots:
+    void toggleFullscreen();
 
 protected:
     void closeEvent(QCloseEvent *);

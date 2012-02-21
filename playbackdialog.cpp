@@ -10,6 +10,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui->fpsEdit->setValidator(new QIntValidator(-3600000,3600000,this));
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
+
 }
 
 PlaybackDialog::~PlaybackDialog()
@@ -76,4 +77,25 @@ void PlaybackDialog::on_toolButton_clicked()
 {
     QString fold= QFileDialog::getExistingDirectory(this,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
     ui->RecFolder->setText(fold);
+}
+
+void PlaybackDialog::togglePlay()
+{
+    ui->playButton->toggle();
+}
+
+void PlaybackDialog::reversePlay()
+{
+    currentTimer=-abs(currentTimer);
+    QString delayTxt=QString("%1").arg(currentTimer);
+    ui->fpsEdit->setText(delayTxt);
+    emit newFps(currentTimer);
+}
+
+void PlaybackDialog::forwardPlay()
+{
+    currentTimer=abs(currentTimer);
+    QString delayTxt=QString("%1").arg(currentTimer);
+    ui->fpsEdit->setText(delayTxt);
+    emit newFps(currentTimer);
 }

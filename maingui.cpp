@@ -22,6 +22,19 @@ MainGui::MainGui(QWidget *parent) :
 
     theScene= new VideoGlScene(controlDialogs,parent);
 
+    QShortcut *playToggle = new QShortcut(QKeySequence(Qt::Key_Space),this);
+    connect(playToggle,SIGNAL(activated()),playDialog,SLOT(togglePlay()));
+    QShortcut *reverse = new QShortcut(QKeySequence(Qt::Key_Left),this);
+    connect(reverse,SIGNAL(activated()),playDialog,SLOT(reversePlay()));
+    QShortcut *forward = new QShortcut(QKeySequence(Qt::Key_Right),this);
+    connect(forward,SIGNAL(activated()),playDialog,SLOT(forwardPlay()));
+    QShortcut * up = new QShortcut(QKeySequence(Qt::Key_Up),this);
+    connect(up,SIGNAL(activated()),playDialog,SLOT(on_ffwdButton_clicked()));
+    QShortcut * down = new QShortcut(QKeySequence(Qt::Key_Down),this);
+    connect(down,SIGNAL(activated()),playDialog,SLOT(on_rwdButton_clicked()));
+    QShortcut * stop = new QShortcut(QKeySequence(Qt::Key_Q),this);
+    connect(stop,SIGNAL(activated()),playDialog,SLOT(on_stopButton_clicked()));
+
 
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
     connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SLOT(newMoviePressed(QString)));

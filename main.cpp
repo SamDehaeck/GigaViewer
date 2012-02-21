@@ -17,8 +17,11 @@ int main(int argc, char *argv[])
     Coordinator theBoss(&view);
     win.setCentralWidget(&view);
 
+    QShortcut *fullToggle = new QShortcut(QKeySequence(Qt::Key_F),&win);
+
     QObject::connect(&win,SIGNAL(windowClosed()),&theBoss,SLOT(stopAcquisition()));
     QObject::connect(&view,SIGNAL(CloseApplic()),&win,SLOT(close()));
+    QObject::connect(fullToggle,SIGNAL(activated()),&win,SLOT(toggleFullscreen()));
 
     win.showFullScreen();
     return a.exec();

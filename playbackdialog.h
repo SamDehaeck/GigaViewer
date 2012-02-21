@@ -40,6 +40,11 @@ private slots:
 
     void on_toolButton_clicked();
 
+    void togglePlay();
+
+    void reversePlay();
+    void forwardPlay();
+
 private:
     Ui::PlaybackDialog *ui;
     int currentTimer;
