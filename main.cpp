@@ -24,5 +24,10 @@ int main(int argc, char *argv[])
     QObject::connect(fullToggle,SIGNAL(activated()),&win,SLOT(toggleFullscreen()));
 
     win.showFullScreen();
+
+    if (argc==2) {
+        view.newMoviePressed(argv[1]);
+    }
+
     return a.exec();
 }
