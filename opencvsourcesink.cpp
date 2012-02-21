@@ -60,7 +60,9 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     }
 //    qDebug()<<camera.get(CV_CAP_PROP_POS_FRAMES);
 
+    target.timeStamp=camera.get(CV_CAP_PROP_POS_FRAMES);
     camera >> target.image;
+
 
     return TRUE;
 }

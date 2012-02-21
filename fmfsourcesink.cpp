@@ -121,17 +121,90 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 bool FmfSourceSink::RecordFrame(ImagePacket &source)
 {
+    if (fwrite(&source.timeStamp,sizeof(double),1,fmfrec)==1) {
+        if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+            return TRUE;
+        }
+    }
     return FALSE;
 }
 
 bool FmfSourceSink::StartRecording(QString recFold, QString codec, int fps, int cols, int rows)
 {
+    if (codec!="FMF") return FALSE;
 
-    return FALSE;
+    QDateTime mom = QDateTime::currentDateTime();
+    QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".fmf";
+
+    uint32_t formatlen = 5;
+    uint32_t version = 3;
+    uint32_t bitsperpixel = 8;
+    char dataformat[] = "MONO8";
+    int sizeofuint32 = 4;
+    int sizeofuint64 = 8;
+
+//    ListIndex=0;
+//    lastPrinted=0;
+
+    fmfrec = fopen(filenam.toStdString().c_str(),"wb");
+
+    if(fwrite(&version,sizeofuint32,1,fmfrec) < 1){
+        fprintf(stderr,"Error reading version number of input fmf file.\n");
+        exit(1);
+    }
+
+    // format length
+    if(fwrite(&formatlen,sizeofuint32,1,fmfrec)<1){
+        fprintf(stderr,"Error writing format length to output fmf file.\n");
+        exit(1);
+    }
+
+    // format string
+    if(fwrite(&dataformat,sizeof(char),formatlen,fmfrec)<formatlen){
+        fprintf(stderr,"Error writing format string to output fmf file.\n");
+        exit(1);
+    }
+
+    // bits per pixel
+    if(fwrite(&bitsperpixel,sizeofuint32,1,fmfrec)<1){
+        fprintf(stderr,"Error writing bits per pixel to output fmf file.\n");
+        exit(1);
+    }
+
+//    uint32_t rowsRead;
+//    uint32_t colsRead;
+      // height of the frame
+    if(fwrite(&rows,sizeofuint32,1,fmfrec)<1){
+        fprintf(stderr,"Error writing frame height to output fmf file.\n");
+        exit(1);
+    }
+
+    // width of the frame
+    if(fwrite(&cols,sizeofuint32,1,fmfrec)<1){
+        fprintf(stderr,"Error writing frame width to output fmf file.\n");
+        exit(1);
+    }
+
+    bytesperchunk=bitsperpixel*rows*cols/8+sizeof(double);
+    // bytes encoding a frame
+    if(fwrite(&bytesperchunk,sizeofuint64,1,fmfrec)<1){
+        fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
+        exit(1);
+    }
+
+    // number of frames
+    uint64_t nRead=0; //will have to write this when closing the recording
+    if(fwrite(&nRead,sizeofuint64,1,fmfrec)<1){
+        fprintf(stderr,"Error writing number of frames to output fmf file.\n");
+        exit(1);
+    }
+
+    return TRUE;
 }
 
 bool FmfSourceSink::StopRecording()
 {
+    fclose(fmfrec);
     return TRUE;
 }
 

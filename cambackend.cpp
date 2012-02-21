@@ -68,7 +68,11 @@ void CamBackend::SetInterval(int newInt)
 void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 {
     if (startRec) {
-        currSink=new OpencvSourceSink;
+        if (codec=="FMF") {
+            currSink=new FmfSourceSink;
+        } else {
+            currSink=new OpencvSourceSink;
+        }
         int fps=timer.interval()/10;
         currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
     } else { // stopping recording

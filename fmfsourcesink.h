@@ -19,6 +19,7 @@ public:
 
 private:
     FILE * fmf;
+    FILE * fmfrec;
     int fmfnpixels;
     uint64_t headersize;
     uint64_t bytesperchunk;
