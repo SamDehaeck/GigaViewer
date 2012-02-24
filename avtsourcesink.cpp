@@ -82,12 +82,14 @@ bool AvtSourceSink::Init()
         }
         rows=height;
 
+        unsigned long camFrequency;
         if((errCode = PvAttrUint32Get(GCamera.Handle,"TimeStampFrequency",&camFrequency)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get freq err:"<< errCode;
             return FALSE;
         }
-        cols=width;
+        camTimeStep=1.0/((double)camFrequency);
+        qDebug()<<"Camera frequency"<<camTimeStep;
 
 
 
@@ -195,7 +197,7 @@ bool AvtSourceSink::StopAcquisition()
     //stop camera receiving triggers
     if ((errCode = PvCommandRun(GCamera.Handle,"AcquisitionStop")) != ePvErrSuccess)
         qDebug()<<"AcquisitionStop command err:"<< errCode;
-    else
+//    else
 //        qDebug()<<"AcquisitionStop success.";
 
     //PvCaptureQueueClear aborts any actively written frame with Frame.Status = ePvErrDataMissing
@@ -208,13 +210,13 @@ bool AvtSourceSink::StopAcquisition()
 //    qDebug()<<"Calling PvCaptureQueueClear...";
     if ((errCode = PvCaptureQueueClear(GCamera.Handle)) != ePvErrSuccess)
         qDebug()<<"PvCaptureQueueClear err:"<< errCode;
-    else
+//    else
 //        qDebug()<<"...Queue cleared.";
 
     //stop driver stream
     if ((errCode = PvCaptureEnd(GCamera.Handle)) != ePvErrSuccess)
         qDebug()<<"PvCaptureEnd err:"<< errCode;
-    else
+//    else
 //        qDebug()<<"Driver stream stopped.";
 
     return TRUE;
@@ -256,9 +258,6 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         qDebug()<<"PvCaptureWaitForFrameDone err:"<< errCode;
         failed = TRUE;
     } else {
-        if (GCamera.Frames[Index].Status != ePvErrSuccess)
-            qDebug()<<"Frame - Error:"<< GCamera.Frames[Index].FrameCount<<"-"<< GCamera.Frames[Index].Status;
-
         // if frame hasn't been cancelled, requeue frame
         if(GCamera.Frames[Index].Status != ePvErrCancelled) {
             //Check for gaps in FrameCount due to image returning from camera with no frame queued.
@@ -270,8 +269,22 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
             Last = GCamera.Frames[Index].FrameCount;
 
-            //shallow copy of image to target.image (sam)
-            target.image=matFrames[Index];
+            if (GCamera.Frames[Index].Status != ePvErrSuccess) {
+                if (GCamera.Frames[Index].Status==ePvErrDataMissing) {
+                    qDebug()<<"Data missing in frame"<<GCamera.Frames[Index].FrameCount;
+                } else {
+                    qDebug()<<"Frame - Error:"<< GCamera.Frames[Index].FrameCount<<"-"<< GCamera.Frames[Index].Status;
+                }
+            } else {
+                //shallow copy of image to target.image (sam)
+                target.image=matFrames[Index];
+                target.seqNumber=GCamera.Frames[Index].FrameCount;
+                unsigned long ts;
+                ts=(((unsigned long)GCamera.Frames[Index].TimestampHi)<<32) + GCamera.Frames[Index].TimestampLo;
+                target.timeStamp=((double)ts)*camTimeStep;
+                //qDebug()<<ts<<target.timeStamp;
+
+            }
 
             //Requeue [Index] frame of FRAMESCOUNT num frames
             if ((errCode = PvCaptureQueueFrame(GCamera.Handle,&GCamera.Frames[Index],NULL)) != ePvErrSuccess) {

@@ -31,7 +31,7 @@ public:
 
 private:
 
-#define FRAMESCOUNT 5
+#define FRAMESCOUNT 50
 
     typedef struct
     {
@@ -46,7 +46,7 @@ private:
     int Index;
     unsigned long Last;
     int rows,cols;
-    unsigned long camFrequency;
+    double camTimeStep;
     cv::Mat buffer;
     QVector<cv::Mat> matFrames;
 
