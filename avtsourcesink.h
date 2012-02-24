@@ -9,6 +9,7 @@
 #include <QThread>
 #include "imagepacket.h"
 #include "imagesourcesink.h"
+#include "opencv2/opencv.hpp"
 
 class Sleeper : public QThread {
 public:
@@ -30,7 +31,7 @@ public:
 
 private:
 
-#define FRAMESCOUNT 50
+#define FRAMESCOUNT 5
 
     typedef struct
     {
@@ -46,6 +47,8 @@ private:
     unsigned long Last;
     int rows,cols;
     unsigned long camFrequency;
+    cv::Mat buffer;
+    QVector<cv::Mat> matFrames;
 
 };
 

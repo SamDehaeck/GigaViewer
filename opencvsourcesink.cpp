@@ -51,7 +51,7 @@ bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
 
 bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     if (!camera.isOpened()) return FALSE;
-    if (indexIncrement=-1) {
+    if (indexIncrement==-1) {
         double newpos=camera.get(CV_CAP_PROP_POS_FRAMES)-2;
 //        qDebug()<<"calculated:"<<newpos;
         if (newpos>=0) {

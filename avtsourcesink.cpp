@@ -1,6 +1,4 @@
 #include "avtsourcesink.h"
-#include "opencv2/opencv.hpp"
-
 
 bool AvtSourceSink::RecordFrame(ImagePacket&)
 {
@@ -19,7 +17,7 @@ bool AvtSourceSink::StopRecording()
 
 bool AvtSourceSink::IsOpened()
 {
-    return FALSE;
+    return TRUE;
 }
 
 bool AvtSourceSink::Init()
@@ -100,8 +98,19 @@ bool AvtSourceSink::Init()
             return FALSE;
         }
 
+        qDebug()<<"Image format:"<<pixelFormat<<","<<cols<<","<<rows;
+
+        const int bufferSize[] = {FRAMESCOUNT, rows,cols};
+
         if (strcmp(pixelFormat,"Mono8")==0) {
-            qDebug()<<"8bit images";
+//            qDebug()<<"8bit images";
+            buffer=cv::Mat(3,bufferSize,CV_8U);
+            matFrames=QVector<cv::Mat>(FRAMESCOUNT);
+
+            for (int i=0;i<FRAMESCOUNT;i++) {
+                    matFrames[i]=cv::Mat(rows,cols,CV_8U,&buffer.data[i*buffer.step[0]]);
+            }
+
         } else if (strcmp(pixelFormat,"Mono16")==0) {
             qDebug()<<"16bit images not yet implemented";
             return FALSE;
@@ -110,11 +119,10 @@ bool AvtSourceSink::Init()
             return FALSE;
         }
 
-
-        // allocate the frame buffers
+        // assign the frame buffers to the created cv::Mat's
         for(int i=0;i<FRAMESCOUNT && !failed;i++)
         {
-            GCamera.Frames[i].ImageBuffer = new char[FrameSize];
+            GCamera.Frames[i].ImageBuffer = matFrames[i].data;
             if(GCamera.Frames[i].ImageBuffer)
             {
                 GCamera.Frames[i].ImageBufferSize = FrameSize;
@@ -166,7 +174,6 @@ bool AvtSourceSink::StartAcquisition(QString dev)
             failed = TRUE;
         }
     }
-
     if (failed)
         return FALSE;
 
@@ -178,7 +185,6 @@ bool AvtSourceSink::StartAcquisition(QString dev)
         qDebug()<<"CameraStart: failed to set camera attributes";
         return FALSE;
     }
-
     return TRUE;
 }
 
@@ -190,7 +196,7 @@ bool AvtSourceSink::StopAcquisition()
     if ((errCode = PvCommandRun(GCamera.Handle,"AcquisitionStop")) != ePvErrSuccess)
         qDebug()<<"AcquisitionStop command err:"<< errCode;
     else
-        qDebug()<<"AcquisitionStop success.";
+//        qDebug()<<"AcquisitionStop success.";
 
     //PvCaptureQueueClear aborts any actively written frame with Frame.Status = ePvErrDataMissing
     //Further queued frames returned with Frame.Status = ePvErrCancelled
@@ -199,17 +205,17 @@ bool AvtSourceSink::StopAcquisition()
     //to give actively written frame time to complete
     Sleeper::msleep(200);
 
-    qDebug()<<"Calling PvCaptureQueueClear...";
+//    qDebug()<<"Calling PvCaptureQueueClear...";
     if ((errCode = PvCaptureQueueClear(GCamera.Handle)) != ePvErrSuccess)
         qDebug()<<"PvCaptureQueueClear err:"<< errCode;
     else
-        qDebug()<<"...Queue cleared.";
+//        qDebug()<<"...Queue cleared.";
 
     //stop driver stream
     if ((errCode = PvCaptureEnd(GCamera.Handle)) != ePvErrSuccess)
         qDebug()<<"PvCaptureEnd err:"<< errCode;
     else
-        qDebug()<<"Driver stream stopped.";
+//        qDebug()<<"Driver stream stopped.";
 
     return TRUE;
 }
@@ -226,9 +232,7 @@ bool AvtSourceSink::ReleaseCamera()
     {
         qDebug()<<"Camera closed.";
     }
-    // delete image buffers
-    for(int i=0;i<FRAMESCOUNT;i++)
-       delete [] (char*)GCamera.Frames[i].ImageBuffer;
+    // delete image buffers => not necessary anymore
 
     GCamera.Handle = NULL;
 
@@ -242,6 +246,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
     tPvErr errCode;
     bool failed=FALSE;
+
 
     while((errCode = PvCaptureWaitForFrameDone(GCamera.Handle,&GCamera.Frames[Index],2000)) == ePvErrTimeout)
                 qDebug()<<"Waiting for frame to return to host...";
@@ -265,10 +270,8 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
             Last = GCamera.Frames[Index].FrameCount;
 
-            //copy image to target.image (sam)
-            cv::Mat dummy(rows,cols,CV_8U,&GCamera.Frames[Index],cols);
-            target.image=dummy.clone();
-
+            //shallow copy of image to target.image (sam)
+            target.image=matFrames[Index];
 
             //Requeue [Index] frame of FRAMESCOUNT num frames
             if ((errCode = PvCaptureQueueFrame(GCamera.Handle,&GCamera.Frames[Index],NULL)) != ePvErrSuccess) {
@@ -285,7 +288,6 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
             failed = TRUE;
         }
     }
-
     return !failed;
 
 }

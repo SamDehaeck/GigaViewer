@@ -13,6 +13,7 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
         connect(theGui,SIGNAL(startRecording(bool,QString,QString)),&camBack,SLOT(StartRecording(bool,QString,QString)));
+        connect(theGui,SIGNAL(newAvtFeedNeeded(bool)),this,SLOT(StartNewAVT(bool)));
     }
 }
 
@@ -57,6 +58,11 @@ void Coordinator::stopAcquisition()
     if (opencvRunning) {
         controlCameraThread(FALSE);
     }
+}
+
+void Coordinator::StartNewAVT(bool startNew)
+{
+    controlCameraThread(startNew,"AVT");
 }
 
 

@@ -39,6 +39,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(StaticPicPressed(QString)),this,SIGNAL(newPicNeeded(QString)));
     connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SLOT(newMoviePressed(QString)));
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
+    connect(fileDialog,SIGNAL(AvtFeedPressed()),this,SLOT(AVTFeedPressed()));
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(CloseApplic()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
@@ -103,6 +104,13 @@ void MainGui::showInputControls(bool visible)
             item->setVisible(visible);
         }
     }
+}
+
+void MainGui::AVTFeedPressed()
+{
+    emit newAvtFeedNeeded(TRUE);
+    showPlaybackControls(TRUE);
+    showInputControls(FALSE);
 }
 
 

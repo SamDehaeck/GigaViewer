@@ -26,7 +26,11 @@ void CamBackend::GrabFrame()
 {
     int incr=1;
     if (reversePlay) incr=-1;
-    currSource->GrabFrame(currImage,incr);
+
+    if (!currSource->GrabFrame(currImage,incr)) {
+        qDebug()<<"Some error occured while grabbing the frame";
+        return;
+    }
     if (currImage.image.rows==0) {
 //        StopAcquisition();
         return;
