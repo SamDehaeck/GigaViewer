@@ -17,7 +17,7 @@ win32 {
         C:\opencv\bin\libopencv_video231d.dll
 } else {
     LIBS += -L/usr/local/lib
-    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI
 }
 
 SOURCES += main.cpp \
@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     playbackdialog.cpp \
     mainwindow.cpp \
     opencvsourcesink.cpp \
-    fmfsourcesink.cpp
+    fmfsourcesink.cpp \
+    avtsourcesink.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -45,7 +46,9 @@ HEADERS  += \
     mainwindow.h \
     opencvsourcesink.h \
     fmfsourcesink.h \
-    imagesourcesink.h
+    imagesourcesink.h \
+    avtsourcesink.h \
+    PvApi.h
 
 FORMS += \
     fileinputdialog.ui \

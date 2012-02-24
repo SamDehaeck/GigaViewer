@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>126</width>
-    <height>194</height>
+    <height>230</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,7 +50,7 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="AvtButton">
        <property name="text">
         <string>AVT Feed</string>
        </property>

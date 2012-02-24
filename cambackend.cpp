@@ -1,6 +1,7 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
+#include "avtsourcesink.h"
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
@@ -38,6 +39,8 @@ bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink;
+    } else if (dev=="AVT") {
+        currSource=new AvtSourceSink;
     } else {
         currSource=new OpencvSourceSink;
     }

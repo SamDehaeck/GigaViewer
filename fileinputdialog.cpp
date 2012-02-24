@@ -36,3 +36,8 @@ void FileInputDialog::on_pushButton_2_clicked()
 {
     emit CloseApp();
 }
+
+void FileInputDialog::on_AvtButton_clicked()
+{
+    emit AvtFeedPressed();
+}
