@@ -16,6 +16,7 @@ public:
     bool StopRecording();
     bool IsOpened();
     bool SetInterval(int);
+    bool SetShutter(int shutTime);
 
 private:
     cv::VideoCapture camera;

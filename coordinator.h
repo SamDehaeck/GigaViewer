@@ -20,6 +20,7 @@ public slots:
     void StartNewAVT(bool startNew);
     void changeFps(int newFps);
     void stopAcquisition();
+    void changeShutter (int time);
 
 private:
     MainGui* theGui;

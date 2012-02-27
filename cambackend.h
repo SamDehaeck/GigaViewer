@@ -15,6 +15,7 @@ public:
     void StopAcquisition();
     void ReleaseCamera();
     void SetInterval(int newInt);
+    void SetShutter(int shut);
 
 signals:
     void NewImageReady(ImagePacket im);

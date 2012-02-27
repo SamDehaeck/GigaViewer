@@ -28,6 +28,9 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
             case 1:
                 item->setData(0,"PLAYBACK");
                 break;
+            case 2:
+                item->setData(0,"CAMERA");
+                break;
         }
 
 

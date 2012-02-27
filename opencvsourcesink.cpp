@@ -76,3 +76,8 @@ bool OpencvSourceSink::SetInterval(int)
 {
     return FALSE;
 }
+
+bool OpencvSourceSink::SetShutter(int)
+{
+    return FALSE;
+}

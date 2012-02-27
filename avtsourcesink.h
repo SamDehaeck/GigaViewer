@@ -29,6 +29,7 @@ public:
     bool StopRecording();
     bool IsOpened();
     bool SetInterval(int msec);
+    bool SetShutter(int shutTime);
 
 private:
 

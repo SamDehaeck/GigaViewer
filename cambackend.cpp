@@ -105,4 +105,11 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
     recording=startRec;
 }
 
+void CamBackend::SetShutter(int shut)
+{
+    if (currSource!=0) {
+        currSource->SetShutter(shut);
+    }
+}
+
 

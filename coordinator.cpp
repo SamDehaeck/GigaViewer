@@ -14,6 +14,7 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
         connect(theGui,SIGNAL(startRecording(bool,QString,QString)),&camBack,SLOT(StartRecording(bool,QString,QString)));
         connect(theGui,SIGNAL(newAvtFeedNeeded(bool)),this,SLOT(StartNewAVT(bool)));
+        connect(theGui,SIGNAL(setShutter(int)),this,SLOT(changeShutter(int)));
     }
 }
 
@@ -63,6 +64,13 @@ void Coordinator::stopAcquisition()
 void Coordinator::StartNewAVT(bool startNew)
 {
     controlCameraThread(startNew,"AVT");
+}
+
+void Coordinator::changeShutter(int time)
+{
+    if (camBack.isRunning()) {
+        camBack.SetShutter(time);
+    }
 }
 
 

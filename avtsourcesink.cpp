@@ -20,26 +20,6 @@ bool AvtSourceSink::IsOpened()
     return TRUE;
 }
 
-bool AvtSourceSink::SetInterval(int msec)
-{
-    double fps = 1000.0/((double)msec);
-    tPvFloat32 fpsFloat=1.0;
-    if (fps>1) {
-        fpsFloat=(int)fps;
-    } else {
-        fpsFloat=fps;
-    }
-    tPvErr errCode;
-
-    if ((errCode=PvAttrFloat32Set(GCamera.Handle,"FrameRate",fpsFloat))!=ePvErrSuccess) {
-        qDebug()<<"Setting the frame rate did not work"<<errCode;
-        return FALSE;
-    } else {
-        qDebug()<<"Framerate will be"<<fpsFloat;
-    }
-    return TRUE;
-}
-
 bool AvtSourceSink::Init()
 {
     tPvErr errCode;
@@ -109,7 +89,7 @@ bool AvtSourceSink::Init()
             return FALSE;
         }
         camTimeStep=1.0/((double)camFrequency);
-        qDebug()<<"Camera frequency"<<camTimeStep;
+//        qDebug()<<"Camera frequency"<<camTimeStep;
 
 
 
@@ -207,6 +187,20 @@ bool AvtSourceSink::StartAcquisition(QString dev)
         qDebug()<<"CameraStart: failed to set camera attributes";
         return FALSE;
     }
+
+    /* if you want to see a list of all attributes
+    tPvAttrListPtr listPtr;
+    unsigned long listLength;
+    if (PvAttrList(GCamera.Handle, &listPtr, &listLength) == ePvErrSuccess)
+    {
+        for (int i = 0; abs(i) < listLength; i++)
+        {
+            const char* attributeName = listPtr[i];
+            printf("Attribute %s\n", attributeName);
+        }
+    }
+    */
+
     return TRUE;
 }
 
@@ -323,4 +317,59 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     }
     return !failed;
 
+}
+
+bool AvtSourceSink::SetInterval(int msec)
+{
+    double fps = 1000.0/((double)msec);
+    tPvFloat32 fpsFloat=1.0;
+    if (fps>1) {
+        fpsFloat=(int)fps;
+        qDebug()<<"Rounded framerate will be"<<fpsFloat;
+    } else {
+        fpsFloat=fps;
+    }
+    tPvErr errCode;
+
+    if ((errCode=PvAttrFloat32Set(GCamera.Handle,"FrameRate",fpsFloat))!=ePvErrSuccess) {
+        qDebug()<<"Setting the frame rate to"<<fpsFloat<<"did not work";
+        return FALSE;
+    }
+    return TRUE;
+}
+
+bool AvtSourceSink::SetShutter(int shutTime)
+{
+    tPvUint32 val=abs(shutTime);
+    char buf[32];
+    unsigned long enum_size;
+    tPvErr errCode;
+    tPvUint32 min, max;
+
+    if ((errCode=PvAttrEnumGet(GCamera.Handle,"ExposureMode",buf,32,&enum_size))!=ePvErrSuccess) {
+        qDebug()<<"Could not get exposure mode";
+    }
+    if (strncmp(buf,"Auto",enum_size)==0) {
+        qDebug()<<"Cannot set shutter because in Auto mode";
+    } else if (strncmp(buf,"Manual",enum_size)==0) {
+        if ((errCode=PvAttrRangeUint32(GCamera.Handle,"ExposureValue",&min,&max))!=ePvErrSuccess) {
+            qDebug()<<"Could not get range, using default";
+            min=50;
+            max=60000000;
+        }
+
+        if (val<min) {
+            qDebug()<<"Minimum allowed shutter time is"<<min;
+        } else if (val>max) {
+            qDebug()<<"Maximum allowed shutter time is"<<max;
+        } else {
+            if ((errCode=PvAttrUint32Set(GCamera.Handle,"ExposureValue",val))!=ePvErrSuccess) {
+                qDebug()<<"Could not set exposure value to"<<shutTime<<"usec";
+            } else {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
 }

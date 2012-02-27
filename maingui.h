@@ -22,7 +22,9 @@ signals:
     void newAvtFeedNeeded(bool start);
     void implementNewFps(int fps);
     void startRecording(bool start,QString recfold,QString codec);
-    void CloseApplic();
+    void closeApplic();
+    void newSampleReady(ImagePacket matrix);
+    void setShutter(int time);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);
@@ -31,15 +33,19 @@ public slots:
     void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);
+    void needNewSample();
 
 
 protected:
     void resizeEvent(QResizeEvent *event);
     void showPlaybackControls(bool visible);
     void showInputControls(bool visible);
+    void showCameraControls(bool visible);
+
 
 private:
     VideoGlScene* theScene;
+    bool getNewSample;
 
 };
 

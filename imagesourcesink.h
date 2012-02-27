@@ -18,6 +18,7 @@ public:
     virtual bool StopRecording()=0;
     virtual bool IsOpened()=0;
     virtual bool SetInterval(int msec)=0;
+    virtual bool SetShutter(int shutTime)=0;
 };
 
 #endif // IMAGESOURCESINK_H

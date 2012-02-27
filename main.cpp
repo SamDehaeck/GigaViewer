@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     QShortcut *closeEv = new QShortcut(QKeySequence(Qt::Key_Escape),&win);
 
     QObject::connect(&win,SIGNAL(windowClosed()),&theBoss,SLOT(stopAcquisition()));
-    QObject::connect(&view,SIGNAL(CloseApplic()),&win,SLOT(close()));
+    QObject::connect(&view,SIGNAL(closeApplic()),&win,SLOT(close()));
     QObject::connect(fullToggle,SIGNAL(activated()),&win,SLOT(toggleFullscreen()));
     QObject::connect(closeEv,SIGNAL(activated()),&win,SLOT(close()));
 

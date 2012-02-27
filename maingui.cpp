@@ -2,6 +2,7 @@
 #include "videoglscene.h"
 #include "fileinputdialog.h"
 #include "playbackdialog.h"
+#include "cameracontrolsdialog.h"
 #include <QList>
 
 MainGui::MainGui(QWidget *parent) :
@@ -14,11 +15,13 @@ MainGui::MainGui(QWidget *parent) :
 
     FileInputDialog* fileDialog = new FileInputDialog;
     PlaybackDialog* playDialog = new PlaybackDialog;
+    CameraControlsDialog* camDialog = new CameraControlsDialog;
 
     QList<QDialog*> controlDialogs;
+    controlDialogs.append(camDialog);
     controlDialogs.append(playDialog);
-
     controlDialogs.append(fileDialog);
+
 
     theScene= new VideoGlScene(controlDialogs,parent);
 
@@ -40,10 +43,13 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SLOT(newMoviePressed(QString)));
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(fileDialog,SIGNAL(AvtFeedPressed()),this,SLOT(AVTFeedPressed()));
-    connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(CloseApplic()));
+    connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
     connect(playDialog,SIGNAL(recordNow(bool,QString,QString)),this,SIGNAL(startRecording(bool,QString,QString)));
+    connect(camDialog,SIGNAL(NeedNewSample()),this,SLOT(needNewSample()));
+    connect(this,SIGNAL(newSampleReady(ImagePacket)),camDialog,SLOT(GotNewSample(ImagePacket)));
+    connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
     setScene(theScene);
 }
 
@@ -58,6 +64,10 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 {
     theScene->imageBuff=theMatrix.image;
     theScene->update();
+    if (getNewSample) {
+        emit newSampleReady(theMatrix);
+        getNewSample=FALSE;
+    }
 }
 
 void MainGui::openCvFeedPressed()
@@ -71,6 +81,7 @@ void MainGui::stopButtonPressed()
 {
     emit newOpencvFeedNeeded(FALSE);
     showPlaybackControls(FALSE);
+    showCameraControls(FALSE);
     showInputControls(TRUE);
 }
 
@@ -106,11 +117,26 @@ void MainGui::showInputControls(bool visible)
     }
 }
 
+void MainGui::showCameraControls(bool visible)
+{
+    foreach (QGraphicsItem *item,theScene->items()) {
+        if (item->data(0)=="CAMERA") {
+            item->setVisible(visible);
+        }
+    }
+}
+
 void MainGui::AVTFeedPressed()
 {
     emit newAvtFeedNeeded(TRUE);
     showPlaybackControls(TRUE);
     showInputControls(FALSE);
+    showCameraControls(TRUE);
+}
+
+void MainGui::needNewSample()
+{
+    getNewSample=TRUE;
 }
 
 

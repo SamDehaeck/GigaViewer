@@ -218,3 +218,8 @@ bool FmfSourceSink::SetInterval(int)
 {
     return FALSE;
 }
+
+bool FmfSourceSink::SetShutter(int)
+{
+    return FALSE;
+}

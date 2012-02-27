@@ -19,10 +19,13 @@
      <property name="text">
       <string>x</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
    </item>
    <item row="3" column="4">
-    <widget class="QLineEdit" name="lineEdit_2"/>
+    <widget class="QLineEdit" name="ROICols"/>
    </item>
    <item row="3" column="0">
     <widget class="QPushButton" name="pushButton_2">
@@ -42,26 +45,35 @@
     </widget>
    </item>
    <item row="3" column="1" colspan="2">
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="QLineEdit" name="ROIRows"/>
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Shutter Time (ms)</string>
+      <string>Shutter Time (us)</string>
      </property>
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="IntensityButton">
      <property name="text">
       <string>Max Intensity</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="3" colspan="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+   <item row="0" column="1" colspan="4">
+    <widget class="QSpinBox" name="shutterSpinBox">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+     <property name="maximum">
+      <number>9999999</number>
+     </property>
+     <property name="singleStep">
+      <number>100</number>
+     </property>
      <property name="value">
-      <double>1.000000000000000</double>
+      <number>100</number>
      </property>
     </widget>
    </item>
