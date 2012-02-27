@@ -277,12 +277,12 @@
            </property>
            <item>
             <property name="text">
-             <string>MSMPEG4V2</string>
+             <string>FMF</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>FMF</string>
+             <string>MSMPEG4V2</string>
             </property>
            </item>
            <item>

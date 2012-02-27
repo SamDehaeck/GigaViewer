@@ -20,6 +20,26 @@ bool AvtSourceSink::IsOpened()
     return TRUE;
 }
 
+bool AvtSourceSink::SetInterval(int msec)
+{
+    double fps = 1000.0/((double)msec);
+    tPvFloat32 fpsFloat=1.0;
+    if (fps>1) {
+        fpsFloat=(int)fps;
+    } else {
+        fpsFloat=fps;
+    }
+    tPvErr errCode;
+
+    if ((errCode=PvAttrFloat32Set(GCamera.Handle,"FrameRate",fpsFloat))!=ePvErrSuccess) {
+        qDebug()<<"Setting the frame rate did not work"<<errCode;
+        return FALSE;
+    } else {
+        qDebug()<<"Framerate will be"<<fpsFloat;
+    }
+    return TRUE;
+}
+
 bool AvtSourceSink::Init()
 {
     tPvErr errCode;
@@ -180,7 +200,7 @@ bool AvtSourceSink::StartAcquisition(QString dev)
         return FALSE;
 
     // set the camera in freerun trigger, continuous mode, and start camera receiving triggers
-    if((PvAttrEnumSet(GCamera.Handle,"FrameStartTriggerMode","Freerun") != ePvErrSuccess) ||
+    if((PvAttrEnumSet(GCamera.Handle,"FrameStartTriggerMode","FixedRate") != ePvErrSuccess) ||
         (PvAttrEnumSet(GCamera.Handle,"AcquisitionMode","Continuous") != ePvErrSuccess) ||
         (PvCommandRun(GCamera.Handle,"AcquisitionStart") != ePvErrSuccess))
     {

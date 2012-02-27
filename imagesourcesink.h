@@ -17,6 +17,7 @@ public:
     virtual bool StartRecording(QString recFold, QString codec,int fps, int cols, int rows)=0;
     virtual bool StopRecording()=0;
     virtual bool IsOpened()=0;
+    virtual bool SetInterval(int msec)=0;
 };
 
 #endif // IMAGESOURCESINK_H

@@ -35,6 +35,8 @@ private:
     double timerInterval;
     QTimer timer;
     bool reversePlay;
+    bool needTimer;
+    bool running;
 
 };
 

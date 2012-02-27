@@ -15,6 +15,8 @@ public:
     bool StartRecording(QString recFold, QString codec, int fps, int cols, int rows);
     bool StopRecording();
     bool IsOpened();
+    bool SetInterval(int);
+
 private:
     cv::VideoCapture camera;
     cv::VideoWriter recFile;

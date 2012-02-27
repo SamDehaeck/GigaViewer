@@ -28,6 +28,7 @@ public:
     bool StartRecording(QString , QString , int , int , int );
     bool StopRecording();
     bool IsOpened();
+    bool SetInterval(int msec);
 
 private:
 

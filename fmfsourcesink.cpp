@@ -132,6 +132,7 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
 bool FmfSourceSink::StartRecording(QString recFold, QString codec, int fps, int cols, int rows)
 {
     if (codec!="FMF") return FALSE;
+    qDebug()<<"fps setting ignored for fmf recording"<<fps;
 
     QDateTime mom = QDateTime::currentDateTime();
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".fmf";
@@ -211,4 +212,9 @@ bool FmfSourceSink::StopRecording()
 bool FmfSourceSink::IsOpened()
 {
     return TRUE;
+}
+
+bool FmfSourceSink::SetInterval(int)
+{
+    return FALSE;
 }

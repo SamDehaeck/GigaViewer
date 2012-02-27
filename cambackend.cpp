@@ -5,7 +5,7 @@
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(100),reversePlay(FALSE)
+    QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(100),reversePlay(FALSE),needTimer(TRUE),running(FALSE)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
 }
@@ -13,12 +13,19 @@ CamBackend::CamBackend(QObject *parent) :
 void CamBackend::run()
 {
     if (currSource->IsOpened()) {
-        timer.setInterval(timerInterval);
-        timer.start();
-        exec(); //will go beyond this point when quit() is send from within this thread
-        timer.stop();
+        if (needTimer) {
+            timer.setInterval(timerInterval);
+            timer.start();
+            exec(); //will go beyond this point when quit() is send from within this thread
+            timer.stop();
+        } else {  // the AVT backend will block itself when waiting for the next frame. No need for an extra timer
+            running=TRUE;
+            while (running) {
+                GrabFrame();
+            }
+        }
     } else {
-        qDebug()<<"Could not open camera";
+        qDebug()<<"Camera is not opened";
     }
 }
 
@@ -43,10 +50,13 @@ bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink;
+        needTimer=TRUE;
     } else if (dev=="AVT") {
         currSource=new AvtSourceSink;
+        needTimer=FALSE;
     } else {
         currSource=new OpencvSourceSink;
+        needTimer=TRUE;
     }
     currSource->Init();
     currSource->StartAcquisition(dev);
@@ -55,8 +65,9 @@ bool CamBackend::StartAcquisition(QString dev)
 
 void CamBackend::StopAcquisition()
 {
+    running=FALSE;
     currSource->StopAcquisition();
-    quit();
+    if (needTimer) quit();
 }
 
 void CamBackend::ReleaseCamera()
@@ -69,7 +80,11 @@ void CamBackend::ReleaseCamera()
 void CamBackend::SetInterval(int newInt)
 {
     reversePlay=newInt<0;
-    timer.setInterval(abs(newInt));
+    if (needTimer) {
+        timer.setInterval(abs(newInt));
+    } else {  // the source handles the interval by itself
+        currSource->SetInterval(abs(newInt));
+    }
 }
 
 void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
