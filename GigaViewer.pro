@@ -58,7 +58,10 @@ FORMS += \
     cameracontrolsdialog.ui
 
 OTHER_FILES += \
-    README.txt
+    README.txt \
+    gigaviewer.desktop \
+    GigaViewer.svg \
+    video-fmf.xml
 
 RESOURCES += \
     icons.qrc

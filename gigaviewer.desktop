@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=GigaViewer
+Exec=/usr/bin/GigaViewer %f
+MimeType=video/fmf
+Icon=GigaViewer
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;Video;
+Comment=
+
