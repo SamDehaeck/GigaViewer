@@ -32,7 +32,8 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     opencvsourcesink.cpp \
     fmfsourcesink.cpp \
-    avtsourcesink.cpp
+    avtsourcesink.cpp \
+    cameracontrolsdialog.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -48,11 +49,13 @@ HEADERS  += \
     fmfsourcesink.h \
     imagesourcesink.h \
     avtsourcesink.h \
-    PvApi.h
+    PvApi.h \
+    cameracontrolsdialog.h
 
 FORMS += \
     fileinputdialog.ui \
-    playbackdialog.ui
+    playbackdialog.ui \
+    cameracontrolsdialog.ui
 
 OTHER_FILES += \
     README.txt
