@@ -89,6 +89,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>filePushButton</tabstop>
+  <tabstop>MovieButton</tabstop>
+  <tabstop>camButton</tabstop>
+  <tabstop>AvtButton</tabstop>
+  <tabstop>pushButton_2</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

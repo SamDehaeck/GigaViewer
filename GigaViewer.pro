@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     opencvsourcesink.cpp \
     fmfsourcesink.cpp \
     avtsourcesink.cpp \
-    cameracontrolsdialog.cpp
+    cameracontrolsdialog.cpp \
+    regexsourcesink.cpp
 
 HEADERS  += \
     videoglscene.h \
@@ -50,7 +51,8 @@ HEADERS  += \
     imagesourcesink.h \
     avtsourcesink.h \
     PvApi.h \
-    cameracontrolsdialog.h
+    cameracontrolsdialog.h \
+    regexsourcesink.h
 
 FORMS += \
     fileinputdialog.ui \

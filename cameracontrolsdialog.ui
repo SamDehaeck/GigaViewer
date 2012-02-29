@@ -79,6 +79,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>shutterSpinBox</tabstop>
+  <tabstop>IntensityButton</tabstop>
+  <tabstop>ROIRows</tabstop>
+  <tabstop>ROICols</tabstop>
+  <tabstop>pushButton_2</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

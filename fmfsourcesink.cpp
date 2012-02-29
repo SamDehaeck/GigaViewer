@@ -75,8 +75,13 @@ bool FmfSourceSink::StartAcquisition(QString dev)
         exit(1);
     }
     headersize = ftell(fmf);
+
+    fseek(fmf,0,SEEK_END);
+    nFrames=(ftell(fmf)-headersize)/bytesperchunk;
+    if (abs(nFrames)!=nRead) qDebug()<<"Wrong number of frames reported";
+    fseek(fmf,headersize,SEEK_SET);
     currPos=0;
-    nFrames=nRead;
+
 
 //		cout<<rows<<" "<<cols<<" "<<n<<endl;
     return TRUE;
@@ -95,9 +100,8 @@ bool FmfSourceSink::ReleaseCamera()
 
 bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-//    if ((currPos+indexIncrement > nFrames)||(currPos+indexIncrement <0)) {
-    if (currPos+indexIncrement <0) {
-        return FALSE;
+    if ((currPos+indexIncrement >= nFrames-1)||(currPos+indexIncrement <0)) {
+        return TRUE;
     }
     if (indexIncrement!=1) {
                 fseek(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);

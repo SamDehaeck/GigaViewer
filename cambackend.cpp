@@ -2,6 +2,7 @@
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
 #include "avtsourcesink.h"
+#include "regexsourcesink.h"
 #include <QDebug>
 
 CamBackend::CamBackend(QObject *parent) :
@@ -49,13 +50,16 @@ void CamBackend::GrabFrame()
 bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".fmf")) {
-        currSource=new FmfSourceSink;
+        currSource=new FmfSourceSink();
+        needTimer=TRUE;
+    } else if ((dev.contains(".png")) or (dev.contains(".bmp")) or (dev.contains(".jpg"))) {
+        currSource=new RegexSourceSink();
         needTimer=TRUE;
     } else if (dev=="AVT") {
-        currSource=new AvtSourceSink;
+        currSource=new AvtSourceSink();
         needTimer=FALSE;
     } else {
-        currSource=new OpencvSourceSink;
+        currSource=new OpencvSourceSink();
         needTimer=TRUE;
     }
     currSource->Init();
