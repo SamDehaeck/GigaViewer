@@ -282,6 +282,16 @@
            </item>
            <item>
             <property name="text">
+             <string>PNG</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>BMP</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
              <string>MSMPEG4V2</string>
             </property>
            </item>
@@ -293,6 +303,11 @@
            <item>
             <property name="text">
              <string>RAW</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>JPG</string>
             </property>
            </item>
           </widget>

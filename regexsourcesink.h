@@ -13,7 +13,7 @@ public:
     bool ReleaseCamera();
     bool GrabFrame(ImagePacket& target,int indexIncrement=1);
     bool RecordFrame(ImagePacket& source);
-    bool StartRecording(QString , QString , int , int , int );
+    bool StartRecording(QString recFold, QString codec, int fps, int cols, int rows);
     bool StopRecording();
     bool IsOpened();
     bool SetInterval(int msec);

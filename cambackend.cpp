@@ -95,9 +95,11 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 {
     if (startRec) {
         if (codec=="FMF") {
-            currSink=new FmfSourceSink;
+            currSink=new FmfSourceSink();
+        } else if (codec=="BMP" or codec=="PNG" or codec=="JPG") {
+            currSink=new RegexSourceSink();
         } else {
-            currSink=new OpencvSourceSink;
+            currSink=new OpencvSourceSink();
         }
         int fps=timer.interval()/10;
         currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);

@@ -73,19 +73,33 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     return FALSE;
 }
 
-bool RegexSourceSink::RecordFrame(ImagePacket &)
+bool RegexSourceSink::RecordFrame(ImagePacket &source)
 {
+    QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(index,8,10,QLatin1Char('0'));
+    if (cv::imwrite(filenam.toStdString().c_str(),source.image)) {
+        index++;
+        return TRUE;
+    }
     return FALSE;
 }
 
-bool RegexSourceSink::StartRecording(QString, QString, int, int, int)
+bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
 {
-    return FALSE;
+    dir=recFold;
+    extension=".png";
+    if (codec=="BMP") {
+        extension=".bmp";
+    } else if (codec=="JPG") {
+        extension=".jpg";
+    }
+    basename="image-";
+    index=0;
+    return TRUE;
 }
 
 bool RegexSourceSink::StopRecording()
 {
-    return FALSE;
+    return TRUE;
 }
 
 bool RegexSourceSink::IsOpened()
@@ -93,7 +107,7 @@ bool RegexSourceSink::IsOpened()
     return TRUE;
 }
 
-bool RegexSourceSink::SetInterval(int msec)
+bool RegexSourceSink::SetInterval(int)
 {
     return FALSE;
 }
