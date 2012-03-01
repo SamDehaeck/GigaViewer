@@ -349,9 +349,13 @@ bool AvtSourceSink::SetShutter(int shutTime)
     if ((errCode=PvAttrEnumGet(GCamera.Handle,"ExposureMode",buf,32,&enum_size))!=ePvErrSuccess) {
         qDebug()<<"Could not get exposure mode";
     }
-    if (strncmp(buf,"Auto",enum_size)==0) {
-        qDebug()<<"Cannot set shutter because in Auto mode";
-    } else if (strncmp(buf,"Manual",enum_size)==0) {
+    if (strncmp(buf,"Manual",enum_size)!=0) {
+        if ((erCode=PvAttrEnumSet(GCamera.Handle,"ExposureMode","Manual"))!=ePvErrSuccess) {
+            qDebug()<<"Failed to set shutter to Manual mode";
+        }
+
+    }
+    if (strncmp(buf,"Manual",enum_size)==0) {
         if ((errCode=PvAttrRangeUint32(GCamera.Handle,"ExposureValue",&min,&max))!=ePvErrSuccess) {
             qDebug()<<"Could not get range, using default";
             min=50;
@@ -370,6 +374,7 @@ bool AvtSourceSink::SetShutter(int shutTime)
             }
         }
     }
+
 
     return FALSE;
 }
