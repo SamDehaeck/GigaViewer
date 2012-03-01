@@ -78,7 +78,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 
     fseek(fmf,0,SEEK_END);
     nFrames=(ftell(fmf)-headersize)/bytesperchunk;
-    if (abs(nFrames)!=nRead) qDebug()<<"Wrong number of frames reported";
+    if (abs(nFrames)!=nRead) qDebug()<<"Wrong number of frames reported"<<nRead<<"versus calculated"<<nFrames;
     fseek(fmf,headersize,SEEK_SET);
     currPos=0;
 
@@ -126,8 +126,16 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 bool FmfSourceSink::RecordFrame(ImagePacket &source)
 {
     if (fwrite(&source.timeStamp,sizeof(double),1,fmfrec)==1) {
-        if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
-            return TRUE;
+        if (source.image.channels()==3) {
+            cv::Mat dummy;
+            cv::cvtColor(source.image,dummy,CV_RGB2GRAY);
+            if (fwrite(dummy.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+                return TRUE;
+            }
+        } else {
+            if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+                return TRUE;
+            }
         }
     }
     return FALSE;
@@ -198,17 +206,24 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int fps, int 
     }
 
     // number of frames
+    recNframespos=ftell(fmfrec);
+
     uint64_t nRead=0; //will have to write this when closing the recording
     if(fwrite(&nRead,sizeofuint64,1,fmfrec)<1){
         fprintf(stderr,"Error writing number of frames to output fmf file.\n");
         exit(1);
     }
+    recheadersize = ftell(fmfrec);
 
     return TRUE;
 }
 
 bool FmfSourceSink::StopRecording()
 {
+    int sizeofuint64 = 8;
+    uint64_t nWritten=(ftell(fmfrec)-recheadersize)/bytesperchunk;
+    fseek(fmfrec,recNframespos,SEEK_SET);
+    if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
     return TRUE;
 }

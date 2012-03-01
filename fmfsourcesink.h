@@ -24,6 +24,8 @@ private:
     FILE * fmfrec;
     int fmfnpixels;
     uint64_t headersize;
+    uint64_t recheadersize;
+    uint64_t recNframespos;
     uint64_t bytesperchunk;
     uint32_t bitsperpixel;
     int rows,cols;
