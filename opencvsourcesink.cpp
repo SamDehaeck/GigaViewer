@@ -44,8 +44,14 @@ bool OpencvSourceSink::ReleaseCamera() {
 }
 
 bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
-    recFile<<source.image;
-    qDebug()<<"Recording Frame";
+    if (source.image.channels()==1) {
+        cv::Mat dummy;
+        cv::cvtColor(source.image,dummy,CV_GRAY2RGB);
+        recFile<<dummy;
+    } else {
+        recFile<<source.image;
+    }
+
     return TRUE;
 }
 
