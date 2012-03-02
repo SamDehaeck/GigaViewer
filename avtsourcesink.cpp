@@ -246,10 +246,6 @@ bool AvtSourceSink::ReleaseCamera()
     {
         qDebug()<<"CameraUnSetup: PvCameraClose err:"<<errCode;
     }
-    else
-    {
-        qDebug()<<"Camera closed.";
-    }
     // delete image buffers => not necessary anymore
 
     GCamera.Handle = NULL;

@@ -70,6 +70,9 @@ bool CamBackend::StartAcquisition(QString dev)
 void CamBackend::StopAcquisition()
 {
     running=FALSE;
+    if (recording) {
+        StartRecording(FALSE);
+    }
     currSource->StopAcquisition();
     if (needTimer) quit();
 }
