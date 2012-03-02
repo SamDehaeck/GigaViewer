@@ -30,6 +30,7 @@ public:
     bool IsOpened();
     bool SetInterval(int msec);
     bool SetShutter(int shutTime);
+    int SetAutoShutter(bool fitRange);
 
 private:
 
@@ -49,6 +50,7 @@ private:
     unsigned long Last;
     int rows,cols;
     double camTimeStep;
+    double camTimeOffset;
     cv::Mat buffer;
     QVector<cv::Mat> matFrames;
 

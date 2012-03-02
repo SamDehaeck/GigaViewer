@@ -28,7 +28,16 @@ void CameraControlsDialog::GotNewSample(ImagePacket imP)
     ui->ROICols->setText(QString::number(imP.image.cols));
 }
 
+void CameraControlsDialog::GotNewShutterSpeed(int shut)
+{
+    shutSpeed=shut;
+    ui->shutterSpinBox->setValue(shut);
+}
+
 void CameraControlsDialog::on_shutterSpinBox_valueChanged(int arg1)
 {
-    emit SetShutterSpeed(arg1);
+    if (arg1!=shutSpeed) {
+        emit SetShutterSpeed(arg1);
+        shutSpeed=arg1;
+    }
 }

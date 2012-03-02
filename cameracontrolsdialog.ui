@@ -7,57 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>118</height>
+    <height>152</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="3">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>x</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="4">
-    <widget class="QLineEdit" name="ROICols"/>
-   </item>
-   <item row="3" column="0">
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="text">
-      <string>Set ROI</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QLabel" name="IntensLabel">
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1" colspan="2">
-    <widget class="QLineEdit" name="ROIRows"/>
-   </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Shutter Time (us)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="IntensityButton">
-     <property name="text">
-      <string>Max Intensity</string>
      </property>
     </widget>
    </item>
@@ -77,11 +37,64 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="3">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>x</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="4">
+    <widget class="QLineEdit" name="ROICols"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="pushButton_2">
+     <property name="text">
+      <string>Set ROI</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QLabel" name="IntensLabel">
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" colspan="2">
+    <widget class="QLineEdit" name="ROIRows"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="IntensityButton">
+     <property name="text">
+      <string>Max Intensity</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="FitRangeButton">
+     <property name="text">
+      <string>Fit Range</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" colspan="2">
+    <widget class="QPushButton" name="FitMeanButton">
+     <property name="text">
+      <string>Fit Mean</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>shutterSpinBox</tabstop>
-  <tabstop>IntensityButton</tabstop>
   <tabstop>ROIRows</tabstop>
   <tabstop>ROICols</tabstop>
   <tabstop>pushButton_2</tabstop>

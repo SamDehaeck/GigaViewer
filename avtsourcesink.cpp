@@ -201,6 +201,8 @@ bool AvtSourceSink::StartAcquisition(QString dev)
     }
     */
 
+    camTimeOffset=0;
+
     return TRUE;
 }
 
@@ -295,7 +297,11 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
                 target.seqNumber=GCamera.Frames[Index].FrameCount;
                 unsigned long ts;
                 ts=(((unsigned long)GCamera.Frames[Index].TimestampHi)<<32) + GCamera.Frames[Index].TimestampLo;
-                target.timeStamp=((double)ts)*camTimeStep;
+                if (camTimeOffset==0.0) {
+                    qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
+                    camTimeOffset=currMsec-((double)ts)*camTimeStep;
+                }
+                target.timeStamp=((double)ts)*camTimeStep+camTimeOffset;
                 //qDebug()<<ts<<target.timeStamp;
 
             }
@@ -350,7 +356,7 @@ bool AvtSourceSink::SetShutter(int shutTime)
         qDebug()<<"Could not get exposure mode";
     }
     if (strncmp(buf,"Manual",enum_size)!=0) {
-        if ((erCode=PvAttrEnumSet(GCamera.Handle,"ExposureMode","Manual"))!=ePvErrSuccess) {
+        if ((errCode=PvAttrEnumSet(GCamera.Handle,"ExposureMode","Manual"))!=ePvErrSuccess) {
             qDebug()<<"Failed to set shutter to Manual mode";
         }
 
@@ -377,4 +383,49 @@ bool AvtSourceSink::SetShutter(int shutTime)
 
 
     return FALSE;
+}
+
+int AvtSourceSink::SetAutoShutter(bool fitRange)
+{
+    tPvErr errCode;
+    tPvUint32 oldval=0;
+    if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&oldval))!=ePvErrSuccess) {
+        qDebug()<<"Could not get initial exposure value";
+    }
+
+    if (fitRange) {
+        if ((errCode=PvAttrEnumSet(GCamera.Handle,"ExposureAutoAlg","FitRange"))!=ePvErrSuccess) {
+            qDebug()<<"Could not set exposure auto algorithm";
+            return 0;
+        }
+    } else {
+        if ((errCode=PvAttrEnumSet(GCamera.Handle,"ExposureAutoAlg","Mean"))!=ePvErrSuccess) {
+            qDebug()<<"Could not set exposure auto algorithm";
+            return 0;
+        }
+    }
+
+    if ((errCode=PvAttrEnumSet(GCamera.Handle,"ExposureMode","AutoOnce"))!=ePvErrSuccess) {
+        qDebug()<<"Failed to set shutter to AutoOnce mode";
+        return 0;
+    }
+
+    //now wait till exposure mode changes to propagate this info back to the gui
+
+    tPvUint32 newval=0;
+    if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&newval))!=ePvErrSuccess) {
+        qDebug()<<"Could not get exposure value";
+    }
+
+    if (newval!=oldval) {
+        return newval;
+    } else {
+        //should sleep a bit before reasking
+        if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&newval))!=ePvErrSuccess) {
+            qDebug()<<"Could not get exposure value";
+        }
+    }
+
+    return newval;
+
 }

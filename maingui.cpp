@@ -1,8 +1,4 @@
 #include "maingui.h"
-#include "videoglscene.h"
-#include "fileinputdialog.h"
-#include "playbackdialog.h"
-#include "cameracontrolsdialog.h"
 #include <QList>
 
 MainGui::MainGui(QWidget *parent) :
@@ -13,9 +9,9 @@ MainGui::MainGui(QWidget *parent) :
     setViewport(new QGLWidget);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-    FileInputDialog* fileDialog = new FileInputDialog;
-    PlaybackDialog* playDialog = new PlaybackDialog;
-    CameraControlsDialog* camDialog = new CameraControlsDialog;
+    fileDialog = new FileInputDialog;
+    playDialog = new PlaybackDialog;
+    camDialog = new CameraControlsDialog;
 
     QList<QDialog*> controlDialogs;
     controlDialogs.append(camDialog);
@@ -88,6 +84,11 @@ void MainGui::stopButtonPressed()
 void MainGui::gotNewFps(int fps)
 {
     emit implementNewFps(fps);
+}
+
+void MainGui::gotNewShutSpeed(int shut)
+{
+    camDialog->GotNewShutterSpeed(shut);
 }
 
 void MainGui::newMoviePressed(QString theString)

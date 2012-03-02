@@ -15,6 +15,7 @@ class CameraControlsDialog : public QDialog
     
 public:
     explicit CameraControlsDialog(QWidget *parent = 0);
+    void GotNewShutterSpeed(int shut);
     ~CameraControlsDialog();
     
 signals:
@@ -24,13 +25,14 @@ signals:
 public slots:
     void GotNewSample(ImagePacket imP);
 
+
 private slots:
     void on_IntensityButton_clicked();
-
     void on_shutterSpinBox_valueChanged(int arg1);
 
 private:
     Ui::CameraControlsDialog *ui;
+    int shutSpeed;
 };
 
 #endif // CAMERACONTROLSDIALOG_H

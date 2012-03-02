@@ -6,6 +6,9 @@
 #include <QGLWidget>
 #include "imagepacket.h"
 #include "videoglscene.h"
+#include "cameracontrolsdialog.h"
+#include "playbackdialog.h"
+#include "fileinputdialog.h"
 
 
 
@@ -33,6 +36,7 @@ public slots:
     void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);
+    void gotNewShutSpeed(int shut);
     void needNewSample();
 
 
@@ -45,6 +49,9 @@ protected:
 
 private:
     VideoGlScene* theScene;
+    FileInputDialog* fileDialog;
+    PlaybackDialog* playDialog;
+    CameraControlsDialog* camDialog;
     bool getNewSample;
 
 };
