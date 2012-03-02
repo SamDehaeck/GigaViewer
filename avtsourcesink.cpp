@@ -203,6 +203,9 @@ bool AvtSourceSink::StartAcquisition(QString dev)
 
     camTimeOffset=0;
 
+    //this is to make it correspond to the default value in the gui
+    SetInterval(100);
+
     return TRUE;
 }
 
