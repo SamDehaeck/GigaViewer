@@ -101,7 +101,6 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
         QStringList vl=valStr.split("/");
         if (vl.count()==2) {
             int newVal=1000/vl[1].toInt();
-            qDebug()<<"Delay given is:"<<vl[1]<<"Hz";
             currentTimer=newVal;
         } else {
             qDebug()<<"Could not understand fps setting";

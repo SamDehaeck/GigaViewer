@@ -231,13 +231,3 @@ bool FmfSourceSink::IsOpened()
 {
     return TRUE;
 }
-
-bool FmfSourceSink::SetInterval(int)
-{
-    return FALSE;
-}
-
-bool FmfSourceSink::SetShutter(int)
-{
-    return FALSE;
-}

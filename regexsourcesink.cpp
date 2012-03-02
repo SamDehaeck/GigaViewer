@@ -107,14 +107,5 @@ bool RegexSourceSink::IsOpened()
     return TRUE;
 }
 
-bool RegexSourceSink::SetInterval(int)
-{
-    return FALSE;
-}
-
-bool RegexSourceSink::SetShutter(int)
-{
-    return FALSE;
-}
 
 

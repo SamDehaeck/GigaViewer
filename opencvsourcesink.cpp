@@ -78,12 +78,3 @@ bool OpencvSourceSink::IsOpened() {
     return camera.isOpened();
 }
 
-bool OpencvSourceSink::SetInterval(int)
-{
-    return FALSE;
-}
-
-bool OpencvSourceSink::SetShutter(int)
-{
-    return FALSE;
-}

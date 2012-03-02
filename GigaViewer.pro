@@ -32,9 +32,11 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     opencvsourcesink.cpp \
     fmfsourcesink.cpp \
+    imagesourcesink.cpp \
     avtsourcesink.cpp \
     cameracontrolsdialog.cpp \
     regexsourcesink.cpp
+
 
 HEADERS  += \
     videoglscene.h \

@@ -24,9 +24,6 @@ public:
     bool StopAcquisition();
     bool ReleaseCamera();
     bool GrabFrame(ImagePacket& target,int indexIncrement=1);
-    bool RecordFrame(ImagePacket& source);
-    bool StartRecording(QString , QString , int , int , int );
-    bool StopRecording();
     bool IsOpened();
     bool SetInterval(int msec);
     bool SetShutter(int shutTime);

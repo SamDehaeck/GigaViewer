@@ -1,20 +1,5 @@
 #include "avtsourcesink.h"
 
-bool AvtSourceSink::RecordFrame(ImagePacket&)
-{
-    return FALSE;
-}
-
-bool AvtSourceSink::StartRecording(QString, QString, int, int, int)
-{
-    return FALSE;
-}
-
-bool AvtSourceSink::StopRecording()
-{
-    return FALSE;
-}
-
 bool AvtSourceSink::IsOpened()
 {
     return TRUE;
