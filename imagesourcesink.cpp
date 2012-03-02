@@ -44,4 +44,9 @@ bool ImageSourceSink::SetShutter(int) {
     return FALSE;
 }
 
+int ImageSourceSink::SetAutoShutter(bool)
+{
+    return 0;
+}
+
 

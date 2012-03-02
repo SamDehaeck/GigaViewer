@@ -46,6 +46,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(NeedNewSample()),this,SLOT(needNewSample()));
     connect(this,SIGNAL(newSampleReady(ImagePacket)),camDialog,SLOT(GotNewSample(ImagePacket)));
     connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
+    connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     setScene(theScene);
 }
 

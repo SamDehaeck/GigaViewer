@@ -16,9 +16,11 @@ public:
     void ReleaseCamera();
     void SetInterval(int newInt);
     void SetShutter(int shut);
+    void SetAutoShutter(bool fitRange);
 
 signals:
     void NewImageReady(ImagePacket im);
+    void shutterChanged(int newTime);
 
 public slots:
     void GrabFrame();

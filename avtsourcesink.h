@@ -9,7 +9,7 @@
 #include <QThread>
 #include "imagepacket.h"
 #include "imagesourcesink.h"
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 class Sleeper : public QThread {
 public:
@@ -31,6 +31,7 @@ public:
 
 private:
 
+// this defines the buffersize
 #define FRAMESCOUNT 50
 
     typedef struct

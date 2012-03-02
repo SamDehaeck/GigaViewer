@@ -41,3 +41,13 @@ void CameraControlsDialog::on_shutterSpinBox_valueChanged(int arg1)
         shutSpeed=arg1;
     }
 }
+
+void CameraControlsDialog::on_FitRangeButton_clicked()
+{
+    emit SetAutoShutter(TRUE);
+}
+
+void CameraControlsDialog::on_FitMeanButton_clicked()
+{
+    emit SetAutoShutter(FALSE);
+}

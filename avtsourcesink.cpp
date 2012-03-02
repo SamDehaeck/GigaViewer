@@ -190,6 +190,7 @@ bool AvtSourceSink::StartAcquisition(QString dev)
 
     //this is to make it correspond to the default value in the gui
     SetInterval(100);
+    SetShutter(100);
 
     return TRUE;
 }
@@ -405,11 +406,19 @@ int AvtSourceSink::SetAutoShutter(bool fitRange)
         return newval;
     } else {
         //should sleep a bit before reasking
-        if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&newval))!=ePvErrSuccess) {
-            qDebug()<<"Could not get exposure value";
+        int counter=0;
+        while ((newval==oldval) and (counter<5)) {
+            Sleeper::msleep(300);
+            if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&newval))!=ePvErrSuccess) {
+                qDebug()<<"Could not get exposure value";
+            }
+            counter++;
+        }
+        if (newval==oldval) {
+            qDebug()<<"Did not get new exposure value";
+            return 0; // so that no new shutterspeed is emitted as signal in cambackend
         }
     }
 
     return newval;
-
 }

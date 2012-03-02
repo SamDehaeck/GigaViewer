@@ -117,7 +117,19 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 void CamBackend::SetShutter(int shut)
 {
     if (currSource!=0) {
-        currSource->SetShutter(shut);
+        if (currSource->SetShutter(shut)) {
+            emit shutterChanged(shut);
+        }
+    }
+}
+
+void CamBackend::SetAutoShutter(bool fitRange)
+{
+    if (currSource!=0) {
+        int val= currSource->SetAutoShutter(fitRange);
+        if (val!=0) {
+            emit shutterChanged(val);
+        }
     }
 }
 

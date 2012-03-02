@@ -28,6 +28,7 @@ signals:
     void closeApplic();
     void newSampleReady(ImagePacket matrix);
     void setShutter(int time);
+    void setAutoShutter(bool fitRange);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);

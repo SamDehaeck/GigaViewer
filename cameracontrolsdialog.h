@@ -21,6 +21,7 @@ public:
 signals:
     void NeedNewSample();
     void SetShutterSpeed(int shut);
+    void SetAutoShutter(bool fitRange);
 
 public slots:
     void GotNewSample(ImagePacket imP);
@@ -29,6 +30,10 @@ public slots:
 private slots:
     void on_IntensityButton_clicked();
     void on_shutterSpinBox_valueChanged(int arg1);
+
+    void on_FitRangeButton_clicked();
+
+    void on_FitMeanButton_clicked();
 
 private:
     Ui::CameraControlsDialog *ui;

@@ -21,6 +21,7 @@ public slots:
     void changeFps(int newFps);
     void stopAcquisition();
     void changeShutter (int time);
+    void setAutoShutter (bool fitRange);
 
 private:
     MainGui* theGui;
