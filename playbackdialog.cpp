@@ -7,7 +7,6 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui(new Ui::PlaybackDialog)
 {
     ui->setupUi(this);
-    ui->fpsEdit->setValidator(new QIntValidator(-3600000,3600000,this));
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
 
@@ -21,15 +20,9 @@ PlaybackDialog::~PlaybackDialog()
 void PlaybackDialog::on_stopButton_clicked()
 {
     ui->playButton->setChecked(TRUE);
-    ui->recButton->setEnabled(FALSE);
+    ui->recButton->setChecked(FALSE);
     ui->fpsEdit->setText("100");
     emit stopPlayback();
-}
-
-void PlaybackDialog::on_fpsEdit_editingFinished()
-{
-    currentTimer=ui->fpsEdit->text().toInt();
-    emit newFps(currentTimer);
 }
 
 void PlaybackDialog::on_ffwdButton_clicked()
@@ -98,5 +91,24 @@ void PlaybackDialog::forwardPlay()
     currentTimer=abs(currentTimer);
     QString delayTxt=QString("%1").arg(currentTimer);
     ui->fpsEdit->setText(delayTxt);
+    emit newFps(currentTimer);
+}
+
+void PlaybackDialog::on_fpsEdit_returnPressed()
+{
+    QString valStr=ui->fpsEdit->text();
+    if (valStr.contains("/")) {
+        QStringList vl=valStr.split("/");
+        if (vl.count()==2) {
+            int newVal=1000/vl[1].toInt();
+            qDebug()<<"Delay given is:"<<vl[1]<<"Hz";
+            currentTimer=newVal;
+        } else {
+            qDebug()<<"Could not understand fps setting";
+        }
+    } else {
+        currentTimer=valStr.toInt();
+    }
+
     emit newFps(currentTimer);
 }

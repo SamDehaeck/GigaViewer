@@ -24,8 +24,6 @@ signals:
 private slots:
     void on_stopButton_clicked();
 
-    void on_fpsEdit_editingFinished();
-
     void on_ffwdButton_clicked();
 
     void on_rwdButton_clicked();
@@ -44,6 +42,8 @@ private slots:
 
     void reversePlay();
     void forwardPlay();
+
+    void on_fpsEdit_returnPressed();
 
 private:
     Ui::PlaybackDialog *ui;
