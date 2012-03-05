@@ -50,6 +50,13 @@ MainGui::MainGui(QWidget *parent) :
     setScene(theScene);
 }
 
+void MainGui::returnToStart()
+{
+    showPlaybackControls(FALSE);
+    showCameraControls(FALSE);
+    showInputControls(TRUE);
+}
+
 void MainGui::resizeEvent(QResizeEvent *event)
 {
     if (scene())
@@ -69,9 +76,9 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 
 void MainGui::openCvFeedPressed()
 {
-    emit newOpencvFeedNeeded(TRUE);
     showPlaybackControls(TRUE);
     showInputControls(FALSE);
+    emit newOpencvFeedNeeded(TRUE);
 }
 
 void MainGui::stopButtonPressed()
@@ -95,9 +102,9 @@ void MainGui::gotNewShutSpeed(int shut)
 void MainGui::newMoviePressed(QString theString)
 {
     if (theString!="") {
-        emit newMovieNeeded(theString);
         showPlaybackControls(TRUE);
         showInputControls(FALSE);
+        emit newMovieNeeded(theString);
     }
 }
 
@@ -130,10 +137,10 @@ void MainGui::showCameraControls(bool visible)
 
 void MainGui::AVTFeedPressed()
 {
-    emit newAvtFeedNeeded(TRUE);
     showPlaybackControls(TRUE);
     showInputControls(FALSE);
     showCameraControls(TRUE);
+    emit newAvtFeedNeeded(TRUE);
 }
 
 void MainGui::needNewSample()

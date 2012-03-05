@@ -33,9 +33,11 @@ SOURCES += main.cpp \
     opencvsourcesink.cpp \
     fmfsourcesink.cpp \
     imagesourcesink.cpp \
-    avtsourcesink.cpp \
-    cameracontrolsdialog.cpp \
-    regexsourcesink.cpp
+    regexsourcesink.cpp \
+    cameracontrolsdialog.cpp
+unix {
+    SOURCES += avtsourcesink.cpp
+}
 
 
 HEADERS  += \
@@ -51,10 +53,13 @@ HEADERS  += \
     opencvsourcesink.h \
     fmfsourcesink.h \
     imagesourcesink.h \
-    avtsourcesink.h \
-    PvApi.h \
     cameracontrolsdialog.h \
     regexsourcesink.h
+
+unix {
+    HEADERS +=  avtsourcesink.h \
+                PvApi.h
+}
 
 FORMS += \
     fileinputdialog.ui \

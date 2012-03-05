@@ -17,6 +17,7 @@ class MainGui : public QGraphicsView
     Q_OBJECT
 public:
     explicit MainGui(QWidget *parent = 0);
+    void returnToStart();
 
 signals:
     void newPicNeeded(QString theString);

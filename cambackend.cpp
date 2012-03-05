@@ -1,9 +1,13 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
-#include "avtsourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
+
+#ifdef Q_OS_LINUX
+#include "avtsourcesink.h"
+#endif
+
 
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(100),reversePlay(FALSE),needTimer(TRUE),running(FALSE)
@@ -52,19 +56,26 @@ bool CamBackend::StartAcquisition(QString dev)
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
         needTimer=TRUE;
-    } else if ((dev.contains(".png")) or (dev.contains(".bmp")) or (dev.contains(".jpg"))) {
+    } else if ((dev.contains(".png")) or (dev.contains(".bmp")) or (dev.contains(".jpg")) or (dev.contains(".JPG"))) {
         currSource=new RegexSourceSink();
         needTimer=TRUE;
     } else if (dev=="AVT") {
+#ifdef Q_OS_LINUX
         currSource=new AvtSourceSink();
         needTimer=FALSE;
+#else
+        qDebug()<<"Prosilica backend not supported on windows"
+        return FALSE;
+#endif
     } else {
         currSource=new OpencvSourceSink();
         needTimer=TRUE;
     }
-    currSource->Init();
-    currSource->StartAcquisition(dev);
-    return TRUE;
+    if (currSource->Init()) {
+        return currSource->StartAcquisition(dev);
+    } else {
+        return FALSE;
+    }
 }
 
 void CamBackend::StopAcquisition()

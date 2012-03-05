@@ -28,6 +28,7 @@ void Coordinator::controlCameraThread(bool startNew,QString dev)
             opencvRunning=TRUE;
         } else {
             //reset gui buttons
+            theGui->returnToStart();
         }
     } else {
         if (camBack.isRunning()) {
