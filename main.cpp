@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     QObject::connect(fullToggle,SIGNAL(activated()),&win,SLOT(toggleFullscreen()));
     QObject::connect(closeEv,SIGNAL(activated()),&win,SLOT(close()));
 
-    win.showFullScreen();
+    win.showMaximized();
 
     if (argc==2) {
         if (QFile::exists(argv[1])) view.newMoviePressed(argv[1]);

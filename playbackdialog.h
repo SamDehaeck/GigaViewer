@@ -19,6 +19,7 @@ public:
 signals:
     void stopPlayback();
     void newFps(int fps);
+    void jumpFrames(bool forward);
     void recordNow(bool checked,QString recFold, QString codec);
 
 private slots:
@@ -48,6 +49,7 @@ private slots:
 private:
     Ui::PlaybackDialog *ui;
     int currentTimer;
+    bool recording;
 };
 
 #endif // PLAYBACKDIALOG_H

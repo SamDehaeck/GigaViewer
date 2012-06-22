@@ -37,6 +37,7 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
         if (i!=0) item->setVisible(FALSE);
         const QRectF rect = item->boundingRect();
         item->setPos(pos.x() - rect.x(), pos.y() - rect.y());
+        if (i==0) pos += QPointF(0,550);             // This is the base Y offset for the extra panels
         pos += QPointF(10 + rect.width(),0);
         i++;
     }
