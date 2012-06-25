@@ -125,6 +125,13 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
     recording=startRec;
 }
 
+void CamBackend::skipForwardBackward(bool forward)
+{
+    if (!currSource->SkipFrames(forward)) {
+        qDebug()<<"Skipping not yet implemented";
+    }
+}
+
 void CamBackend::SetShutter(int shut)
 {
     if (currSource!=0) {
@@ -143,5 +150,6 @@ void CamBackend::SetAutoShutter(bool fitRange)
         }
     }
 }
+
 
 

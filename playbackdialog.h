@@ -24,26 +24,16 @@ signals:
 
 private slots:
     void on_stopButton_clicked();
-
     void on_ffwdButton_clicked();
-
     void on_rwdButton_clicked();
-
     void on_playButton_toggled(bool checked);
-
     void on_recButton_toggled(bool checked);
-
     void on_RecSettings_clicked();
-
     void on_backButton_clicked();
-
     void on_toolButton_clicked();
-
     void togglePlay();
-
     void reversePlay();
     void forwardPlay();
-
     void on_fpsEdit_returnPressed();
 
 public slots:

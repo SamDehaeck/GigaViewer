@@ -20,6 +20,7 @@ public:
     virtual bool SetInterval(int msec);
     virtual bool SetShutter(int shutTime);
     virtual int SetAutoShutter(bool fitRange);
+    virtual bool SkipFrames(bool forward);
 };
 
 #endif // IMAGESOURCESINK_H

@@ -231,3 +231,7 @@ bool FmfSourceSink::IsOpened()
 {
     return TRUE;
 }
+
+bool FmfSourceSink::SkipFrames(bool forward) {
+    qDebug()<<"Will try to skip";
+}

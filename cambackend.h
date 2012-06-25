@@ -25,6 +25,7 @@ signals:
 public slots:
     void GrabFrame();
     void StartRecording(bool start, QString recFold="", QString codec="");
+    void skipForwardBackward(bool forward);
 
 private:
     void run();

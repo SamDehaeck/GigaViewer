@@ -31,6 +31,7 @@ signals:
     void newFrameNrShowing(int nr);
     void setShutter(int time);
     void setAutoShutter(bool fitRange);
+    void skipFrames(bool forward);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);

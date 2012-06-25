@@ -49,4 +49,9 @@ int ImageSourceSink::SetAutoShutter(bool)
     return 0;
 }
 
+bool ImageSourceSink::SkipFrames(bool)
+{
+    return FALSE;
+}
+
 
