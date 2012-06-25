@@ -41,6 +41,7 @@ bool RegexSourceSink::StartAcquisition(QString dev)
     }
     if (goodFiles->count()==0) qDebug()<<"No matching files found";
     index=0;
+    nFrames=goodFiles->count();
 
     return TRUE;
 }
@@ -106,6 +107,24 @@ bool RegexSourceSink::StopRecording()
 bool RegexSourceSink::IsOpened()
 {
     return TRUE;
+}
+
+bool RegexSourceSink::SkipFrames(bool forward)
+{
+    int skipping = 0;
+    if (forward) {
+        skipping=nFrames/10;
+    } else {
+        skipping=-nFrames/50;
+    }
+//    qDebug()<<"Will try to skip "<<skipping<<" frames";
+
+    if (index+skipping<nFrames and index+skipping>0) {
+        index+=skipping;
+        return TRUE;
+    } else {
+        return TRUE; // it is not a real error after all
+    }
 }
 
 

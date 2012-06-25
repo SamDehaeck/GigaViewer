@@ -233,5 +233,20 @@ bool FmfSourceSink::IsOpened()
 }
 
 bool FmfSourceSink::SkipFrames(bool forward) {
-    qDebug()<<"Will try to skip";
+    int skipping = 0;
+    if (forward) {
+        skipping=nFrames/10;
+    } else {
+        skipping=-nFrames/50;
+    }
+//    qDebug()<<"Will try to skip "<<skipping<<" frames";
+
+    if ((currPos+skipping >= nFrames-1)||(currPos+skipping <0)) {
+        return TRUE;
+    }
+
+
+    fseek(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
+    currPos+=skipping;
+    return TRUE;
 }

@@ -78,3 +78,29 @@ bool OpencvSourceSink::IsOpened() {
     return camera.isOpened();
 }
 
+bool OpencvSourceSink::SkipFrames(bool forward)
+{
+    int nFrames=camera.get(CV_CAP_PROP_FRAME_COUNT);
+//    qDebug()<<"Number of frames"<<nFrames;
+    int currPos=camera.get(CV_CAP_PROP_POS_FRAMES);
+    int skipping = 0;
+    if (forward) {
+        skipping=nFrames/10;
+    } else {
+        skipping=-nFrames/50;
+    }
+//    qDebug()<<"Will try to skip "<<skipping<<" frames";
+    if (skipping==0) return TRUE; //skipping did not work
+
+    if ((currPos+skipping >= nFrames-1)||(currPos+skipping <0)) {
+        return TRUE;
+    }
+
+
+    camera.set(CV_CAP_PROP_POS_FRAMES,currPos+skipping);
+    currPos+=skipping;
+    return TRUE;
+
+
+}
+
