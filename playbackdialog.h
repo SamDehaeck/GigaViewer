@@ -46,6 +46,9 @@ private slots:
 
     void on_fpsEdit_returnPressed();
 
+public slots:
+    void newFrameNumberReceived(int nr);
+
 private:
     Ui::PlaybackDialog *ui;
     int currentTimer;

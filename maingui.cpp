@@ -47,6 +47,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(this,SIGNAL(newSampleReady(ImagePacket)),camDialog,SLOT(GotNewSample(ImagePacket)));
     connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
+    connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
     setScene(theScene);
 }
 
@@ -68,6 +69,7 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 {
     theScene->imageBuff=theMatrix.image;
     theScene->update();
+    emit newFrameNrShowing(theMatrix.seqNumber);
     if (getNewSample) {
         emit newSampleReady(theMatrix);
         getNewSample=FALSE;

@@ -63,6 +63,7 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         QFile dum(dir+"/"+goodFiles->at(index));
         if (dum.exists()) {
             target.image=cv::imread(dum.fileName().toStdString().c_str());
+            target.seqNumber=index;
             return TRUE;
         } else {
             qDebug()<<"File did not exist"<<dum.fileName();

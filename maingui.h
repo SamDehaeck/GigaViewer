@@ -28,6 +28,7 @@ signals:
     void startRecording(bool start,QString recfold,QString codec);
     void closeApplic();
     void newSampleReady(ImagePacket matrix);
+    void newFrameNrShowing(int nr);
     void setShutter(int time);
     void setAutoShutter(bool fitRange);
 

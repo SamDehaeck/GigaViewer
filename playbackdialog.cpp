@@ -119,3 +119,9 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
 
     emit newFps(currentTimer);
 }
+
+void PlaybackDialog::newFrameNumberReceived(int nr)
+{
+    QString frameTxt=QString("%1").arg(nr);
+    ui->RightStatus->setText(frameTxt);
+}
