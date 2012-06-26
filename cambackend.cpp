@@ -128,7 +128,7 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 void CamBackend::skipForwardBackward(bool forward)
 {
     if (!currSource->SkipFrames(forward)) {
-        qDebug()<<"Skipping not yet implemented";
+        qDebug()<<"Skipping did not work";
     }
 }
 

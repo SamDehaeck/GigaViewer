@@ -20,6 +20,8 @@ public:
 private:
     cv::VideoCapture camera;
     cv::VideoWriter recFile;
+    int nFrames;
+    bool liveFeed;
 };
 
 #endif // OPENCVSOURCESINK_H
