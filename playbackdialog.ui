@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>513</width>
-    <height>91</height>
+    <width>571</width>
+    <height>100</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -194,19 +194,50 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="fpsEdit">
-              <property name="toolTip">
-               <string extracomment="This is the time between successive images. If you want to give a fps value in Hz, then simply type &quot;1/fps&quot; and it will be transformed."/>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>100</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
+             <widget class="QWidget" name="widget_3" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="margin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLineEdit" name="fpsEdit">
+                 <property name="toolTip">
+                  <string extracomment="This is the time between successive images. If you want to give a fps value in Hz, then simply type &quot;1/fps&quot; and it will be transformed."/>
+                 </property>
+                 <property name="layoutDirection">
+                  <enum>Qt::LeftToRight</enum>
+                 </property>
+                 <property name="text">
+                  <string>100</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="horizontalSlider">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>69</number>
+                 </property>
+                 <property name="value">
+                  <number>19</number>
+                 </property>
+                 <property name="tracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>

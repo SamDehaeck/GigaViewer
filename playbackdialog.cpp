@@ -113,6 +113,7 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
         } else {
             qDebug()<<"Could not understand fps setting";
         }
+        if (valStr.at(0)=='-') currentTimer=-currentTimer;
     } else {
         currentTimer=valStr.toInt();
     }
@@ -124,4 +125,29 @@ void PlaybackDialog::newFrameNumberReceived(int nr)
 {
     QString frameTxt=QString("%1").arg(nr);
     ui->RightStatus->setText(frameTxt);
+}
+
+void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
+{
+    double newFrameRate=1;
+    if (value>10) {
+        newFrameRate=value-9;
+    } else {
+        newFrameRate=value/10.0;
+    }
+//    qDebug()<<"Converted new value "<<value<<" into new fps "<<newFrameRate;
+    QString oldText=ui->fpsEdit->text();
+    QString delayTxt;
+    int newVal;
+    if (oldText.at(0)=='-') {
+        delayTxt=QString("-1/%1").arg(newFrameRate);
+        newVal=(int)(-1000/newFrameRate);
+    } else {
+        delayTxt=QString("1/%1").arg(newFrameRate);
+        newVal=(int)(1000/newFrameRate);
+    }
+    ui->fpsEdit->setText(delayTxt);
+
+    currentTimer=newVal;
+    emit newFps(currentTimer);
 }

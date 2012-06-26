@@ -36,6 +36,8 @@ private slots:
     void forwardPlay();
     void on_fpsEdit_returnPressed();
 
+    void on_horizontalSlider_valueChanged(int value);
+
 public slots:
     void newFrameNumberReceived(int nr);
 
