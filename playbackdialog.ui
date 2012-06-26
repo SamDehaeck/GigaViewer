@@ -395,6 +395,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>horizontalSlider</tabstop>
+  <tabstop>stopButton</tabstop>
+  <tabstop>playButton</tabstop>
+  <tabstop>ffwdButton</tabstop>
+  <tabstop>recButton</tabstop>
+  <tabstop>RecSettings</tabstop>
+  <tabstop>fpsEdit</tabstop>
+  <tabstop>rwdButton</tabstop>
+  <tabstop>backButton</tabstop>
+  <tabstop>RecFolder</tabstop>
+  <tabstop>toolButton</tabstop>
+  <tabstop>codecBox</tabstop>
+ </tabstops>
  <resources>
   <include location="icons.qrc"/>
  </resources>

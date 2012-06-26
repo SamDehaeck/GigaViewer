@@ -150,4 +150,5 @@ void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 
     currentTimer=newVal;
     emit newFps(currentTimer);
+    ui->playButton->setChecked(TRUE);
 }
