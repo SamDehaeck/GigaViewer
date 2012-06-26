@@ -6,6 +6,7 @@ FileInputDialog::FileInputDialog(QWidget *parent) :
     ui(new Ui::FileInputDialog)
 {
     ui->setupUi(this);
+    currentDir=QDir::home();
 }
 
 FileInputDialog::~FileInputDialog()
@@ -16,7 +17,12 @@ FileInputDialog::~FileInputDialog()
 void FileInputDialog::on_filePushButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
-    QDir::homePath(), tr("All files (*.*)") );
+    currentDir.absolutePath(), tr("All files (*.*)") );
+    if (resp=="") {
+        currentDir=QDir::home();
+    } else {
+        currentDir=QDir(resp);
+    }
     emit StaticPicPressed(resp);
 }
 
@@ -28,7 +34,12 @@ void FileInputDialog::on_camButton_clicked() {
 void FileInputDialog::on_MovieButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Movie"),
-    QDir::homePath(), tr("All files (*.*)") );
+    currentDir.absolutePath(), tr("All files (*.*)") );
+    if (resp=="") {
+        currentDir=QDir::home();
+    } else {
+        currentDir=QDir(resp);
+    }
     emit MoviePressed(resp);
 }
 

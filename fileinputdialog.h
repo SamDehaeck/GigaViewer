@@ -35,6 +35,7 @@ private slots:
 
 private:
     Ui::FileInputDialog *ui;
+    QDir currentDir;
 };
 
 #endif // FILEINPUTDIALOG_H
