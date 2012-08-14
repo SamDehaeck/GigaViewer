@@ -28,7 +28,10 @@ int main(int argc, char *argv[])
     win.showMaximized();
 
     if (argc==2) {
-        if (QFile::exists(argv[1])) view.newMoviePressed(argv[1]);
+        if (QFile::exists(argv[1])) {
+            view.newMoviePressed(argv[1]);
+            win.setWindowTitle(argv[1]);
+        }
     }
 
     return a.exec();
