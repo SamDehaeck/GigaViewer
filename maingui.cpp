@@ -50,6 +50,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
     setScene(theScene);
+    getNewSample=FALSE;
 }
 
 void MainGui::returnToStart()

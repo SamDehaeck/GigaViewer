@@ -34,7 +34,7 @@
    <item row="2" column="0">
     <widget class="QPushButton" name="IntensityButton">
      <property name="text">
-      <string>Max Intensity</string>
+      <string>Analyze Image</string>
      </property>
     </widget>
    </item>
@@ -71,16 +71,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="IntensLabel">
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="1">
     <widget class="QLineEdit" name="ROIRows"/>
    </item>
@@ -96,6 +86,16 @@
    </item>
    <item row="4" column="3">
     <widget class="QLineEdit" name="ROICols"/>
+   </item>
+   <item row="2" column="1" colspan="3">
+    <widget class="QLabel" name="IntensLabel">
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
