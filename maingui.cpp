@@ -83,6 +83,7 @@ void MainGui::openCvFeedPressed()
     showPlaybackControls(TRUE);
     showInputControls(FALSE);
     emit newOpencvFeedNeeded(TRUE);
+    this->parentWidget()->setWindowTitle("OpenCV Feed");
 }
 
 void MainGui::stopButtonPressed()
@@ -91,6 +92,7 @@ void MainGui::stopButtonPressed()
     showPlaybackControls(FALSE);
     showCameraControls(FALSE);
     showInputControls(TRUE);
+    this->parentWidget()->setWindowTitle("GigaViewer");
 }
 
 void MainGui::gotNewFps(int fps)
@@ -109,6 +111,7 @@ void MainGui::newMoviePressed(QString theString)
         showPlaybackControls(TRUE);
         showInputControls(FALSE);
         emit newMovieNeeded(theString);
+        this->parentWidget()->setWindowTitle(theString);
     }
 }
 
@@ -145,6 +148,7 @@ void MainGui::AVTFeedPressed()
     showInputControls(FALSE);
     showCameraControls(TRUE);
     emit newAvtFeedNeeded(TRUE);
+    this->parentWidget()->setWindowTitle("AVT Live Camera Feed");
 }
 
 void MainGui::needNewSample()

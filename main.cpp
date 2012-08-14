@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
     if (argc==2) {
         if (QFile::exists(argv[1])) {
             view.newMoviePressed(argv[1]);
-            win.setWindowTitle(argv[1]);
         }
     }
 
