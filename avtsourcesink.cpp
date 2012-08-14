@@ -284,10 +284,9 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
                 ts=(((unsigned long)GCamera.Frames[Index].TimestampHi)<<32) + GCamera.Frames[Index].TimestampLo;
                 if (camTimeOffset==0.0) {
                     qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
-                    camTimeOffset=currMsec-((double)ts)*camTimeStep;
+                    camTimeOffset=currMsec-((double)ts)*camTimeStep*1000.0;
                 }
-                target.timeStamp=((double)ts)*camTimeStep+camTimeOffset;
-                //qDebug()<<ts<<target.timeStamp;
+                target.timeStamp=((double)ts)*camTimeStep*1000.0+camTimeOffset;
 
             }
 
