@@ -19,30 +19,41 @@ bool AvtSourceSink::Init()
     memset(&GCamera,0,sizeof(tCamera));
 
     tPvUint32 count,connected;
-    tPvCameraInfo list;
+    tPvCameraInfo list[2]; //current max is 2 cameras
 
     if (!PvCameraCount()) {
         Sleeper::msleep(2000);
         if (!PvCameraCount()) return FALSE;
     }
     bool failed = FALSE;
-    count = PvCameraList(&list,1,&connected);
-    if(count == 1)
-    {
-        GCamera.UID = list.UniqueId;
-        qDebug()<<"grabbing camera"<<list.SerialString;
+    count = PvCameraList(list,2,&connected);
 
+    qDebug()<<"Camera count:"<< count;
+    qDebug()<<"Camera 1 detected:"<< list[0].DisplayName;
+    qDebug()<<"Camera 2 detected:"<< list[1].DisplayName;
+
+    int tryCam=0;
+
+    if(count <= 2)
+    {
         tPvErr errCode;
         unsigned long FrameSize = 0;
 
-        if ((errCode = PvCameraOpen(GCamera.UID,ePvAccessMaster,&(GCamera.Handle))) != ePvErrSuccess)
-        {
-            if (errCode == ePvErrAccessDenied)
-                qDebug()<<"PvCameraOpen returned ePvErrAccessDenied"<<"Camera already open as Master, or camera wasn't properly closed and still waiting to HeartbeatTimeout.";
-            else
-                qDebug()<<"PvCameraOpen err:"<< errCode;
-            return FALSE;
-        }
+        do {
+            GCamera.UID = list[tryCam].UniqueId;
+            qDebug()<<"grabbing camera"<<list[tryCam].DisplayName;
+            if ((errCode = PvCameraOpen(GCamera.UID,ePvAccessMaster,&(GCamera.Handle))) != ePvErrSuccess)
+            {
+                if (errCode == ePvErrAccessDenied)
+                    qDebug()<<"PvCameraOpen returned ePvErrAccessDenied"<<"Camera already open as Master, or camera wasn't properly closed and still waiting to HeartbeatTimeout.";
+
+                else
+                    qDebug()<<"PvCameraOpen err:"<< errCode;
+
+                tryCam++;
+            }
+            if (tryCam>1) return FALSE;
+        } while (errCode!=ePvErrSuccess);
 
         // Calculate frame buffer size
         if((errCode = PvAttrUint32Get(GCamera.Handle,"TotalBytesPerFrame",&FrameSize)) != ePvErrSuccess)
