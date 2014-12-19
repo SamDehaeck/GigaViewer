@@ -4,19 +4,22 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl widgets
 
 TARGET = GigaViewer
 TEMPLATE = app
 
 win32 {
-    INCLUDEPATH += C:\opencv\include
-    LIBS += C:\opencv\bin\libopencv_core231d.dll \
-        C:\opencv\bin\libopencv_imgproc231d.dll \
-        C:\opencv\bin\libopencv_highgui231d.dll \
-        C:\opencv\bin\libopencv_video231d.dll
+    INCLUDEPATH += C:\opencv\build\include
+
+    LIBS +=  C:\opencv\build\x86\vc10\lib\opencv_core2410.lib \
+         C:\opencv\build\x86\vc10\lib\opencv_imgproc2410.lib \
+         C:\opencv\build\x86\vc10\lib\opencv_highgui2410.lib \
+         C:\opencv\build\x86\vc10\lib\opencv_video2410.lib \
+         "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\PvAPI.lib" \
+         "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\ImageLib.lib"
 } else {
-    LIBS += -L/usr/local/lib
+    LIBS += -L /usr/local/lib
     LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI
 }
 
@@ -35,9 +38,9 @@ SOURCES += main.cpp \
     imagesourcesink.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp
-unix {
+#unix {
     SOURCES += avtsourcesink.cpp
-}
+#}
 
 
 HEADERS  += \
@@ -56,10 +59,10 @@ HEADERS  += \
     cameracontrolsdialog.h \
     regexsourcesink.h
 
-unix {
+#unix {
     HEADERS +=  avtsourcesink.h \
                 PvApi.h
-}
+#}
 
 FORMS += \
     fileinputdialog.ui \
