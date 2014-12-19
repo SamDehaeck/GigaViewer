@@ -2,9 +2,8 @@ The goal of this program is to create an opengl viewer capable of working
 with Prosilica/AVT cameras and modify their important settings such as
 framerate and exposure levels. And allow saving the acquired images to disk.
 
-For the moment it works on linux and compiles on windows.
-However, it can lock up the webcam on windows using opencv and also the display does not seem right.
-Should do more testing to find out why this is, but unfortunately I do not have a windows test box..
+For the moment it works on linux and windows provided that it can find
+the opencv and QT libraries.
 
 Installing on Linux:
 --------------------
@@ -29,3 +28,4 @@ To correctly associate the created .fmf movies with the application do the follo
 * sudo gtk-update-icon-cache /usr/share/icons/gnome
 
 if this is not working, copy it to your iconset folder mimetypes/scalable folder on apply gtk-update-icon-cache to this folder
+
