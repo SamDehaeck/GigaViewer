@@ -81,8 +81,8 @@ void CameraControlsDialog::GotNewSample(ImagePacket imP)
     cv::Point maxInd;
     double maxMag;
     cv::minMaxLoc(newTemp,NULL,&maxMag,NULL,&maxInd);
-    double period=m/(sqrt(pow((maxInd.x),2)+pow((maxInd.y-cy),2))+xoffset); //problem if m!=n !!!!
-    double angle=atan2(cy-maxInd.y,maxInd.x)*180.0/3.1415965359;
+    double period=m/(sqrt(pow((maxInd.x),2.)+pow((maxInd.y-cy),2.))+xoffset); //problem if m!=n !!!! // add a '.' after the 2 to prevent error with type conversion msvc10 bug...
+    double angle=atan2((double)(cy)-maxInd.y,maxInd.x)*180.0/3.1415965359; // type conversion of cy to avoid an error with msvc10, again...
 
     ui->IntensLabel->setText("Max Intensity: "+QString::number(max)+" - Dominant period: "+QString::number(period,'f',2)+" at "+QString::number(angle,'f',2)+QChar(0xB0));
 
@@ -104,10 +104,10 @@ void CameraControlsDialog::on_shutterSpinBox_valueChanged(int arg1)
 
 void CameraControlsDialog::on_FitRangeButton_clicked()
 {
-    emit SetAutoShutter(TRUE);
+    emit SetAutoShutter(true);
 }
 
 void CameraControlsDialog::on_FitMeanButton_clicked()
 {
-    emit SetAutoShutter(FALSE);
+    emit SetAutoShutter(false);
 }

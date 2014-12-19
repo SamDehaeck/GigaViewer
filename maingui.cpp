@@ -50,14 +50,14 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
     setScene(theScene);
-    getNewSample=FALSE;
+    getNewSample=false;
 }
 
 void MainGui::returnToStart()
 {
-    showPlaybackControls(FALSE);
-    showCameraControls(FALSE);
-    showInputControls(TRUE);
+    showPlaybackControls(false);
+    showCameraControls(false);
+    showInputControls(true);
 }
 
 void MainGui::resizeEvent(QResizeEvent *event)
@@ -74,24 +74,24 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
     emit newFrameNrShowing(theMatrix.seqNumber);
     if (getNewSample) {
         emit newSampleReady(theMatrix);
-        getNewSample=FALSE;
+        getNewSample=false;
     }
 }
 
 void MainGui::openCvFeedPressed()
 {
-    showPlaybackControls(TRUE);
-    showInputControls(FALSE);
-    emit newOpencvFeedNeeded(TRUE);
+    showPlaybackControls(true);
+    showInputControls(false);
+    emit newOpencvFeedNeeded(true);
     this->parentWidget()->setWindowTitle("OpenCV Feed");
 }
 
 void MainGui::stopButtonPressed()
 {
-    emit newOpencvFeedNeeded(FALSE);
-    showPlaybackControls(FALSE);
-    showCameraControls(FALSE);
-    showInputControls(TRUE);
+    emit newOpencvFeedNeeded(false);
+    showPlaybackControls(false);
+    showCameraControls(false);
+    showInputControls(true);
     this->parentWidget()->setWindowTitle("GigaViewer");
 }
 
@@ -108,8 +108,8 @@ void MainGui::gotNewShutSpeed(int shut)
 void MainGui::newMoviePressed(QString theString)
 {
     if (theString!="") {
-        showPlaybackControls(TRUE);
-        showInputControls(FALSE);
+        showPlaybackControls(true);
+        showInputControls(false);
         emit newMovieNeeded(theString);
         this->parentWidget()->setWindowTitle(theString);
     }
@@ -144,16 +144,16 @@ void MainGui::showCameraControls(bool visible)
 
 void MainGui::AVTFeedPressed()
 {
-    showPlaybackControls(TRUE);
-    showInputControls(FALSE);
-    showCameraControls(TRUE);
-    emit newAvtFeedNeeded(TRUE);
+    showPlaybackControls(true);
+    showInputControls(false);
+    showCameraControls(true);
+    emit newAvtFeedNeeded(true);
     this->parentWidget()->setWindowTitle("AVT Live Camera Feed");
 }
 
 void MainGui::needNewSample()
 {
-    getNewSample=TRUE;
+    getNewSample=true;
 }
 
 

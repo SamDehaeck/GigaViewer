@@ -4,7 +4,7 @@
 
 PlaybackDialog::PlaybackDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::PlaybackDialog),recording(FALSE)
+    ui(new Ui::PlaybackDialog),recording(false)
 {
     ui->setupUi(this);
     currentTimer=100;
@@ -19,21 +19,21 @@ PlaybackDialog::~PlaybackDialog()
 
 void PlaybackDialog::on_stopButton_clicked()
 {
-    ui->playButton->setChecked(TRUE);
-    ui->recButton->setChecked(FALSE);
+    ui->playButton->setChecked(true);
+    ui->recButton->setChecked(false);
     ui->fpsEdit->setText("100");
-    recording=FALSE;
+    recording=false;
     emit stopPlayback();
 }
 
 void PlaybackDialog::on_ffwdButton_clicked()
 {
-    emit jumpFrames(TRUE);
+    emit jumpFrames(true);
 }
 
 void PlaybackDialog::on_rwdButton_clicked()
 {
-    emit jumpFrames(FALSE);
+    emit jumpFrames(false);
 }
 
 void PlaybackDialog::on_playButton_toggled(bool checked)
@@ -89,7 +89,7 @@ void PlaybackDialog::reversePlay()
     currentTimer=-abs(currentTimer);
     QString delayTxt=QString("%1").arg(currentTimer);
     ui->fpsEdit->setText(delayTxt);
-    ui->playButton->setChecked(TRUE);
+    ui->playButton->setChecked(true);
     emit newFps(currentTimer);
 }
 
@@ -98,7 +98,7 @@ void PlaybackDialog::forwardPlay()
     currentTimer=abs(currentTimer);
     QString delayTxt=QString("%1").arg(currentTimer);
     ui->fpsEdit->setText(delayTxt);
-    ui->playButton->setChecked(TRUE);
+    ui->playButton->setChecked(true);
     emit newFps(currentTimer);
 }
 
@@ -150,5 +150,5 @@ void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 
     currentTimer=newVal;
     emit newFps(currentTimer);
-    ui->playButton->setChecked(TRUE);
+    ui->playButton->setChecked(true);
 }

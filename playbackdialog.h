@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QtGui>
+#include <QtWidgets>
 
 namespace Ui {
     class PlaybackDialog;

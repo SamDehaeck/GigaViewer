@@ -21,11 +21,15 @@ public:
 signals:
     void NewImageReady(ImagePacket im);
     void shutterChanged(int newTime);
+    void startTheTimer(int interval);
+    void stopTheTimer();
 
 public slots:
     void GrabFrame();
     void StartRecording(bool start, QString recFold="", QString codec="");
     void skipForwardBackward(bool forward);
+    void willStartTheTimer(int interval);
+    void willStopTheTimer();
 
 private:
     void run();

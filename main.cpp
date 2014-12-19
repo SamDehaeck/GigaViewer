@@ -1,5 +1,6 @@
 #include <QtGui>
 #include <QGLWidget>
+#include <QtWidgets>
 
 #include "mainwindow.h"
 #include "maingui.h"

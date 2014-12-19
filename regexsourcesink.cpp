@@ -3,7 +3,7 @@
 
 bool RegexSourceSink::Init()
 {
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::StartAcquisition(QString dev)
@@ -43,36 +43,36 @@ bool RegexSourceSink::StartAcquisition(QString dev)
     index=0;
     nFrames=goodFiles->count();
 
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::StopAcquisition()
 {
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::ReleaseCamera()
 {
     delete goodFiles;
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    if (index+indexIncrement<goodFiles->count() and index+indexIncrement>0) {
+    if (index+indexIncrement<goodFiles->count() && index+indexIncrement>0) {
         index+=indexIncrement;
         QFile dum(dir+"/"+goodFiles->at(index));
         if (dum.exists()) {
             target.image=cv::imread(dum.fileName().toStdString().c_str());
             target.seqNumber=index;
-            return TRUE;
+            return true;
         } else {
             qDebug()<<"File did not exist"<<dum.fileName();
         }
     } else {
-        return TRUE; // it is not a real error after all
+        return true; // it is not a real error after all
     }
-    return FALSE;
+    return false;
 }
 
 bool RegexSourceSink::RecordFrame(ImagePacket &source)
@@ -80,9 +80,9 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
     QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(index,8,10,QLatin1Char('0'));
     if (cv::imwrite(filenam.toStdString().c_str(),source.image)) {
         index++;
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
@@ -96,17 +96,17 @@ bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, 
     }
     basename="image-";
     index=0;
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::StopRecording()
 {
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::IsOpened()
 {
-    return TRUE;
+    return true;
 }
 
 bool RegexSourceSink::SkipFrames(bool forward)
@@ -119,11 +119,11 @@ bool RegexSourceSink::SkipFrames(bool forward)
     }
 //    qDebug()<<"Will try to skip "<<skipping<<" frames";
 
-    if (index+skipping<nFrames and index+skipping>0) {
+    if (index+skipping<nFrames && index+skipping>0) {
         index+=skipping;
-        return TRUE;
+        return true;
     } else {
-        return TRUE; // it is not a real error after all
+        return true; // it is not a real error after all
     }
 }
 

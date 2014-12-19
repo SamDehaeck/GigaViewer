@@ -2,7 +2,7 @@
 
 bool AvtSourceSink::IsOpened()
 {
-    return TRUE;
+    return true;
 }
 
 bool AvtSourceSink::Init()
@@ -12,7 +12,7 @@ bool AvtSourceSink::Init()
     // initialize the PvAPI
     if((errCode = PvInitialize()) != ePvErrSuccess) {
         qDebug()<<"PvInitialize err:"<< errCode;
-        return FALSE;
+        return false;
     }
 
     //IMPORTANT: Initialize camera structure. See tPvFrame in PvApi.h for more info.
@@ -23,9 +23,9 @@ bool AvtSourceSink::Init()
 
     if (!PvCameraCount()) {
         Sleeper::msleep(2000);
-        if (!PvCameraCount()) return FALSE;
+        if (!PvCameraCount()) return false;
     }
-    bool failed = FALSE;
+    bool failed = false;
     count = PvCameraList(list,2,&connected);
 
     qDebug()<<"Camera count:"<< count;
@@ -52,14 +52,14 @@ bool AvtSourceSink::Init()
 
                 tryCam++;
             }
-            if (tryCam>1) return FALSE;
+            if (tryCam>1) return false;
         } while (errCode!=ePvErrSuccess);
 
         // Calculate frame buffer size
         if((errCode = PvAttrUint32Get(GCamera.Handle,"TotalBytesPerFrame",&FrameSize)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get TotalBytesPerFrame err:"<< errCode;
-            return FALSE;
+            return false;
         }
 
         unsigned long width,height;
@@ -67,14 +67,14 @@ bool AvtSourceSink::Init()
         if((errCode = PvAttrUint32Get(GCamera.Handle,"Width",&width)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get width err:"<< errCode;
-            return FALSE;
+            return false;
         }
         cols=width;
 
         if((errCode = PvAttrUint32Get(GCamera.Handle,"Height",&height)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get height err:"<< errCode;
-            return FALSE;
+            return false;
         }
         rows=height;
 
@@ -82,7 +82,7 @@ bool AvtSourceSink::Init()
         if((errCode = PvAttrUint32Get(GCamera.Handle,"TimeStampFrequency",&camFrequency)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get freq err:"<< errCode;
-            return FALSE;
+            return false;
         }
         camTimeStep=1.0/((double)camFrequency);
 //        qDebug()<<"Camera frequency"<<camTimeStep;
@@ -93,7 +93,7 @@ bool AvtSourceSink::Init()
         if((errCode = PvAttrEnumGet(GCamera.Handle,"PixelFormat",pixelFormat,256,NULL)) != ePvErrSuccess)
         {
             qDebug()<<"CameraSetup: Get PixelFormat err:"<<errCode;
-            return FALSE;
+            return false;
         }
 
         qDebug()<<"Image format:"<<pixelFormat<<","<<cols<<","<<rows;
@@ -111,10 +111,10 @@ bool AvtSourceSink::Init()
 
         } else if (strcmp(pixelFormat,"Mono16")==0) {
             qDebug()<<"16bit images not yet implemented";
-            return FALSE;
+            return false;
         } else {
             qDebug()<<"Unknown format:"<<pixelFormat;
-            return FALSE;
+            return false;
         }
 
         // assign the frame buffers to the created cv::Mat's
@@ -128,7 +128,7 @@ bool AvtSourceSink::Init()
             else
             {
                 qDebug()<<"CameraSetup: Failed to allocate buffers.";
-                failed = TRUE;
+                failed = true;
             }
         }
 
@@ -139,12 +139,12 @@ bool AvtSourceSink::Init()
         if((errCode = PvCaptureAdjustPacketSize(GCamera.Handle,8228)) != ePvErrSuccess)
         {
             qDebug()<<"CameraStart: PvCaptureAdjustPacketSize err:"<<errCode;
-            return FALSE;
+            return false;
         }
         return !failed;
     } else {
         qDebug()<<"Multiple cameras not yet supported";
-        return FALSE;
+        return false;
     }
 }
 
@@ -153,14 +153,14 @@ bool AvtSourceSink::StartAcquisition(QString dev)
     if (dev!="AVT") qDebug()<<"Different devices not yet implemented";
 
     tPvErr errCode;
-    bool failed = FALSE;
+    bool failed = false;
     Index=0;
     Last=0;
     // start driver capture stream
     if((errCode = PvCaptureStart(GCamera.Handle)) != ePvErrSuccess)
     {
         qDebug()<<"CameraStart: PvCaptureStart err:"<< errCode;
-        return FALSE;
+        return false;
     }
 
     // queue frames. No FrameDoneCB callback function.
@@ -169,11 +169,11 @@ bool AvtSourceSink::StartAcquisition(QString dev)
         if((errCode = PvCaptureQueueFrame(GCamera.Handle,&(GCamera.Frames[i]),NULL)) != ePvErrSuccess)
         {
             qDebug()<<"CameraStart: PvCaptureQueueFrame err:"<<errCode;
-            failed = TRUE;
+            failed = true;
         }
     }
     if (failed)
-        return FALSE;
+        return false;
 
     // set the camera in freerun trigger, continuous mode, and start camera receiving triggers
     if((PvAttrEnumSet(GCamera.Handle,"FrameStartTriggerMode","FixedRate") != ePvErrSuccess) ||
@@ -181,7 +181,7 @@ bool AvtSourceSink::StartAcquisition(QString dev)
         (PvCommandRun(GCamera.Handle,"AcquisitionStart") != ePvErrSuccess))
     {
         qDebug()<<"CameraStart: failed to set camera attributes";
-        return FALSE;
+        return false;
     }
 
     /* if you want to see a list of all attributes
@@ -203,7 +203,7 @@ bool AvtSourceSink::StartAcquisition(QString dev)
     SetInterval(100);
     SetShutter(100);
 
-    return TRUE;
+    return true;
 }
 
 bool AvtSourceSink::StopAcquisition()
@@ -235,7 +235,7 @@ bool AvtSourceSink::StopAcquisition()
 //    else
 //        qDebug()<<"Driver stream stopped.";
 
-    return TRUE;
+    return true;
 }
 
 bool AvtSourceSink::ReleaseCamera()
@@ -251,7 +251,7 @@ bool AvtSourceSink::ReleaseCamera()
     GCamera.Handle = NULL;
 
     PvUnInitialize();
-    return TRUE;
+    return true;
 }
 
 bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
@@ -259,7 +259,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     if (indexIncrement<0) qDebug()<<"Cannot stream backwards";
 
     tPvErr errCode;
-    bool failed=FALSE;
+    bool failed=false;
 
 
     while((errCode = PvCaptureWaitForFrameDone(GCamera.Handle,&GCamera.Frames[Index],2000)) == ePvErrTimeout)
@@ -268,7 +268,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     if(errCode != ePvErrSuccess) {
         //likely camera unplugged
         qDebug()<<"PvCaptureWaitForFrameDone err:"<< errCode;
-        failed = TRUE;
+        failed = true;
     } else {
         // if frame hasn't been cancelled, requeue frame
         if(GCamera.Frames[Index].Status != ePvErrCancelled) {
@@ -304,7 +304,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
             //Requeue [Index] frame of FRAMESCOUNT num frames
             if ((errCode = PvCaptureQueueFrame(GCamera.Handle,&GCamera.Frames[Index],NULL)) != ePvErrSuccess) {
                 qDebug()<<"PvCaptureQueueFrame err:"<< errCode;
-                failed = TRUE;
+                failed = true;
             }
 
             //Increment [Index]
@@ -313,7 +313,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
                 Index = 0;
         } else {
             //Cancelled
-            failed = TRUE;
+            failed = true;
         }
     }
     return !failed;
@@ -334,9 +334,9 @@ bool AvtSourceSink::SetInterval(int msec)
 
     if ((errCode=PvAttrFloat32Set(GCamera.Handle,"FrameRate",fpsFloat))!=ePvErrSuccess) {
         qDebug()<<"Setting the frame rate to"<<fpsFloat<<"did not work";
-        return FALSE;
+        return false;
     }
-    return TRUE;
+    return true;
 }
 
 bool AvtSourceSink::SetShutter(int shutTime)
@@ -371,13 +371,13 @@ bool AvtSourceSink::SetShutter(int shutTime)
             if ((errCode=PvAttrUint32Set(GCamera.Handle,"ExposureValue",val))!=ePvErrSuccess) {
                 qDebug()<<"Could not set exposure value to"<<shutTime<<"usec";
             } else {
-                return TRUE;
+                return true;
             }
         }
     }
 
 
-    return FALSE;
+    return false;
 }
 
 int AvtSourceSink::SetAutoShutter(bool fitRange)
@@ -417,7 +417,7 @@ int AvtSourceSink::SetAutoShutter(bool fitRange)
     } else {
         //should sleep a bit before reasking
         int counter=0;
-        while ((newval==oldval) and (counter<5)) {
+        while ((newval==oldval) && (counter<5)) {
             Sleeper::msleep(300);
             if ((errCode=PvAttrUint32Get(GCamera.Handle,"ExposureValue",&newval))!=ePvErrSuccess) {
                 qDebug()<<"Could not get exposure value";

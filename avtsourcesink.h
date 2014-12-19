@@ -2,9 +2,16 @@
 #define AVTSOURCESINK_H
 
 //defines necessary for PvApi header..
+#ifdef Q_OS_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <Winsock2.h>
+#else
 #define _LINUX
 #define _x64
-#include <PvApi.h>
+#endif
+
+#include "PvApi.h"
 
 #include <QThread>
 #include "imagepacket.h"

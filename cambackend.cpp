@@ -3,28 +3,26 @@
 #include "fmfsourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
-
-#ifdef Q_OS_LINUX
 #include "avtsourcesink.h"
-#endif
 
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(FALSE),timerInterval(100),reversePlay(FALSE),needTimer(TRUE),running(FALSE)
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),needTimer(true),running(false)
 {
-    connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()), Qt::DirectConnection);
+    connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
+    connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
+    connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
 }
 
 void CamBackend::run()
 {
     if (currSource->IsOpened()) {
         if (needTimer) {
-            timer.setInterval(timerInterval);
-            timer.start();
+            emit startTheTimer(timerInterval); // needs to be started in a slot for interthread communication purposes...
             exec(); //will go beyond this point when quit() is send from within this thread
-            timer.stop();
+            emit stopTheTimer();
         } else {  // the AVT backend will block itself when waiting for the next frame. No need for an extra timer
-            running=TRUE;
+            running=true;
             while (running) {
                 GrabFrame();
             }
@@ -55,34 +53,34 @@ bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
-        needTimer=TRUE;
-    } else if ((dev.contains(".png")) or (dev.contains(".bmp")) or (dev.contains(".jpg")) or (dev.contains(".JPG"))) {
+        needTimer=true;
+    } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG"))) {
         currSource=new RegexSourceSink();
-        needTimer=TRUE;
+        needTimer=true;
     } else if (dev=="AVT") {
-#ifdef Q_OS_LINUX
+//#ifdef Q_OS_LINUX
         currSource=new AvtSourceSink();
-        needTimer=FALSE;
-#else
-        qDebug()<<"Prosilica backend not supported on windows"
-        return FALSE;
-#endif
+        needTimer=false;
+//#else
+  //      qDebug()<<"Prosilica backend not supported on windows";
+    //    return false;
+//#endif
     } else {
         currSource=new OpencvSourceSink();
-        needTimer=TRUE;
+        needTimer=true;
     }
     if (currSource->Init()) {
         return currSource->StartAcquisition(dev);
     } else {
-        return FALSE;
+        return false;
     }
 }
 
 void CamBackend::StopAcquisition()
 {
-    running=FALSE;
+    running=false;
     if (recording) {
-        StartRecording(FALSE);
+        StartRecording(false);
     }
     currSource->StopAcquisition();
     if (needTimer) quit();
@@ -110,7 +108,7 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
     if (startRec) {
         if (codec=="FMF") {
             currSink=new FmfSourceSink();
-        } else if (codec=="BMP" or codec=="PNG" or codec=="JPG") {
+        } else if (codec=="BMP" || codec=="PNG" || codec=="JPG") {
             currSink=new RegexSourceSink();
         } else {
             currSink=new OpencvSourceSink();
@@ -130,6 +128,17 @@ void CamBackend::skipForwardBackward(bool forward)
     if (!currSource->SkipFrames(forward)) {
         qDebug()<<"Skipping did not work";
     }
+}
+
+void CamBackend::willStartTheTimer(int interval)
+{
+    timer.setInterval(interval);
+    timer.start();
+}
+
+void CamBackend::willStopTheTimer()
+{
+    timer.stop();
 }
 
 void CamBackend::SetShutter(int shut)

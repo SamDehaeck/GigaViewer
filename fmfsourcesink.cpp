@@ -3,7 +3,7 @@
 
 bool FmfSourceSink::Init()
 {
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::StartAcquisition(QString dev)
@@ -84,24 +84,24 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 
 
 //		cout<<rows<<" "<<cols<<" "<<n<<endl;
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::StopAcquisition()
 {
     fclose(fmf);
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::ReleaseCamera()
 {
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
     if ((currPos+indexIncrement >= nFrames-1)||(currPos+indexIncrement <0)) {
-        return TRUE;
+        return true;
     }
     if (indexIncrement!=1) {
                 fseek(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
@@ -116,11 +116,11 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
             target.image=temp;
             currPos+=indexIncrement;
             target.seqNumber=currPos;
-            return TRUE;
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 bool FmfSourceSink::RecordFrame(ImagePacket &source)
@@ -130,20 +130,20 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
             cv::Mat dummy;
             cv::cvtColor(source.image,dummy,CV_RGB2GRAY);
             if (fwrite(dummy.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
-                return TRUE;
+                return true;
             }
         } else {
             if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
-                return TRUE;
+                return true;
             }
         }
     }
-    return FALSE;
+    return false;
 }
 
 bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
-    if (codec!="FMF") return FALSE;
+    if (codec!="FMF") return false;
 
     QDateTime mom = QDateTime::currentDateTime();
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".fmf";
@@ -214,7 +214,7 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
     }
     recheadersize = ftell(fmfrec);
 
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::StopRecording()
@@ -224,12 +224,12 @@ bool FmfSourceSink::StopRecording()
     fseek(fmfrec,recNframespos,SEEK_SET);
     if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::IsOpened()
 {
-    return TRUE;
+    return true;
 }
 
 bool FmfSourceSink::SkipFrames(bool forward) {
@@ -242,11 +242,11 @@ bool FmfSourceSink::SkipFrames(bool forward) {
 //    qDebug()<<"Will try to skip "<<skipping<<" frames";
 
     if ((currPos+skipping >= nFrames-1)||(currPos+skipping <0)) {
-        return TRUE;
+        return true;
     }
 
 
     fseek(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
     currPos+=skipping;
-    return TRUE;
+    return true;
 }

@@ -1,18 +1,18 @@
 #include "opencvsourcesink.h"
 
 bool OpencvSourceSink::Init() {
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::StartAcquisition(QString dev) {
     if (dev=="0") {
         camera.open(0);
         nFrames=0;
-        liveFeed=TRUE;
+        liveFeed=true;
     } else {
         camera.open(dev.toStdString());
         nFrames=camera.get(CV_CAP_PROP_FRAME_COUNT);
-        liveFeed=FALSE;
+        liveFeed=false;
     }
     return camera.isOpened();
 }
@@ -29,22 +29,22 @@ bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,in
         fourcc=0;// uncompressed raw format
     }
     recFile=cv::VideoWriter(filenam.toStdString(),fourcc,fps,cv::Size(cols,rows));
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::StopRecording() {
     //nothing to do
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::StopAcquisition() {
     //nothing specific to do, the thread will be quited in thread class
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::ReleaseCamera() {
     if (camera.isOpened()) camera.release();
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
@@ -56,11 +56,11 @@ bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
         recFile<<source.image;
     }
 
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
-    if (!camera.isOpened()) return FALSE;
+    if (!camera.isOpened()) return false;
     if (indexIncrement==-1) {
         double newpos=camera.get(CV_CAP_PROP_POS_FRAMES)-2;
 //        qDebug()<<"calculated:"<<newpos;
@@ -79,7 +79,7 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     target.timeStamp=QDateTime::currentMSecsSinceEpoch();
 
 
-    return TRUE;
+    return true;
 }
 
 bool OpencvSourceSink::IsOpened() {
@@ -98,17 +98,17 @@ bool OpencvSourceSink::SkipFrames(bool forward)
             skipping=-nFrames/50;
         }
     //    qDebug()<<"Will try to skip "<<skipping<<" frames";
-        if (skipping==0) return TRUE; //skipping did not work
+        if (skipping==0) return true; //skipping did not work
 
         if ((currPos+skipping >= nFrames-1)||(currPos+skipping <0)) {
-            return TRUE;
+            return true;
         }
 
 
         camera.set(CV_CAP_PROP_POS_FRAMES,currPos+skipping);
         currPos+=skipping;
     }
-    return TRUE;
+    return true;
 
 
 }

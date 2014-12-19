@@ -1,47 +1,47 @@
 #include "imagesourcesink.h"
 
 bool ImageSourceSink::Init() {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::StartAcquisition(QString) {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::StopAcquisition() {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::ReleaseCamera() {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::GrabFrame(ImagePacket&,int) {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::RecordFrame(ImagePacket&) {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::StartRecording(QString,QString,int,int,int) {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::StopRecording() {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::IsOpened() {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::SetInterval(int) {
-    return FALSE;
+    return false;
 }
 
 bool ImageSourceSink::SetShutter(int) {
-    return FALSE;
+    return false;
 }
 
 int ImageSourceSink::SetAutoShutter(bool)
@@ -51,7 +51,7 @@ int ImageSourceSink::SetAutoShutter(bool)
 
 bool ImageSourceSink::SkipFrames(bool)
 {
-    return FALSE;
+    return false;
 }
 
 

@@ -4,6 +4,7 @@
 #include <QGraphicsView>
 #include <QtGui>
 #include <QGLWidget>
+#include <QtWidgets>
 #include "imagepacket.h"
 #include "videoglscene.h"
 #include "cameracontrolsdialog.h"
