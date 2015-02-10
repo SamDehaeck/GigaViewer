@@ -21,6 +21,7 @@ public:
     virtual bool SetShutter(int shutTime);
     virtual int SetAutoShutter(bool fitRange);
     virtual bool SkipFrames(bool forward);
+    virtual ~ImageSourceSink() {}
 };
 
 #endif // IMAGESOURCESINK_H

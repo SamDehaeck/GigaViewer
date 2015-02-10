@@ -78,7 +78,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 
     fseek(fmf,0,SEEK_END);
     nFrames=(ftell(fmf)-headersize)/bytesperchunk;
-    if (abs(nFrames)!=nRead) qDebug()<<"Wrong number of frames reported"<<nRead<<"versus calculated"<<nFrames;
+    if (abs(nFrames)!=int(nRead)) qDebug()<<"Wrong number of frames reported"<<nRead<<"versus calculated"<<nFrames;
     fseek(fmf,headersize,SEEK_SET);
     currPos=0;
 

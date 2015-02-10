@@ -4,7 +4,9 @@
 #include <QGraphicsView>
 #include <QtGui>
 #include <QGLWidget>
+#if QT_VERSION >= 0x050000
 #include <QtWidgets>
+#endif
 #include "imagepacket.h"
 #include "videoglscene.h"
 #include "cameracontrolsdialog.h"

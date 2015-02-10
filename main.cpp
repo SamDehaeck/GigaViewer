@@ -1,6 +1,8 @@
 #include <QtGui>
 #include <QGLWidget>
+#if QT_VERSION >= 0x050000
 #include <QtWidgets>
+#endif
 
 #include "mainwindow.h"
 #include "maingui.h"
