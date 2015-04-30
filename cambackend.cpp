@@ -54,7 +54,7 @@ bool CamBackend::StartAcquisition(QString dev)
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
         needTimer=true;
-    } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG"))) {
+    } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG")) || (dev.contains(".tif")) || (dev.contains(".TIF"))) {
         currSource=new RegexSourceSink();
         needTimer=true;
     } else if (dev=="AVT") {
