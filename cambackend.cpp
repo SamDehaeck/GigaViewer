@@ -67,40 +67,40 @@ void CamBackend::GrabFrame()
 //    cv::Mat mask;
 //    cv::GaussianBlur(intImage,mask,cv::Size(0,0),5);
 
-    double maxVal;
-    cv::Point maxPos;
-    cv::minMaxLoc(intImage,0,&maxVal,0,&maxPos);
+//    double maxVal;
+//    cv::Point maxPos;
+//    cv::minMaxLoc(intImage,0,&maxVal,0,&maxPos);
 
-    int x=maxPos.x;
-    int y=maxPos.y;
-    int ymin=y-1;
-    int yplus=y+1;
-    int xmin=x-1;
-    int xplus=x+1;
-    int valXmin=intImage.at<uint8_t>(ymin,x);
-    int valXplus=intImage.at<uint8_t>(yplus,x);
-    int valYmin=intImage.at<uint8_t>(y,xmin);
-    int valYplus=intImage.at<uint8_t>(y,xplus);
+//    int x=maxPos.x;
+//    int y=maxPos.y;
+//    int ymin=y-1;
+//    int yplus=y+1;
+//    int xmin=x-1;
+//    int xplus=x+1;
+//    int valXmin=intImage.at<uint8_t>(ymin,x);
+//    int valXplus=intImage.at<uint8_t>(yplus,x);
+//    int valYmin=intImage.at<uint8_t>(y,xmin);
+//    int valYplus=intImage.at<uint8_t>(y,xplus);
 
-    double LM1,LM2,LM3;
-    LM1=cv::log(valXmin);
-    LM2=cv::log(maxVal);
-    LM3=cv::log(valXplus);
-    double N=LM1-LM3;
-    double D=2.*(LM1-2*LM2+LM3);
-    double Rx=x+N/D;
+//    double LM1,LM2,LM3;
+//    LM1=cv::log(valXmin);
+//    LM2=cv::log(maxVal);
+//    LM3=cv::log(valXplus);
+//    double N=LM1-LM3;
+//    double D=2.*(LM1-2*LM2+LM3);
+//    double Rx=x+N/D;
 
 
-    LM1=cv::log(valYmin);
-    LM2=cv::log(maxVal);
-    LM3=cv::log(valYplus);
-    N=LM1-LM3;
-    D=2.*(LM1-2*LM2+LM3);
-    double Ry=y+N/D;
-    cv::Point cent(Rx,Ry);
+//    LM1=cv::log(valYmin);
+//    LM2=cv::log(maxVal);
+//    LM3=cv::log(valYplus);
+//    N=LM1-LM3;
+//    D=2.*(LM1-2*LM2+LM3);
+//    double Ry=y+N/D;
+//    cv::Point cent(Rx,Ry);
 
 //    std::cout<<"Maxpos: "<<x<<", "<<y<<" and gauss interpol: "<<Rx<<", "<<Ry<<" for maxval: "<<maxVal<<std::endl;
-    cv::circle(currImage.image,cent,4,100,-1);
+//    cv::circle(currImage.image,cent,4,100,-1);
 
 
     // could also use cv::Moments if the peak is not Gaussian due to saturation.
@@ -110,24 +110,81 @@ void CamBackend::GrabFrame()
     // plot the biggest one or faster is just use erosion filter
     cv::Mat mask;
 //    cv::threshold(intImage,mask,0,255,cv::THRESH_OTSU|cv::THRESH_BINARY_INV);
-    cv::threshold(intImage,mask,200,255,cv::THRESH_BINARY_INV);
+    cv::threshold(intImage,mask,100,255,cv::THRESH_BINARY_INV);
 //    cv::threshold(intImage,mask,200,255,cv::THRESH_BINARY);
-    cv::Mat nMat;
-    intImage.copyTo(nMat,mask);
+
 //    nMat=mask.mul(intImage);
-//    cv::vector<cv::vector<cv::Point> > magContours;
-//    cv::findContours(mask,magContours,cv::RETR_LIST,cv::CHAIN_APPROX_NONE);
+    cv::vector<cv::vector<cv::Point> > magContours;
+    cv::findContours(mask,magContours,cv::RETR_LIST,cv::CHAIN_APPROX_NONE);
+    int maxi(0);
+    double maxA(0.0);
+    for (uint i=0;i<magContours.size();i++) {
+        double temp=contourArea(magContours[i]);
+        if (temp>maxA) {
+            maxi=i;
+            maxA=temp;
+        }
+    }
+//    std::cout<<"MaxArea is "<<maxA<<" at "<<maxi<<std::endl;
+    cv::Mat mask2=cv::Mat::zeros(mask.rows,mask.cols,CV_8U);
+    cv::drawContours(mask2,magContours,maxi,255,-1);
+
+
+
+
 
     cv::Moments caract;
-    caract=cv::moments(nMat,true);
+    caract=cv::moments(mask2);
 //    cv::Size nsiz=nMat.size();
 //    std::cout<<"Moment: "<<caract.m00/nsiz.width<<std::endl;//" - "<<caract.m00%nsiz.width<<std::endl;
+    cv::Point mc;
+    mc=cv::Point(caract.m10/caract.m00,caract.m01/caract.m00);
+    cv::circle(mask2,mc,4,100,-1);
 
     // once the object is detected, I could use for instance cv::phaseCorrelate in a local neighbourhood
     // of the pixel (128x128 pix) to find the new location? => but need an old image => not so interesting
     //
-
+/*
+    cv::Mat nMat;
+    intImage.copyTo(nMat,mask);
     currImage.image=nMat.clone();
+*/
+
+/*
+    //Only if the current area is bigger replace, otherwise keep the value
+    for( int i = 1; i < contours.size() ; i++ )
+    { if (  contourArea(contours[i]) > contourArea(contours[findcont]) )
+         {  //area1 = contourArea(contours[i]); area2 = contourArea(contours[findcont]);
+           findcont = i; }
+    }
+
+    //contoursf.push_back(contours[findcont]);
+     contoursf.insert(contoursf.begin(), contours.begin() + findcont, contours.begin() + findcont+1);
+
+
+
+    //contours[findcont], 0);
+       /// Get the moments
+      vector<Moments> mu(contoursf.size() );
+      for( int i = 0; i < contoursf.size(); i++ )
+         { mu[i] = moments( contoursf[i], false ); }
+
+      ///  Get the mass centers:
+      vector<Point2f> mc( contoursf.size() );
+      for( int i = 0; i < contoursf.size(); i++ )
+         { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
+
+
+
+
+      Ppoint[0] = mc[0].x;
+      Ppoint[1] = mc[0].y;
+*/
+
+
+    currImage.image=mask2.clone();
+
+
 
     // could also do some skipping here in order not to show all images.
     emit NewImageReady(currImage);
