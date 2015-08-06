@@ -20,7 +20,7 @@ win32 {
          "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\ImageLib.lib"
 } else {
     LIBS += -L /usr/local/lib
-    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI
+    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP
 }
 
 SOURCES += main.cpp \
@@ -60,30 +60,39 @@ HEADERS  += \
     cameracontrolsdialog.h \
     regexsourcesink.h \
     vimbasourcesink.h \
-    VimbaCpp/Feature.hpp \
-    VimbaCpp/FeatureContainer.h \
-    VimbaCpp/FeatureContainer.hpp \
-    VimbaCpp/FileLogger.h \
-    VimbaCpp/Frame.h \
-    VimbaCpp/ICameraFactory.h \
-    VimbaCpp/ICameraListObserver.h \
-    VimbaCpp/IFeatureObserver.h \
-    VimbaCpp/IFrameObserver.h \
-    VimbaCpp/IInterfaceListObserver.h \
-    VimbaCpp/Interface.h \
-    VimbaCpp/Interface.hpp \
-    VimbaCpp/IRegisterDevice.h \
-    VimbaCpp/LoggerDefines.h \
-    VimbaCpp/Mutex.h \
-    VimbaCpp/SharedPointer.h \
-    VimbaCpp/SharedPointer_impl.h \
-    VimbaCpp/SharedPointerDefines.h \
-    VimbaCpp/UserLoggerDefines.h \
-    VimbaCpp/UserSharedPointerDefines.h \
-    VimbaCpp/VimbaCPP.h \
-    VimbaCpp/VimbaCPPCommon.h \
-    VimbaCpp/VimbaSystem.h \
-    VimbaCpp/VimbaSystem.hpp
+    VimbaC/Include/VimbaC.h \
+    VimbaC/Include/VmbCommonTypes.h \
+    VimbaCPP/Include/AncillaryData.h \
+    VimbaCPP/Include/BasicLockable.h \
+    VimbaCPP/Include/Camera.h \
+    VimbaCPP/Include/Camera.hpp \
+    VimbaCPP/Include/EnumEntry.h \
+    VimbaCPP/Include/EnumEntry.hpp \
+    VimbaCPP/Include/Feature.h \
+    VimbaCPP/Include/Feature.hpp \
+    VimbaCPP/Include/FeatureContainer.h \
+    VimbaCPP/Include/FeatureContainer.hpp \
+    VimbaCPP/Include/FileLogger.h \
+    VimbaCPP/Include/Frame.h \
+    VimbaCPP/Include/ICameraFactory.h \
+    VimbaCPP/Include/ICameraListObserver.h \
+    VimbaCPP/Include/IFeatureObserver.h \
+    VimbaCPP/Include/IFrameObserver.h \
+    VimbaCPP/Include/IInterfaceListObserver.h \
+    VimbaCPP/Include/Interface.h \
+    VimbaCPP/Include/Interface.hpp \
+    VimbaCPP/Include/IRegisterDevice.h \
+    VimbaCPP/Include/LoggerDefines.h \
+    VimbaCPP/Include/Mutex.h \
+    VimbaCPP/Include/SharedPointer.h \
+    VimbaCPP/Include/SharedPointer_impl.h \
+    VimbaCPP/Include/SharedPointerDefines.h \
+    VimbaCPP/Include/UserLoggerDefines.h \
+    VimbaCPP/Include/UserSharedPointerDefines.h \
+    VimbaCPP/Include/VimbaCPP.h \
+    VimbaCPP/Include/VimbaCPPCommon.h \
+    VimbaCPP/Include/VimbaSystem.h \
+    VimbaCPP/Include/VimbaSystem.hpp
 
 #unix {
     HEADERS +=  avtsourcesink.h \

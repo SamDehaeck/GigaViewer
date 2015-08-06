@@ -9,7 +9,7 @@
     #include <time.h>
 #endif
 
-//#include "VimbaCpp/VimbaCPP.h"
+#include "VimbaCPP/Include/VimbaCPP.h"
 
 
 // now other imports
@@ -22,6 +22,7 @@
 class VimbaSourceSink : public ImageSourceSink
 {
 public:
+    VimbaSourceSink();
     bool Init();
     bool StartAcquisition(QString dev="0");
     bool StopAcquisition();
@@ -33,7 +34,8 @@ public:
     int SetAutoShutter(bool fitRange);
 
 private:
-//    VimbaSystem & system = VimbaSystem :: GetInstance ();
+    AVT::VmbAPI::VimbaSystem & system;
+    AVT::VmbAPI::CameraPtr     pCamera;
 
 };
 
