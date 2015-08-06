@@ -37,7 +37,8 @@ SOURCES += main.cpp \
     fmfsourcesink.cpp \
     imagesourcesink.cpp \
     regexsourcesink.cpp \
-    cameracontrolsdialog.cpp
+    cameracontrolsdialog.cpp \
+    vimbasourcesink.cpp
 #unix {
     SOURCES += avtsourcesink.cpp
 #}
@@ -57,7 +58,32 @@ HEADERS  += \
     fmfsourcesink.h \
     imagesourcesink.h \
     cameracontrolsdialog.h \
-    regexsourcesink.h
+    regexsourcesink.h \
+    vimbasourcesink.h \
+    VimbaCpp/Feature.hpp \
+    VimbaCpp/FeatureContainer.h \
+    VimbaCpp/FeatureContainer.hpp \
+    VimbaCpp/FileLogger.h \
+    VimbaCpp/Frame.h \
+    VimbaCpp/ICameraFactory.h \
+    VimbaCpp/ICameraListObserver.h \
+    VimbaCpp/IFeatureObserver.h \
+    VimbaCpp/IFrameObserver.h \
+    VimbaCpp/IInterfaceListObserver.h \
+    VimbaCpp/Interface.h \
+    VimbaCpp/Interface.hpp \
+    VimbaCpp/IRegisterDevice.h \
+    VimbaCpp/LoggerDefines.h \
+    VimbaCpp/Mutex.h \
+    VimbaCpp/SharedPointer.h \
+    VimbaCpp/SharedPointer_impl.h \
+    VimbaCpp/SharedPointerDefines.h \
+    VimbaCpp/UserLoggerDefines.h \
+    VimbaCpp/UserSharedPointerDefines.h \
+    VimbaCpp/VimbaCPP.h \
+    VimbaCpp/VimbaCPPCommon.h \
+    VimbaCpp/VimbaSystem.h \
+    VimbaCpp/VimbaSystem.hpp
 
 #unix {
     HEADERS +=  avtsourcesink.h \

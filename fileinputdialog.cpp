@@ -15,6 +15,7 @@ FileInputDialog::~FileInputDialog()
     delete ui;
 }
 
+// load picture from disk button
 void FileInputDialog::on_filePushButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
@@ -27,11 +28,12 @@ void FileInputDialog::on_filePushButton_clicked()
     emit StaticPicPressed(resp);
 }
 
+// load opencvFeed
 void FileInputDialog::on_camButton_clicked() {
     emit OpencvFeedPressed();
 }
 
-// load movie button
+// load movie (from disk) button
 void FileInputDialog::on_MovieButton_clicked()
 {
     QString resp = QFileDialog::getOpenFileName(this,tr("Open Movie"),
@@ -44,12 +46,19 @@ void FileInputDialog::on_MovieButton_clicked()
     emit MoviePressed(resp);
 }
 
+// exit button
 void FileInputDialog::on_pushButton_2_clicked()
 {
     emit CloseApp();
 }
 
+// Avt (PvAPI) feed (Prosilica)
 void FileInputDialog::on_AvtButton_clicked()
 {
     emit AvtFeedPressed();
+}
+
+void FileInputDialog::on_vimbaButton_clicked()
+{
+    emit VimbaFeedPressed();
 }

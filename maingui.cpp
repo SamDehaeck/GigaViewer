@@ -39,6 +39,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(MoviePressed(QString)),this,SLOT(newMoviePressed(QString)));
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(fileDialog,SIGNAL(AvtFeedPressed()),this,SLOT(AVTFeedPressed()));
+    connect(fileDialog,SIGNAL(VimbaFeedPressed()),this,SLOT(VimbaFeedPressed()));
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
@@ -149,6 +150,15 @@ void MainGui::AVTFeedPressed()
     showCameraControls(true);
     emit newAvtFeedNeeded(true);
     this->parentWidget()->setWindowTitle("AVT Live Camera Feed");
+}
+
+void MainGui::VimbaFeedPressed()
+{
+    showPlaybackControls(true);
+    showInputControls(false);
+    showCameraControls(true);
+    emit newVimbaFeedNeeded(true);
+    this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
 }
 
 void MainGui::needNewSample()

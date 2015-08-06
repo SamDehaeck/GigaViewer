@@ -4,6 +4,7 @@
 #include "regexsourcesink.h"
 #include <QDebug>
 #include "avtsourcesink.h"
+#include "vimbasourcesink.h"
 
 
 CamBackend::CamBackend(QObject *parent) :
@@ -14,6 +15,14 @@ CamBackend::CamBackend(QObject *parent) :
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
 }
 
+
+// in coordinator, first the StartAcquisition method is called and then the Cambackend Thread is started which executes
+// this run method. Two use cases here for the moment:
+// 1. you need a timer: this is for sources which don't provide one (fmf, regex, opencv). In this case, we start a Qtimer
+//    which calls the Grabframe method each time the timer ticks
+// 2. you don't need a timer (Prosilica): you can get correct timing from the camera. Therefore, do a continuous loop
+//    in which you directly call GrabFrame. This grabframe method blocks for the avtsource until the timing is right
+//    (Function waitForQueuedFrame)
 void CamBackend::run()
 {
     if (currSource->IsOpened()) {
@@ -58,13 +67,11 @@ bool CamBackend::StartAcquisition(QString dev)
         currSource=new RegexSourceSink();
         needTimer=true;
     } else if (dev=="AVT") {
-//#ifdef Q_OS_LINUX
         currSource=new AvtSourceSink();
         needTimer=false;
-//#else
-  //      qDebug()<<"Prosilica backend not supported on windows";
-    //    return false;
-//#endif
+    } else if (dev=="Vimba") {
+        currSource=new VimbaSourceSink();
+        needTimer=false;
     } else {
         currSource=new OpencvSourceSink();
         needTimer=true;
