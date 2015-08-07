@@ -36,6 +36,11 @@ public:
 private:
     AVT::VmbAPI::VimbaSystem & system;
     AVT::VmbAPI::CameraPtr     pCamera;
+//    AVT::VmbAPI::IFrameObserverPtr frameWatcher;
+
+    int bufCount;
+    VmbInt64_t height,width;
+    double frameRate,exposure;
 
 };
 
