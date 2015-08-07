@@ -21,7 +21,7 @@
 #include "vimbaframeobserver.h"
 #include <opencv2/opencv.hpp>
 #include "cambackend.h"
-
+#include "avtsourcesink.h"
 
 class VimbaSourceSink : public ImageSourceSink
 {
@@ -38,6 +38,8 @@ public:
     int SetAutoShutter(bool fitRange);
 
 private:
+    void listOptions(AVT::VmbAPI::FeaturePtr pFeature);
+
     AVT::VmbAPI::VimbaSystem & system;
     AVT::VmbAPI::CameraPtr     pCamera;
     VimbaFrameObserver* frameWatcher;

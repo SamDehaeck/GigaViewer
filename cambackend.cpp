@@ -75,6 +75,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
     } else if (dev=="Vimba") {
+        currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
         currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
@@ -96,6 +97,8 @@ void CamBackend::StopAcquisition()
     if (recording) {
         StartRecording(false);
     }
+    currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
+
     currSource->StopAcquisition();
     if (needTimer) quit();
     if (doesCallBack) quit();

@@ -13,7 +13,6 @@ bool VimbaSourceSink::IsOpened()
 
 bool VimbaSourceSink::Init()
 {
-    qDebug()<<"Vimba Init";
     VmbErrorType    err=system.Startup();
     CameraPtrVector cameras;
 
@@ -80,7 +79,7 @@ bool VimbaSourceSink::Init()
                             {
                                 // Fall back to Mono
                                 err = pFeature->SetValue( VmbPixelFormatMono8 );
-                                qDebug()<<"Will work in Mono8 mode";
+//                                qDebug()<<"Will work in Mono8 mode";
                             }
 
                         }
@@ -88,7 +87,7 @@ bool VimbaSourceSink::Init()
                         // Set Trigger source to fixedRate
                         err=pCamera->GetFeatureByName("TriggerSource",pFeature);
                         if (err==VmbErrorSuccess) {
-                            pFeature->SetValue(5); //this should be fixedRate
+                            pFeature->SetValue("FixedRate");
                         }
 
                         // get Camera timestamp frequency
@@ -102,10 +101,11 @@ bool VimbaSourceSink::Init()
                                 qDebug()<<"Could not get val: "<<err;
                             }
                         } else {
-                            qDebug()<<"Could not query frequency: "<<err;
-                            qDebug()<<"Will use LUT";
+                            qDebug()<<"Could not query frequency: "<<err<<" => Will use LUT";
                             if (namestr=="GE1050") {
                                 camFreq=79861111;
+                            } else {
+                                qDebug()<<"Model not yet in LUT => unreliable timestamps";
                             }
                         }
 
@@ -113,7 +113,7 @@ bool VimbaSourceSink::Init()
                         // Set acquisition mode to continuous
                         err=pCamera->GetFeatureByName("AcquisitionMode",pFeature);
                         if (err==VmbErrorSuccess) {
-                            pFeature->SetValue(0); // this should be continuous
+                            pFeature->SetValue("Continuous"); // this should be continuous
                         }
 
                         // get height and width of current camera
@@ -125,12 +125,11 @@ bool VimbaSourceSink::Init()
                         if (err==VmbErrorSuccess) {
                             pFeature->GetValue(height); // this should be continuous
                         }
-                        qDebug()<<"Width and Height: "<<width<<", "<<height;
 
                         // make sure shutter time is manual
                         err=pCamera->GetFeatureByName("ExposureAuto",pFeature);
                         if (err==VmbErrorSuccess) {
-                            pFeature->SetValue(0); // this should be manual exposure setting
+                            pFeature->SetValue("Off"); // this should be manual exposure setting
                         }
 
 
@@ -170,7 +169,7 @@ bool VimbaSourceSink::StartAcquisition(QString dev)
     if (dev!="Vimba") {
         qDebug()<<"Device name incorrect for Vimba: "<<dev;
     }
-    qDebug()<<"Vimba Start Acquisition";
+//    qDebug()<<"Vimba Start Acquisition";
     SetShutter(100);
     SetInterval(100);
     initialStamp=0; // to make sure I start counting time from zero
@@ -215,30 +214,30 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     err=pFrame->GetHeight(height);
     err=pFrame->GetWidth(width);
     if (pixFormat==VmbPixelFormatMono8) {
-        target.image=cv::Mat::zeros(width,height,CV_8U);
+        target.image=cv::Mat(width,height,CV_8U);
         err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
         if (err!=VmbErrorSuccess) {
             qDebug()<<"Something went wrong assigning the data";
         }
-
-        VmbUint64_t id;
-        err=pFrame->GetFrameID(id);
-        target.seqNumber=id;
-
-        VmbUint64_t stamp;
-        err=pFrame->GetTimestamp(stamp);
-        if (initialStamp==0) {
-            initialStamp=stamp;
-            qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
-            timeOffset=currMsec;
-        }
-        target.timeStamp=timeOffset+1000.0*(stamp-initialStamp)/(1.0*camFreq);
-//        qDebug()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
-
-
-        pCamera->QueueFrame( pFrame ); // requeue immediately. Not sure what will happen if buffer too small!
+    } else {
+        qDebug()<<"Other pixel formats not yet working";
     }
 
+    VmbUint64_t id;
+    err=pFrame->GetFrameID(id);
+    target.seqNumber=id;
+
+    VmbUint64_t stamp;
+    err=pFrame->GetTimestamp(stamp);
+    if (initialStamp==0) {
+        initialStamp=stamp;
+        qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
+        timeOffset=currMsec;
+    }
+    target.timeStamp=timeOffset+1000.0*(stamp-initialStamp)/(1.0*camFreq);
+//        qDebug()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
+
+    pCamera->QueueFrame( pFrame ); // requeue here. Not sure what will happen if buffer too small!
 
     return true;
 
@@ -253,7 +252,7 @@ bool VimbaSourceSink::SetInterval(int msec)
         err=pFeature->SetValue(acqRate); // this should be continuous
         if (err==VmbErrorSuccess) {
             frameRate=acqRate;
-            qDebug()<<"New frame rate is: "<<frameRate;
+//            qDebug()<<"New frame rate is: "<<frameRate;
             return true;
         }
     }
@@ -270,7 +269,7 @@ bool VimbaSourceSink::SetShutter(int shutTime)
         err=pFeature->SetValue(dShut);
         if (err==VmbErrorSuccess) {
             exposure=shutTime;
-            qDebug()<<"New shutter time is: "<<dShut;
+//            qDebug()<<"New shutter time is: "<<dShut;
             return true;
         }
     }
@@ -280,7 +279,80 @@ bool VimbaSourceSink::SetShutter(int shutTime)
 
 int VimbaSourceSink::SetAutoShutter(bool fitRange)
 {
-    qDebug()<<"Vimba set auto shutter";
-    return true;
+//    qDebug()<<"Vimba set auto shutter";
+    FeaturePtr pFeature;
+    VmbErrorType err;
+    double oldShut;
+    err=pCamera->GetFeatureByName("ExposureTimeAbs",pFeature);
+    if (err==VmbErrorSuccess) {
+        pFeature->GetValue(oldShut);
+    }
+
+    err=pCamera->GetFeatureByName("ExposureAutoAlg",pFeature);
+    if (err==VmbErrorSuccess) {
+
+        if (fitRange) {
+            err=pFeature->SetValue("FitRange"); // Fit Range algorithm
+            if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set Fit Range";
+        } else {
+            err=pFeature->SetValue("Mean"); // Mean algorithm
+            if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set Mean";
+        }
+    } else {
+        qDebug()<<"Couldn't set the auto-algorithm";
+    }
+
+    err=pCamera->GetFeatureByName("ExposureAutoOutliers",pFeature);
+    if (err==VmbErrorSuccess) {
+        err=pFeature->SetValue(10); // 0.1% of the top pixels considered as outliers (important for fitRange algorithm!)
+        if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set num value for outliers";
+    } else {
+        qDebug()<<"Couldn't set the auto-outliers";
+    }
+
+    // now ready to do the once-off autosetting
+    err=pCamera->GetFeatureByName("ExposureAuto",pFeature);
+    if (err==VmbErrorSuccess) {
+        err=pFeature->SetValue("Once");
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Once did not work: "<<err;
+        }
+    } else {
+        qDebug()<<"Did not find auto feature";
+    }
+
+    double newShut;
+    err=pCamera->GetFeatureByName("ExposureTimeAbs",pFeature);
+    if (err!=VmbErrorSuccess) {
+        qDebug()<<"Could not lock exposureFeature";
+    }
+
+    err=pFeature->GetValue(newShut);
+    if (err!=VmbErrorSuccess) {
+        //should sleep a bit before reasking
+        int counter=0;
+        bool succ=false;
+        while (not succ && (counter<10)) {
+            Sleeper::msleep(300);
+            err=pFeature->GetValue(newShut);
+            if (err!=VmbErrorSuccess) {
+                qDebug()<<"Could not get exposure value: "<<err;
+            } else {
+                succ=true;
+            }
+            counter++;
+        }
+    }
+
+    return newShut;
+}
+
+void VimbaSourceSink::listOptions(FeaturePtr pFeature) {
+    StringVector vals;
+    pFeature->GetValues(vals);
+    for (uint i=0;i<vals.size();i++) {
+        qDebug()<<"Valid values: " << QString::fromStdString(vals[i]);
+    }
+
 }
 
