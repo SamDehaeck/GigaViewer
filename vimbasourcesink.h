@@ -45,6 +45,9 @@ private:
     int bufCount;
     VmbInt64_t height,width;
     double frameRate,exposure;
+    VmbInt64_t camFreq,initialStamp;
+    int timeOffset;
+
 
 };
 

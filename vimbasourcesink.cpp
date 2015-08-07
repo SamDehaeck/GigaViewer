@@ -2,7 +2,7 @@
 
 using namespace AVT::VmbAPI;
 
-VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50) {
+VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
     parent=par;
 }
 
@@ -91,6 +91,25 @@ bool VimbaSourceSink::Init()
                             pFeature->SetValue(5); //this should be fixedRate
                         }
 
+                        // get Camera timestamp frequency
+//                        err=pCamera->GetFeatureByName("GevTimestampTickFrequency",pFeature);
+                        err=pCamera->GetFeatureByName("TimeStampFrequency",pFeature);
+                        if (err==VmbErrorSuccess) {
+                            err=pFeature->GetValue(camFreq);
+                            if (err==VmbErrorSuccess) {
+                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
+                            } else {
+                                qDebug()<<"Could not get val: "<<err;
+                            }
+                        } else {
+                            qDebug()<<"Could not query frequency: "<<err;
+                            qDebug()<<"Will use LUT";
+                            if (namestr=="GE1050") {
+                                camFreq=79861111;
+                            }
+                        }
+
+
                         // Set acquisition mode to continuous
                         err=pCamera->GetFeatureByName("AcquisitionMode",pFeature);
                         if (err==VmbErrorSuccess) {
@@ -154,6 +173,7 @@ bool VimbaSourceSink::StartAcquisition(QString dev)
     qDebug()<<"Vimba Start Acquisition";
     SetShutter(100);
     SetInterval(100);
+    initialStamp=0; // to make sure I start counting time from zero
     pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
     return true;
 }
@@ -200,6 +220,22 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         if (err!=VmbErrorSuccess) {
             qDebug()<<"Something went wrong assigning the data";
         }
+
+        VmbUint64_t id;
+        err=pFrame->GetFrameID(id);
+        target.seqNumber=id;
+
+        VmbUint64_t stamp;
+        err=pFrame->GetTimestamp(stamp);
+        if (initialStamp==0) {
+            initialStamp=stamp;
+            qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
+            timeOffset=currMsec;
+        }
+        target.timeStamp=timeOffset+1000.0*(stamp-initialStamp)/(1.0*camFreq);
+//        qDebug()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
+
+
         pCamera->QueueFrame( pFrame ); // requeue immediately. Not sure what will happen if buffer too small!
     }
 

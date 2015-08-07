@@ -85,7 +85,7 @@ bool AvtSourceSink::Init()
             return false;
         }
         camTimeStep=1.0/((double)camFrequency);
-//        qDebug()<<"Camera frequency"<<camTimeStep;
+        qDebug()<<"Camera frequency"<<camFrequency;
 
 
 
