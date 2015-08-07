@@ -14,15 +14,19 @@
 
 // now other imports
 #include <QThread>
+#include <QObject>
+#include <QtGui>
 #include "imagepacket.h"
 #include "imagesourcesink.h"
+#include "vimbaframeobserver.h"
 #include <opencv2/opencv.hpp>
+#include "cambackend.h"
 
 
 class VimbaSourceSink : public ImageSourceSink
 {
 public:
-    VimbaSourceSink();
+    VimbaSourceSink(CamBackend* parent);
     bool Init();
     bool StartAcquisition(QString dev="0");
     bool StopAcquisition();
@@ -36,8 +40,8 @@ public:
 private:
     AVT::VmbAPI::VimbaSystem & system;
     AVT::VmbAPI::CameraPtr     pCamera;
-//    AVT::VmbAPI::IFrameObserverPtr frameWatcher;
-
+    VimbaFrameObserver* frameWatcher;
+    CamBackend* parent;
     int bufCount;
     VmbInt64_t height,width;
     double frameRate,exposure;

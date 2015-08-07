@@ -44,6 +44,7 @@ private:
     QTimer timer;
     bool reversePlay;
     bool needTimer;
+    bool doesCallBack;
     bool running;
 
 };

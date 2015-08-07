@@ -30,6 +30,8 @@ void CamBackend::run()
             emit startTheTimer(timerInterval); // needs to be started in a slot for interthread communication purposes...
             exec(); //will go beyond this point when quit() is send from within this thread
             emit stopTheTimer();
+        } else if (doesCallBack) { // Vimba does this and we should just wait till quit is called
+            exec();
         } else {  // the AVT backend will block itself when waiting for the next frame. No need for an extra timer
             running=true;
             while (running) {
@@ -63,18 +65,23 @@ bool CamBackend::StartAcquisition(QString dev)
     if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
         needTimer=true;
+        doesCallBack=false;
     } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG")) || (dev.contains(".tif")) || (dev.contains(".TIF"))) {
         currSource=new RegexSourceSink();
         needTimer=true;
+        doesCallBack=false;
     } else if (dev=="AVT") {
         currSource=new AvtSourceSink();
         needTimer=false;
+        doesCallBack=false;
     } else if (dev=="Vimba") {
-        currSource=new VimbaSourceSink();
+        currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
+        doesCallBack=true;
     } else {
         currSource=new OpencvSourceSink();
         needTimer=true;
+        doesCallBack=false;
     }
     if (currSource->Init()) {
         return currSource->StartAcquisition(dev);
@@ -91,6 +98,7 @@ void CamBackend::StopAcquisition()
     }
     currSource->StopAcquisition();
     if (needTimer) quit();
+    if (doesCallBack) quit();
 }
 
 void CamBackend::ReleaseCamera()

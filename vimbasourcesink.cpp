@@ -2,8 +2,8 @@
 
 using namespace AVT::VmbAPI;
 
-VimbaSourceSink::VimbaSourceSink(): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50) {
-
+VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50) {
+    parent=par;
 }
 
 bool VimbaSourceSink::IsOpened()
@@ -117,9 +117,8 @@ bool VimbaSourceSink::Init()
 
 
 
-                        // construct and connect frame observer to the camera
-//                        frameWatcher=new FrameObserver( pCamera,  );
-
+                        // construct the frame observer to the camera
+                        frameWatcher=new VimbaFrameObserver( pCamera, parent );
 
                     } else {
                         // camera did not open successfully
@@ -155,13 +154,18 @@ bool VimbaSourceSink::StartAcquisition(QString dev)
     qDebug()<<"Vimba Start Acquisition";
     SetShutter(100);
     SetInterval(100);
-//    pCamera->StartContinuousImageAcquisition(bufCount,frameWatcher);
+    pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
     return true;
 }
 
 bool VimbaSourceSink::StopAcquisition()
 {
-    qDebug()<<"Vimba Stop Acquisition";
+    VmbErrorType err;
+    err=pCamera->StopContinuousImageAcquisition();
+    if (err!=VmbErrorSuccess) {
+        qDebug()<<"Stopping did not work: "<<err;
+    }
+    frameWatcher->ClearFrameQueue();
     return true;
 }
 
@@ -181,7 +185,25 @@ bool VimbaSourceSink::ReleaseCamera()
 
 bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-//    qDebug()<<"VimbaSourceSink Grab Frame";
+    if (indexIncrement<0) qDebug()<<"Cannot stream backwards";
+
+    AVT::VmbAPI::FramePtr pFrame=frameWatcher->GetFrame();
+    VmbErrorType err;
+    VmbUint32_t width,height;
+    VmbPixelFormatType pixFormat;
+    err=pFrame->GetPixelFormat(pixFormat);
+    err=pFrame->GetHeight(height);
+    err=pFrame->GetWidth(width);
+    if (pixFormat==VmbPixelFormatMono8) {
+        target.image=cv::Mat::zeros(width,height,CV_8U);
+        err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Something went wrong assigning the data";
+        }
+        pCamera->QueueFrame( pFrame ); // requeue immediately. Not sure what will happen if buffer too small!
+    }
+
+
     return true;
 
 }
