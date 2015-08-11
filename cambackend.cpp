@@ -13,16 +13,19 @@ CamBackend::CamBackend(QObject *parent) :
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
+    format="BAYERRG8";
+//    format="MONO8";
 }
 
 
 // in coordinator, first the StartAcquisition method is called and then the Cambackend Thread is started which executes
-// this run method. Two use cases here for the moment:
+// this run method. Three use cases here for the moment:
 // 1. you need a timer: this is for sources which don't provide one (fmf, regex, opencv). In this case, we start a Qtimer
 //    which calls the Grabframe method each time the timer ticks
 // 2. you don't need a timer (Prosilica): you can get correct timing from the camera. Therefore, do a continuous loop
 //    in which you directly call GrabFrame. This grabframe method blocks for the avtsource until the timing is right
 //    (Function waitForQueuedFrame)
+// 3. you don't need a timer but the SDK uses callbacks when the frame is ready (VIMBA).
 void CamBackend::run()
 {
     if (currSource->IsOpened()) {
@@ -57,9 +60,29 @@ void CamBackend::GrabFrame()
         return;
     }
     if (recording && currSink) currSink->RecordFrame(currImage);
+
+    // adapt image if not 8 bits
+    if (format.contains("MONO")) {
+        if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
+            currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            /* Alternative is to scale down to 8bits but this requires making a new Mat..
+            cv::Mat newMat;
+            currImage.image.convertTo(newMat, CV_8U, 1./16.);
+            currImage.image=newMat;*/
+        }
+    } else if (format=="BAYERRG8") { // do colour interpolation but only for showing to screen!
+        cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+        cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+        currImage.image=dummy;
+    } else {
+        qDebug()<<"Format in grab frame not understood: "<<format;
+    }
+
+
     emit NewImageReady(currImage);
 }
 
+// make new source
 bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".fmf")) {
@@ -75,8 +98,10 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
     } else if (dev=="Vimba") {
-        currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
-        currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
+//        currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
+//        currSource=new VimbaSourceSink(this,"MONO8"); //vimba needs the current object to connect the grabFrame signal
+//        qDebug()<<"Will init vimba with: "<<format;
+        currSource=new VimbaSourceSink(this,format); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
     } else {
@@ -91,13 +116,14 @@ bool CamBackend::StartAcquisition(QString dev)
     }
 }
 
+// stop source
 void CamBackend::StopAcquisition()
 {
     running=false;
     if (recording) {
         StartRecording(false);
     }
-    currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
+    currImage.image.release();//=cv::Mat::zeros(1024,1024,CV_8U);
 
     currSource->StopAcquisition();
     if (needTimer) quit();
@@ -121,11 +147,18 @@ void CamBackend::SetInterval(int newInt)
     }
 }
 
+//make new sink
 void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 {
     if (startRec) {
-        if (codec=="FMF") {
+        if (codec.contains("FMF")) {
             currSink=new FmfSourceSink();
+            if (format.contains("8")) {
+                codec="FMF8";
+            } else {
+                codec="FMF12";
+            }
+
         } else if (codec=="BMP" || codec=="PNG" || codec=="JPG") {
             currSink=new RegexSourceSink();
         } else {

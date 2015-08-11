@@ -26,7 +26,7 @@
 class VimbaSourceSink : public ImageSourceSink
 {
 public:
-    VimbaSourceSink(CamBackend* parent);
+    VimbaSourceSink(CamBackend* parent, QString formatstring);
     bool Init();
     bool StartAcquisition(QString dev="0");
     bool StopAcquisition();
@@ -49,6 +49,7 @@ private:
     double frameRate,exposure;
     VmbInt64_t camFreq,initialStamp;
     int timeOffset;
+    QString format;
 
 
 };

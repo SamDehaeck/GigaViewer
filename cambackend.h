@@ -46,6 +46,7 @@ private:
     bool needTimer;
     bool doesCallBack;
     bool running;
+    QString format;
 
 };
 

@@ -2,8 +2,9 @@
 
 using namespace AVT::VmbAPI;
 
-VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
+VimbaSourceSink::VimbaSourceSink(CamBackend* par, QString formatstring): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
     parent=par;
+    format=formatstring;
 }
 
 bool VimbaSourceSink::IsOpened()
@@ -22,9 +23,10 @@ bool VimbaSourceSink::Init()
         err = system.GetCameras( cameras );            // Fetch all cameras known to Vimba
         if( VmbErrorSuccess == err )
         {
-            qDebug() << "Cameras found: " << cameras.size();
+
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
+                    qDebug() << "Cameras found: " << cameras.size();
                     for (uint i=0;i<cameras.size();i++) {
                         CameraPtr cam=cameras[i];
                         std::string namestr;
@@ -73,15 +75,27 @@ bool VimbaSourceSink::Init()
                         err = pCamera->GetFeatureByName( "PixelFormat", pFeature );
                         if ( VmbErrorSuccess == err )
                         {
-                            // Try to set BGR
-                            err = pFeature->SetValue( VmbPixelFormatRgb8 );
-                            if ( VmbErrorSuccess != err )
-                            {
-                                // Fall back to Mono
+//                            VmbPixelFormatType theF;
+//                            std::string form;
+//                            err=pFeature->GetValue(form);
+//                            listOptions(pFeature);
+//                            qDebug()<<"Format is "<<QString::fromStdString(form);
+                             //Remove the setting here for the moment to allow testing 12 bit mode
+                             // Fall back to Mono
+//                            err = pFeature->SetValue( VmbPixelFormatMono8 );
+                            if (format=="MONO8") {
                                 err = pFeature->SetValue( VmbPixelFormatMono8 );
-//                                qDebug()<<"Will work in Mono8 mode";
+                            } else if (format=="MONO12") {
+                                err = pFeature->SetValue( VmbPixelFormatMono12 );
+                            } else if (format=="BAYERRG8") {
+                                err=pFeature->SetValue(VmbPixelFormatBayerRG8);
+                            } else {
+                                qDebug()<<"Pixel Format not recognised: "<<format;
                             }
-
+                            std::string form;
+                            err=pFeature->GetValue(form);
+                            qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
+//                                qDebug()<<"Will work in Mono8 mode";
                         }
 
                         // Set Trigger source to fixedRate
@@ -91,14 +105,13 @@ bool VimbaSourceSink::Init()
                         }
 
                         // get Camera timestamp frequency
-//                        err=pCamera->GetFeatureByName("GevTimestampTickFrequency",pFeature);
-                        err=pCamera->GetFeatureByName("TimeStampFrequency",pFeature);
+                        err=pCamera->GetFeatureByName("GevTimestampTickFrequency",pFeature);
                         if (err==VmbErrorSuccess) {
                             err=pFeature->GetValue(camFreq);
                             if (err==VmbErrorSuccess) {
-                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
+                                //qDebug()<<"Camera freq is "<<(1.0*camFreq);
                             } else {
-                                qDebug()<<"Could not get val: "<<err;
+                                qDebug()<<"Could not extract freq: "<<err;
                             }
                         } else {
                             qDebug()<<"Could not query frequency: "<<err<<" => Will use LUT";
@@ -184,13 +197,11 @@ bool VimbaSourceSink::StopAcquisition()
     if (err!=VmbErrorSuccess) {
         qDebug()<<"Stopping did not work: "<<err;
     }
-    frameWatcher->ClearFrameQueue();
     return true;
 }
 
 bool VimbaSourceSink::ReleaseCamera()
 {
-    qDebug()<<"Vimba Release Camera";
     VmbErrorType err=pCamera->Close();
     if (err!=VmbErrorSuccess) {
         qDebug()<<"Problem closing the camera";
@@ -213,12 +224,30 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     err=pFrame->GetPixelFormat(pixFormat);
     err=pFrame->GetHeight(height);
     err=pFrame->GetWidth(width);
-    if (pixFormat==VmbPixelFormatMono8) {
-        target.image=cv::Mat(width,height,CV_8U);
+    if ((pixFormat==VmbPixelFormatMono8)||(pixFormat==VmbPixelFormatBayerRG8)) {
+        target.image=cv::Mat(height,width,CV_8U);
         err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
         if (err!=VmbErrorSuccess) {
             qDebug()<<"Something went wrong assigning the data";
         }
+    } else if (pixFormat==VmbPixelFormatMono12) {
+//        qDebug()<<"Help, 12 bit images coming in!!";
+        target.image=cv::Mat(height,width,CV_16U);
+        err=pFrame->GetImage(target.image.data);
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Something went wrong with the reception of the 12 bit image: "<<err;
+        } else {
+            //qDebug()<<"12-bit image should be moving up the stack";
+        }
+
+/*    } else if (pixFormat==VmbPixelFormatBayerRG8) {
+        target.image=cv::Mat(height,width,CV_8UC3);
+        cv::Mat dummy(height,width,CV_8U);
+        err=pFrame->GetImage(dummy.data); // assign the frame image buffer pointer to the target image
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Something went wrong assigning the colour data";
+        }
+        cv::cvtColor(dummy,target.image,CV_BayerRG2BGR);*/
     } else {
         qDebug()<<"Other pixel formats not yet working";
     }
@@ -254,9 +283,27 @@ bool VimbaSourceSink::SetInterval(int msec)
             frameRate=acqRate;
 //            qDebug()<<"New frame rate is: "<<frameRate;
             return true;
+        } else {
+            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
+            err=pCamera->GetFeatureByName("AcquisitionFrameRateLimit",pFeature);
+            double maxRate;
+            if (err==VmbErrorSuccess) {
+                err=pFeature->GetValue(maxRate);
+                if (acqRate>maxRate) {
+                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
+                    err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
+                    acqRate=maxRate;
+                    err=pFeature->SetValue(acqRate);
+                    if (err!=VmbErrorSuccess) {
+                        qDebug()<<"Setting to max also did not work!";
+                        acqRate=maxRate-1;
+                        err=pFeature->SetValue(acqRate);
+                    }
+                }
+            }
         }
     }
-    qDebug()<<"Setting interval did not work: "<<err;
+
     return false;
 }
 
