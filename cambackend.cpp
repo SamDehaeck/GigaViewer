@@ -13,9 +13,7 @@ CamBackend::CamBackend(QObject *parent) :
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
-//    format="BAYERRG8";
-//    format="MONO8";
-    format="MONO12";
+    format="";
 }
 
 
@@ -102,6 +100,18 @@ bool CamBackend::StartAcquisition(QString dev)
 //        currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
 //        currSource=new VimbaSourceSink(this,"MONO8"); //vimba needs the current object to connect the grabFrame signal
 //        qDebug()<<"Will init vimba with: "<<format;
+
+        QStringList items;
+        items << "MONO8" << "MONO12" << "BAYERRG8";
+        bool ok;
+        QString item = QInputDialog::getItem(NULL, "Pixel format",
+                                            "Selection options:", items, 0, false, &ok);
+        if (ok && !item.isEmpty()) {
+            format=item;
+        }
+
+
+
         currSource=new VimbaSourceSink(this,format); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;

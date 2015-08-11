@@ -79,6 +79,14 @@ bool VimbaSourceSink::Init()
 //                            std::string form;
 //                            err=pFeature->GetValue(form);
 //                            listOptions(pFeature);
+
+
+
+
+
+
+
+
 //                            qDebug()<<"Format is "<<QString::fromStdString(form);
                              //Remove the setting here for the moment to allow testing 12 bit mode
                              // Fall back to Mono

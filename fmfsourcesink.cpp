@@ -158,10 +158,7 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
             }
         } else {
             if (dataformat.contains("8")) {
-                uint writtenbytes=fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec);
-                qDebug()<<"Written bytes: "<<writtenbytes;
-                if (writtenbytes==uint(source.image.rows*source.image.cols)) {
-//                qDebug()<<"Writing frame successfull";
+                if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
                     return true;
                 }
             } else if (dataformat.contains("12")) {
