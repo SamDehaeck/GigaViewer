@@ -13,8 +13,9 @@ CamBackend::CamBackend(QObject *parent) :
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
-    format="BAYERRG8";
+//    format="BAYERRG8";
 //    format="MONO8";
+    format="MONO12";
 }
 
 
@@ -25,7 +26,7 @@ CamBackend::CamBackend(QObject *parent) :
 // 2. you don't need a timer (Prosilica): you can get correct timing from the camera. Therefore, do a continuous loop
 //    in which you directly call GrabFrame. This grabframe method blocks for the avtsource until the timing is right
 //    (Function waitForQueuedFrame)
-// 3. you don't need a timer but the SDK uses callbacks when the frame is ready (VIMBA).
+// 3. you don't need a timer but the SDK uses callbacks when the frame is ready (VIMBA). Just idle till somebody says to quit
 void CamBackend::run()
 {
     if (currSource->IsOpened()) {

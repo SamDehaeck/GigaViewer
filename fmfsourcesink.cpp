@@ -10,8 +10,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 {
     uint32_t formatlen = 5;
     uint32_t version = 3;
-    uint32_t bitsperpixel = 8;
-    char dataformat[] = "MONO8";
+    char dataf[15];
     int sizeofuint32 = 4;
     int sizeofuint64 = 8;
 
@@ -28,21 +27,35 @@ bool FmfSourceSink::StartAcquisition(QString dev)
     if (version==3) {
           // format length
           if(fread(&formatlen,sizeofuint32,1,fmf)<1){
-            fprintf(stderr,"Error writing format length to output fmf file.\n");
+            fprintf(stderr,"Error reading format length to output fmf file.\n");
             exit(1);
           }
 
           // format string
-          if(fread(&dataformat,sizeof(char),formatlen,fmf)<formatlen){
-            fprintf(stderr,"Error writing format string to output fmf file.\n");
+          if(fread(dataf,sizeof(char),formatlen,fmf)<formatlen){
+            fprintf(stderr,"Error reading format string to output fmf file.\n");
             exit(1);
           }
+          dataf[formatlen]='\0';
+          dataformat=dataf;
+          if (dataformat=="MONO8") {
+              qDebug()<<"Recognised Mono8 FMF-file";
+          } else if (dataformat=="MONO12") {
+              qDebug()<<"Recognised Mono12 FMF-file";
+          } else if (dataformat=="BAYERRG8") {
+              qDebug()<<"Recognised BayerRG8 FMF-file";
+          } else {
+              qDebug()<<"Unrecognised format "<<dataformat;
+          }
+//          std::string dataf(dataformat);
+
 
           // bits per pixel
           if(fread(&bitsperpixel,sizeofuint32,1,fmf)<1){
-            fprintf(stderr,"Error writing bits per pixel to output fmf file.\n");
+            fprintf(stderr,"Error reading bits per pixel to output fmf file.\n");
             exit(1);
           }
+//          qDebug()<<"Formatlen, dataformat, bitsperpixel"<<formatlen<<", "<<dataformat<<", "<<bitsperpixel;
 
     }
 
@@ -83,7 +96,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
     currPos=0;
 
 
-//		cout<<rows<<" "<<cols<<" "<<n<<endl;
+//    qDebug()<<"Found: "<<bytesperchunk<<" - "<<nRead<<" - "<<nFrames<<" - "<<bitsperpixel;
     return true;
 }
 
@@ -111,13 +124,22 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 //    }
 
     if (fread(&target.timeStamp,sizeof(double),1,fmf)) {
-        cv::Mat temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
-        if (fread(temp.data, 1, rows*cols, fmf)) {
-            target.image=temp;
-            currPos+=indexIncrement;
-            target.seqNumber=currPos;
-            return true;
+        // change CV_8U to instance variable datatype
+        cv::Mat temp;
+        if (bitsperpixel==8) {
+            temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
+            fread(temp.data, 1, rows*cols, fmf);
+            target.image=temp.clone();
+        } else {
+            temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
+            fread(temp.ptr<u_int16_t>(0), 2, rows*cols, fmf);
+            target.image=temp.clone();
         }
+
+        currPos+=indexIncrement;
+        target.seqNumber=currPos;
+        return true;
+
     }
 
     return false;
@@ -126,6 +148,8 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 bool FmfSourceSink::RecordFrame(ImagePacket &source)
 {
     if (fwrite(&source.timeStamp,sizeof(double),1,fmfrec)==1) {
+        //test here what the bitdepth of the source image is
+//        if (source.image.depth()==2)
         if (source.image.channels()==3) {
             cv::Mat dummy;
             cv::cvtColor(source.image,dummy,CV_RGB2GRAY);
@@ -133,8 +157,22 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
                 return true;
             }
         } else {
-            if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
-                return true;
+            if (dataformat.contains("8")) {
+                uint writtenbytes=fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec);
+                qDebug()<<"Written bytes: "<<writtenbytes;
+                if (writtenbytes==uint(source.image.rows*source.image.cols)) {
+//                qDebug()<<"Writing frame successfull";
+                    return true;
+                }
+            } else if (dataformat.contains("12")) {
+                if (fwrite(source.image.ptr<u_int16_t>(0),2,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+                    return true;
+                } else {
+                    qDebug()<<"Writing 12bit frame unsuccessfull";
+                    return false;
+                }
+            } else {
+                qDebug()<<"Problem with dataformat: "<<dataformat;
             }
         }
     }
@@ -143,17 +181,29 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
 
 bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
-    if (codec!="FMF") return false;
+    uint32_t version = 3;
+    int sizeofuint32 = 4;
+    int sizeofuint64 = 8;
+    uint32_t formatlen;
+    uint32_t bitsperpixel;
+//    std::string dataformat;
+
+    if ((codec=="FMF") || (codec=="FMF8")) {
+        formatlen=5;
+        bitsperpixel=8;
+        dataformat="MONO8";
+    } else if (codec=="FMF12") {
+        formatlen=6;
+        bitsperpixel=16;
+        dataformat="MONO12";
+    } else {
+        return false;
+    }
 
     QDateTime mom = QDateTime::currentDateTime();
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".fmf";
 
-    uint32_t formatlen = 5;
-    uint32_t version = 3;
-    uint32_t bitsperpixel = 8;
-    char dataformat[] = "MONO8";
-    int sizeofuint32 = 4;
-    int sizeofuint64 = 8;
+
 
 //    ListIndex=0;
 //    lastPrinted=0;
@@ -161,7 +211,7 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
     fmfrec = fopen(filenam.toStdString().c_str(),"wb");
 
     if(fwrite(&version,sizeofuint32,1,fmfrec) < 1){
-        fprintf(stderr,"Error reading version number of input fmf file.\n");
+        fprintf(stderr,"Error writing version number of input fmf file.\n");
         exit(1);
     }
 
@@ -172,7 +222,7 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
     }
 
     // format string
-    if(fwrite(&dataformat,sizeof(char),formatlen,fmfrec)<formatlen){
+    if(fwrite(dataformat.toStdString().c_str(),sizeof(char),formatlen,fmfrec)<formatlen){
         fprintf(stderr,"Error writing format string to output fmf file.\n");
         exit(1);
     }
@@ -203,6 +253,7 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
         exit(1);
     }
+//    qDebug()<<"bytesperchunk will be: "<<bytesperchunk;
 
     // number of frames
     recNframespos=ftell(fmfrec);
@@ -220,7 +271,8 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
 bool FmfSourceSink::StopRecording()
 {
     int sizeofuint64 = 8;
-    uint64_t nWritten=(ftell(fmfrec)-recheadersize)/bytesperchunk;
+    uint64_t posNow=ftell(fmfrec);
+    uint64_t nWritten=(posNow-recheadersize)/bytesperchunk;
     fseek(fmfrec,recNframespos,SEEK_SET);
     if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
