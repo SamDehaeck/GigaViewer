@@ -61,7 +61,8 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     GLenum format = GL_LUMINANCE;
     if (cn==3) {
 #ifdef Q_OS_WIN32
-        format = GL_RGB;
+//        format = GL_RGB; // this setting was used for correct webcam viewing but is not working for Vimba colour cameras
+        format = GL_BGR;
 #else
         format = GL_BGR;
 #endif

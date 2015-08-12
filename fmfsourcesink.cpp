@@ -132,7 +132,7 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
             target.image=temp.clone();
         } else {
             temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
-            fread(temp.ptr<u_int16_t>(0), 2, rows*cols, fmf);
+            fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
             target.image=temp.clone();
         }
 
@@ -167,7 +167,7 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
                     return true;
                 }
             } else if (dataformat.contains("12")) {
-                if (fwrite(source.image.ptr<u_int16_t>(0),2,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+                if (fwrite(source.image.ptr<uint16_t>(0),2,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
                     return true;
                 } else {
                     qDebug()<<"Writing 12bit frame unsuccessfull";

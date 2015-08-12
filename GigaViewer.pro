@@ -12,12 +12,14 @@ TEMPLATE = app
 win32 {
     INCLUDEPATH += C:\opencv\build\include
 
-    LIBS +=  C:\opencv\build\x86\vc10\lib\opencv_core2410.lib \
-         C:\opencv\build\x86\vc10\lib\opencv_imgproc2410.lib \
-         C:\opencv\build\x86\vc10\lib\opencv_highgui2410.lib \
-         C:\opencv\build\x86\vc10\lib\opencv_video2410.lib \
+    LIBS +=  C:\opencv\build\x86\vc12\lib\opencv_core2411.lib \
+         C:\opencv\build\x86\vc12\lib\opencv_imgproc2411.lib \
+         C:\opencv\build\x86\vc12\lib\opencv_highgui2411.lib \
+         C:\opencv\build\x86\vc12\lib\opencv_video2411.lib \
          "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\PvAPI.lib" \
-         "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\ImageLib.lib"
+         "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\ImageLib.lib" \
+         "C:\Program Files\Allied Vision Technologies\AVTVimba_1.3\VimbaCPP\Lib\Win32\VimbaCPP.lib"
+    LIBS += -lopengl32
 } else {
     LIBS += -L /usr/local/lib
     LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP

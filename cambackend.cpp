@@ -5,6 +5,7 @@
 #include <QDebug>
 #include "avtsourcesink.h"
 #include "vimbasourcesink.h"
+#include <QInputDialog>
 
 
 CamBackend::CamBackend(QObject *parent) :

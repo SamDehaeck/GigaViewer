@@ -387,7 +387,7 @@ int VimbaSourceSink::SetAutoShutter(bool fitRange)
         //should sleep a bit before reasking
         int counter=0;
         bool succ=false;
-        while (not succ && (counter<10)) {
+        while (!succ && (counter<10)) {
             Sleeper::msleep(300);
             err=pFeature->GetValue(newShut);
             if (err!=VmbErrorSuccess) {
