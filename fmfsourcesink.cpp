@@ -138,6 +138,7 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
         currPos+=indexIncrement;
         target.seqNumber=currPos;
+        target.pixFormat=dataformat;
         return true;
 
     }
@@ -147,6 +148,10 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 bool FmfSourceSink::RecordFrame(ImagePacket &source)
 {
+    if (source.pixFormat!=dataformat) {
+        qDebug()<<"Image pixel format different from written fmf-header: "<<source.pixFormat<<" - "<<dataformat;
+        return false;
+    }
     if (fwrite(&source.timeStamp,sizeof(double),1,fmfrec)==1) {
         //test here what the bitdepth of the source image is
 //        if (source.image.depth()==2)
@@ -193,6 +198,10 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         formatlen=6;
         bitsperpixel=16;
         dataformat="MONO12";
+    } else if (codec=="FMFRGB8") {
+        formatlen=8;
+        bitsperpixel=8;
+        dataformat="BAYERRG8";
     } else {
         return false;
     }

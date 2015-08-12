@@ -10,6 +10,7 @@ struct ImagePacket {
         std::string fileName;
         int seqNumber;
         double timeStamp;
+        QString pixFormat;
 
         ImagePacket();
         ImagePacket(const ImagePacket &src);

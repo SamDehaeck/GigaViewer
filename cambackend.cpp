@@ -13,7 +13,7 @@ CamBackend::CamBackend(QObject *parent) :
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
-    format="";
+    format="MONO8"; //fall back format
 }
 
 
@@ -61,20 +61,30 @@ void CamBackend::GrabFrame()
     if (recording && currSink) currSink->RecordFrame(currImage);
 
     // adapt image if not 8 bits
-    if (format.contains("MONO")) {
+    if (currImage.pixFormat=="") {
+        //sink does not support it yet
+        currImage.pixFormat="MONO8";
+    }
+    if (currImage.pixFormat.contains("MONO")) {
         if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
-            currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            double max;
+            cv::minMaxLoc(currImage.image,NULL,&max);
+            if (max<4096) {
+                currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            }
             /* Alternative is to scale down to 8bits but this requires making a new Mat..
             cv::Mat newMat;
             currImage.image.convertTo(newMat, CV_8U, 1./16.);
             currImage.image=newMat;*/
         }
-    } else if (format=="BAYERRG8") { // do colour interpolation but only for showing to screen!
-        cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-        cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
-        currImage.image=dummy;
+    } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
+        if (currImage.image.channels()==1) {
+            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+            currImage.image=dummy;
+        }
     } else {
-        qDebug()<<"Format in grab frame not understood: "<<format;
+        qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
 
 
@@ -164,10 +174,12 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
     if (startRec) {
         if (codec.contains("FMF")) {
             currSink=new FmfSourceSink();
-            if (format.contains("8")) {
+            if (format=="MONO8") {
                 codec="FMF8";
-            } else {
+            } else if (format=="MONO12") {
                 codec="FMF12";
+            } else if (format=="BAYERRG8") {
+                codec="FMFRGB8";
             }
 
         } else if (codec=="BMP" || codec=="PNG" || codec=="JPG") {

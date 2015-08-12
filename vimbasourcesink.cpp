@@ -81,12 +81,6 @@ bool VimbaSourceSink::Init()
 //                            listOptions(pFeature);
 
 
-
-
-
-
-
-
 //                            qDebug()<<"Format is "<<QString::fromStdString(form);
                              //Remove the setting here for the moment to allow testing 12 bit mode
                              // Fall back to Mono
@@ -99,6 +93,9 @@ bool VimbaSourceSink::Init()
                                 err=pFeature->SetValue(VmbPixelFormatBayerRG8);
                             } else {
                                 qDebug()<<"Pixel Format not recognised: "<<format;
+                            }
+                            if (err!=VmbErrorSuccess) {
+                                qDebug()<<"Could not set requested pixel format.";
                             }
                             std::string form;
                             err=pFeature->GetValue(form);
@@ -238,6 +235,8 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         if (err!=VmbErrorSuccess) {
             qDebug()<<"Something went wrong assigning the data";
         }
+        if (pixFormat==VmbPixelFormatMono8) target.pixFormat="MONO8";
+        if (pixFormat==VmbPixelFormatBayerRG8) target.pixFormat="BAYERRG8";
     } else if (pixFormat==VmbPixelFormatMono12) {
 //        qDebug()<<"Help, 12 bit images coming in!!";
         target.image=cv::Mat(height,width,CV_16U);
@@ -247,6 +246,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         } else {
             //qDebug()<<"12-bit image should be moving up the stack";
         }
+        target.pixFormat="MONO12";
 
 /*    } else if (pixFormat==VmbPixelFormatBayerRG8) {
         target.image=cv::Mat(height,width,CV_8UC3);
