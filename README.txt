@@ -1,7 +1,9 @@
 The goal of this program is to create an opengl viewer capable of working
-with Prosilica/AVT cameras and modify their important settings such as
-framerate and exposure levels. And allow saving the acquired images to disk.
+(mainly) with GigE cameras and modify their important settings such as
+framerate and exposure levels, while allowing to save the acquired images to disk.
 
+The program is compatible with the PvApi and Vimba SDK's, which allows it to connect
+to AVT cameras. But other camera types can be added if necessary.
 For the moment it works on linux and windows provided that it can find
 the opencv and QT libraries.
 
