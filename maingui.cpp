@@ -154,10 +154,10 @@ void MainGui::AVTFeedPressed()
 
 void MainGui::VimbaFeedPressed()
 {
+    emit newVimbaFeedNeeded(true);
     showPlaybackControls(true);
     showInputControls(false);
-    showCameraControls(true);
-    emit newVimbaFeedNeeded(true);
+    showCameraControls(true);    
     this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
 }
 
