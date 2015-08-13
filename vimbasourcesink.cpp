@@ -432,3 +432,31 @@ std::vector<std::string> VimbaSourceSink::listOptions(FeaturePtr pFeature) {
     return realVals;
 }
 
+bool VimbaSourceSink::SetRoiRows(int rows) {
+    if (rows>maxHeight) {
+        rows=maxHeight;
+    }
+    FeaturePtr pFeature;
+    VmbErrorType err;
+    err=pCamera->GetFeatureByName("Height",pFeature);
+    if (err==VmbErrorSuccess) {
+        pFeature->SetValue(rows);
+        height=rows;
+    }
+    return true;
+}
+
+bool VimbaSourceSink::SetRoiCols(int cols) {
+    if (cols>maxWidth) {
+        cols=maxWidth;
+    }
+    FeaturePtr pFeature;
+    VmbErrorType err;
+    err=pCamera->GetFeatureByName("Width",pFeature);
+    if (err==VmbErrorSuccess) {
+        pFeature->SetValue(cols);
+        width=cols;
+    }
+    return true;
+}
+

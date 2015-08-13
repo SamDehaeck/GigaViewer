@@ -30,6 +30,8 @@ public slots:
     void skipForwardBackward(bool forward);
     void willStartTheTimer(int interval);
     void willStopTheTimer();
+    void setRoiRows(int rows);
+    void setRoiCols(int cols);
 
 private:
     void run();

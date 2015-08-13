@@ -50,6 +50,10 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
+    connect(camDialog,SIGNAL(SetRoiRows(int)),this,SIGNAL(setRoiRows(int)));
+    connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
+
+
     setScene(theScene);
     getNewSample=false;
 }
@@ -165,5 +169,6 @@ void MainGui::needNewSample()
 {
     getNewSample=true;
 }
+
 
 

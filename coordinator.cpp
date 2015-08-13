@@ -19,6 +19,8 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(theGui,SIGNAL(setAutoShutter(bool)),this,SLOT(setAutoShutter(bool)));
         connect(&camBack,SIGNAL(shutterChanged(int)),theGui,SLOT(gotNewShutSpeed(int)));
         connect(theGui,SIGNAL(skipFrames(bool)),&camBack,SLOT(skipForwardBackward(bool)));
+        connect(theGui,SIGNAL(setRoiRows(int)),&camBack,SLOT(setRoiRows(int)));
+        connect(theGui,SIGNAL(setRoiCols(int)),&camBack,SLOT(setRoiCols(int)));
     }
 }
 

@@ -22,6 +22,8 @@ signals:
     void NeedNewSample();
     void SetShutterSpeed(int shut);
     void SetAutoShutter(bool fitRange);
+    void SetRoiRows(int rows);
+    void SetRoiCols(int cols);
 
 public slots:
     void GotNewSample(ImagePacket imP);
@@ -34,6 +36,12 @@ private slots:
     void on_FitRangeButton_clicked();
 
     void on_FitMeanButton_clicked();
+
+    void on_ROIRows_editingFinished();
+
+    void on_ROICols_editingFinished();
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::CameraControlsDialog *ui;

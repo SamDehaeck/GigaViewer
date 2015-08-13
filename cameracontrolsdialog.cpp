@@ -117,3 +117,22 @@ void CameraControlsDialog::on_FitMeanButton_clicked()
 {
     emit SetAutoShutter(false);
 }
+
+void CameraControlsDialog::on_ROIRows_editingFinished()
+{
+    //qDebug()<<"ROI rows updated to "<<ui->ROIRows->text();
+    emit SetRoiRows(ui->ROIRows->text().toInt());
+}
+
+void CameraControlsDialog::on_ROICols_editingFinished()
+{
+//    qDebug()<<"ROI cols updated to "<<ui->ROICols->text();
+    emit SetRoiCols(ui->ROICols->text().toInt());
+}
+
+void CameraControlsDialog::on_pushButton_2_clicked()
+{
+    // emitting unrealistic roi values should set them to their maximum
+    emit SetRoiRows(5000);
+    emit SetRoiCols(5000);
+}

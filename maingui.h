@@ -36,6 +36,8 @@ signals:
     void setShutter(int time);
     void setAutoShutter(bool fitRange);
     void skipFrames(bool forward);
+    void setRoiRows(int rows);
+    void setRoiCols(int cols);
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);

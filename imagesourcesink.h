@@ -18,6 +18,8 @@ public:
     virtual bool StopRecording();
     virtual bool IsOpened();
     virtual bool SetInterval(int msec);
+    virtual bool SetRoiRows(int rows);
+    virtual bool SetRoiCols(int cols);
     virtual bool SetShutter(int shutTime);
     virtual int SetAutoShutter(bool fitRange);
     virtual bool SkipFrames(bool forward);

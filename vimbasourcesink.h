@@ -34,6 +34,8 @@ public:
     bool GrabFrame(ImagePacket& target,int indexIncrement=1);
     bool IsOpened();
     bool SetInterval(int msec);
+    bool SetRoiRows(int rows);
+    bool SetRoiCols(int cols);
     bool SetShutter(int shutTime);
     int SetAutoShutter(bool fitRange);
     std::vector<std::string> listPixelFormats();

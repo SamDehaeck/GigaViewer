@@ -254,5 +254,13 @@ void CamBackend::SetAutoShutter(bool fitRange)
     }
 }
 
+void CamBackend::setRoiRows(int rows) {
+    currSource->SetRoiRows(rows);
+}
+
+void CamBackend::setRoiCols(int cols) {
+    currSource->SetRoiCols(cols);
+}
+
 
 

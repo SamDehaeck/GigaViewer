@@ -40,6 +40,14 @@ bool ImageSourceSink::SetInterval(int) {
     return false;
 }
 
+bool ImageSourceSink::SetRoiRows(int) {
+    return false;
+}
+
+bool ImageSourceSink::SetRoiCols(int) {
+    return false;
+}
+
 bool ImageSourceSink::SetShutter(int) {
     return false;
 }

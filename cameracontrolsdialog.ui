@@ -24,10 +24,10 @@
    <item row="4" column="0">
     <widget class="QPushButton" name="pushButton_2">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="text">
-      <string>Set ROI</string>
+      <string>Reset ROI</string>
      </property>
     </widget>
    </item>
@@ -100,6 +100,12 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>shutterSpinBox</tabstop>
+  <tabstop>FitRangeButton</tabstop>
+  <tabstop>FitMeanButton</tabstop>
+  <tabstop>IntensityButton</tabstop>
+  <tabstop>ROIRows</tabstop>
+  <tabstop>ROICols</tabstop>
   <tabstop>pushButton_2</tabstop>
  </tabstops>
  <resources/>
