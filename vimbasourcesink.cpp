@@ -119,6 +119,8 @@ bool VimbaSourceSink::Init()
                             qDebug()<<"Could not query frequency: "<<err<<" => Will use LUT";
                             if (namestr=="GE1050") {
                                 camFreq=79861111;
+                            } else if (namestr=="GE1910") {
+                                camFreq=79861111;
                             } else {
                                 qDebug()<<"Model not yet in LUT => unreliable timestamps";
                             }
