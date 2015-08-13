@@ -21,6 +21,8 @@ void VimbaSourceSink::setFormat(QString formatstring) {
             err = pFeature->SetValue( VmbPixelFormatMono8 );
         } else if (format=="MONO12") {
             err = pFeature->SetValue( VmbPixelFormatMono12 );
+        } else if (format=="MONO14") {
+            err = pFeature->SetValue( VmbPixelFormatMono14 );
         } else if (format=="BAYERRG8") {
             err=pFeature->SetValue(VmbPixelFormatBayerRG8);
         } else {
@@ -232,8 +234,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         }
         if (pixFormat==VmbPixelFormatMono8) target.pixFormat="MONO8";
         if (pixFormat==VmbPixelFormatBayerRG8) target.pixFormat="BAYERRG8";
-    } else if (pixFormat==VmbPixelFormatMono12) {
-//        qDebug()<<"Help, 12 bit images coming in!!";
+    } else if ((pixFormat==VmbPixelFormatMono12)||(pixFormat=VmbPixelFormatMono14)) {
         target.image=cv::Mat(height,width,CV_16U);
         err=pFrame->GetImage(target.image.data);
         if (err!=VmbErrorSuccess) {
@@ -241,16 +242,8 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         } else {
             //qDebug()<<"12-bit image should be moving up the stack";
         }
-        target.pixFormat="MONO12";
-
-/*    } else if (pixFormat==VmbPixelFormatBayerRG8) {
-        target.image=cv::Mat(height,width,CV_8UC3);
-        cv::Mat dummy(height,width,CV_8U);
-        err=pFrame->GetImage(dummy.data); // assign the frame image buffer pointer to the target image
-        if (err!=VmbErrorSuccess) {
-            qDebug()<<"Something went wrong assigning the colour data";
-        }
-        cv::cvtColor(dummy,target.image,CV_BayerRG2BGR);*/
+        if (pixFormat==VmbPixelFormatMono12) target.pixFormat="MONO12";
+        if (pixFormat==VmbPixelFormatMono14) target.pixFormat="MONO14";
     } else {
         qDebug()<<"Other pixel formats not yet working";
     }

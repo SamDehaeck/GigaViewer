@@ -70,8 +70,10 @@ void CamBackend::GrabFrame()
         if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
             double max;
             cv::minMaxLoc(currImage.image,NULL,&max);
-            if (max<4096) {
-                currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            if (currImage.pixFormat=="MONO12") {
+                if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            } else if (currImage.pixFormat=="MONO14") {
+                if (max<16384) currImage.image=currImage.image*4;
             }
             /* Alternative is to scale down to 8bits but this requires making a new Mat..
             cv::Mat newMat;
@@ -126,10 +128,14 @@ bool CamBackend::StartAcquisition(QString dev)
                     items<<"MONO8";
                 } else if (pixF[i]=="Mono12") {
                     items<<"MONO12";
+                } else if (pixF[i]=="Mono14") {
+                    items<<"MONO14";
                 } else if (pixF[i]=="BayerRG8") {
                     items<<"BAYERRG8";
                 } else {
-                    qDebug()<<"This pixel-mode not yet available: "<<QString::fromStdString(pixF[i]);
+                    if (!QString::fromStdString(pixF[i]).contains("Packed")) {
+                        qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
+                    }
                 }
 
             }
@@ -190,6 +196,8 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
                 codec="FMF8";
             } else if (format=="MONO12") {
                 codec="FMF12";
+            } else if (format=="MONO14") {
+                codec="FMF14";
             } else if (format=="BAYERRG8") {
                 codec="FMFRGB8";
             }

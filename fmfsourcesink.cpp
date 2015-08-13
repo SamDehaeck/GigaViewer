@@ -42,6 +42,8 @@ bool FmfSourceSink::StartAcquisition(QString dev)
               qDebug()<<"Recognised Mono8 FMF-file";
           } else if (dataformat=="MONO12") {
               qDebug()<<"Recognised Mono12 FMF-file";
+          } else if (dataformat=="MONO14") {
+              qDebug()<<"Recognised Mono14 FMF-file";
           } else if (dataformat=="BAYERRG8") {
               qDebug()<<"Recognised BayerRG8 FMF-file";
           } else {
@@ -166,11 +168,11 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
                 if (fwrite(source.image.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
                     return true;
                 }
-            } else if (dataformat.contains("12")) {
+            } else if ((dataformat.contains("12"))||(dataformat.contains("14"))) {
                 if (fwrite(source.image.ptr<uint16_t>(0),2,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
                     return true;
                 } else {
-                    qDebug()<<"Writing 12bit frame unsuccessfull";
+                    qDebug()<<"Writing 12bit or 14bit frame unsuccessfull";
                     return false;
                 }
             } else {
@@ -198,6 +200,10 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         formatlen=6;
         bitsperpixel=16;
         dataformat="MONO12";
+    } else if (codec=="FMF14") {
+        formatlen=6;
+        bitsperpixel=16;
+        dataformat="MONO14";
     } else if (codec=="FMFRGB8") {
         formatlen=8;
         bitsperpixel=8;
