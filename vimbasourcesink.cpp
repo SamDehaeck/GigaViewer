@@ -133,13 +133,26 @@ bool VimbaSourceSink::Init()
                             pFeature->SetValue("Continuous"); // this should be continuous
                         }
 
-                        // get height and width of current camera
+                        // set/get maximum height and width of current camera
+                        err=pCamera->GetFeatureByName("WidthMax",pFeature);
+                        if (err==VmbErrorSuccess) {
+                            pFeature->GetValue(maxWidth);
+                        }
+
                         err=pCamera->GetFeatureByName("Width",pFeature);
                         if (err==VmbErrorSuccess) {
+                            pFeature->SetValue(maxWidth);
                             pFeature->GetValue(width); // this should be continuous
                         }
+
+                        err=pCamera->GetFeatureByName("HeightMax",pFeature);
+                        if (err==VmbErrorSuccess) {
+                            pFeature->GetValue(maxHeight);
+                        }
+
                         err=pCamera->GetFeatureByName("Height",pFeature);
                         if (err==VmbErrorSuccess) {
+                            pFeature->SetValue(maxHeight);
                             pFeature->GetValue(height); // this should be continuous
                         }
 

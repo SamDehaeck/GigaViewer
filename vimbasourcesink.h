@@ -49,6 +49,7 @@ private:
     CamBackend* parent;
     int bufCount;
     VmbInt64_t height,width;
+    VmbInt64_t maxHeight,maxWidth;
     double frameRate,exposure;
     VmbInt64_t camFreq,initialStamp;
     int timeOffset;
