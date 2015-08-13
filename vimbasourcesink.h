@@ -36,9 +36,12 @@ public:
     bool SetInterval(int msec);
     bool SetShutter(int shutTime);
     int SetAutoShutter(bool fitRange);
+    std::vector<std::string> listPixelFormats();
+    void setFormat(QString formatstring);
+
 
 private:
-    void listOptions(AVT::VmbAPI::FeaturePtr pFeature);
+    std::vector<std::string> listOptions(AVT::VmbAPI::FeaturePtr pFeature);
 
     AVT::VmbAPI::VimbaSystem & system;
     AVT::VmbAPI::CameraPtr     pCamera;

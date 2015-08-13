@@ -40,10 +40,11 @@ void Coordinator::controlCameraThread(bool startNew,QString dev)
                 camBack.terminate();
             }
             opencvRunning=false;
+            camBack.ReleaseCamera(); //this checks first if it is opened. Needs to be called in same thread as camera.open
         } else {
-//            qDebug()<<"Thread not running";
+            //qDebug()<<"Thread not running";
         }
-        camBack.ReleaseCamera(); //this checks first if it is opened. Needs to be called in same thread as camera.open
+
     }
 }
 

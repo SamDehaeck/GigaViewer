@@ -154,10 +154,10 @@ void MainGui::AVTFeedPressed()
 
 void MainGui::VimbaFeedPressed()
 {
-    emit newVimbaFeedNeeded(true);
+    emit newVimbaFeedNeeded(true);  // if this fails, the controls will be reset but this will be 'undone' by next commands
     showPlaybackControls(true);
     showInputControls(false);
-    showCameraControls(true);    
+    showCameraControls(true);
     this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
 }
 

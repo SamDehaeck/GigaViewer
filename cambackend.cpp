@@ -108,21 +108,6 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
     } else if (dev=="Vimba") {
-//        currImage.image=cv::Mat::zeros(1024,1024,CV_8U);
-//        currSource=new VimbaSourceSink(this,"MONO8"); //vimba needs the current object to connect the grabFrame signal
-//        qDebug()<<"Will init vimba with: "<<format;
-
-        QStringList items;
-        items << "MONO8" << "MONO12" << "BAYERRG8";
-        bool ok;
-        QString item = QInputDialog::getItem(NULL, "Pixel format",
-                                            "Selection options:", items, 0, false, &ok);
-        if (ok && !item.isEmpty()) {
-            format=item;
-        }
-
-
-
         currSource=new VimbaSourceSink(this,format); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
@@ -132,6 +117,32 @@ bool CamBackend::StartAcquisition(QString dev)
         doesCallBack=false;
     }
     if (currSource->Init()) {
+        if (dev=="Vimba") {
+            std::vector<std::string> pixF;
+            QStringList items;
+            pixF=static_cast<VimbaSourceSink*>(currSource)->listPixelFormats();
+            for (uint i=0;i<pixF.size();i++) {
+                if (pixF[i]=="Mono8") {
+                    items<<"MONO8";
+                } else if (pixF[i]=="Mono12") {
+                    items<<"MONO12";
+                } else if (pixF[i]=="BayerRG8") {
+                    items<<"BAYERRG8";
+                } else {
+                    qDebug()<<"This pixel-mode not yet available: "<<QString::fromStdString(pixF[i]);
+                }
+
+            }
+
+            bool ok;
+            QString item = QInputDialog::getItem(NULL, "Pixel format",
+                                                "Selection options:", items, 0, false, &ok);
+            if (ok && !item.isEmpty()) {
+                format=item;
+                static_cast<VimbaSourceSink*>(currSource)->setFormat(format);
+                qDebug()<<"Selected "<<format;
+            }
+        }
         return currSource->StartAcquisition(dev);
     } else {
         return false;

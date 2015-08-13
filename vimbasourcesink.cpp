@@ -7,6 +7,35 @@ VimbaSourceSink::VimbaSourceSink(CamBackend* par, QString formatstring): system 
     format=formatstring;
 }
 
+void VimbaSourceSink::setFormat(QString formatstring) {
+    format=formatstring;
+    FeaturePtr pFeature;
+    VmbErrorType err;
+
+    // Check/set pixel format
+    // Set pixel format. For the sake of simplicity we only support Mono and BGR in this example.
+    err = pCamera->GetFeatureByName( "PixelFormat", pFeature );
+    if ( VmbErrorSuccess == err )
+    {
+        if (format=="MONO8") {
+            err = pFeature->SetValue( VmbPixelFormatMono8 );
+        } else if (format=="MONO12") {
+            err = pFeature->SetValue( VmbPixelFormatMono12 );
+        } else if (format=="BAYERRG8") {
+            err=pFeature->SetValue(VmbPixelFormatBayerRG8);
+        } else {
+            qDebug()<<"Pixel Format not yet working in Gigaviewer: "<<format;
+        }
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Could not set requested pixel format.";
+        }
+        std::string form;
+        err=pFeature->GetValue(form);
+        qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
+//                                qDebug()<<"Will work in Mono8 mode";
+    }
+}
+
 bool VimbaSourceSink::IsOpened()
 {
     return true;
@@ -21,8 +50,7 @@ bool VimbaSourceSink::Init()
     {
         // now find all cameras
         err = system.GetCameras( cameras );            // Fetch all cameras known to Vimba
-        if( VmbErrorSuccess == err )
-        {
+        if( VmbErrorSuccess == err ) {
 
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
@@ -69,39 +97,6 @@ bool VimbaSourceSink::Init()
 
                         // get/set some features
                         FeaturePtr pFeature;
-
-                        // Check/set pixel format
-                        // Set pixel format. For the sake of simplicity we only support Mono and BGR in this example.
-                        err = pCamera->GetFeatureByName( "PixelFormat", pFeature );
-                        if ( VmbErrorSuccess == err )
-                        {
-//                            VmbPixelFormatType theF;
-//                            std::string form;
-//                            err=pFeature->GetValue(form);
-//                            listOptions(pFeature);
-
-
-//                            qDebug()<<"Format is "<<QString::fromStdString(form);
-                             //Remove the setting here for the moment to allow testing 12 bit mode
-                             // Fall back to Mono
-//                            err = pFeature->SetValue( VmbPixelFormatMono8 );
-                            if (format=="MONO8") {
-                                err = pFeature->SetValue( VmbPixelFormatMono8 );
-                            } else if (format=="MONO12") {
-                                err = pFeature->SetValue( VmbPixelFormatMono12 );
-                            } else if (format=="BAYERRG8") {
-                                err=pFeature->SetValue(VmbPixelFormatBayerRG8);
-                            } else {
-                                qDebug()<<"Pixel Format not recognised: "<<format;
-                            }
-                            if (err!=VmbErrorSuccess) {
-                                qDebug()<<"Could not set requested pixel format.";
-                            }
-                            std::string form;
-                            err=pFeature->GetValue(form);
-                            qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
-//                                qDebug()<<"Will work in Mono8 mode";
-                        }
 
                         // Set Trigger source to fixedRate
                         err=pCamera->GetFeatureByName("TriggerSource",pFeature);
@@ -161,24 +156,24 @@ bool VimbaSourceSink::Init()
                         return false;
                     }
                 }
+            } else {
+                qDebug()<<"Zero cameras found";
+                return false;
             }
 
 
 
-        }
-        else
-        {
+        } else {
             qDebug() << "Could not list cameras. Error code: " << err;
+            return false;
         }
-        return true;
-    }
-    else
-    {
+
+    } else {
         qDebug() << "Could not start system. Error code: " << err;
         return false;
     }
 
-
+    return true;
 
 }
 
@@ -402,12 +397,30 @@ int VimbaSourceSink::SetAutoShutter(bool fitRange)
     return newShut;
 }
 
-void VimbaSourceSink::listOptions(FeaturePtr pFeature) {
+std::vector<std::string> VimbaSourceSink::listPixelFormats() {
+    FeaturePtr pFeature;
+    VmbErrorType err;
+    err = pCamera->GetFeatureByName( "PixelFormat", pFeature );
+    if ( VmbErrorSuccess == err ) {
+        return listOptions(pFeature);
+    } else {
+        StringVector vals;
+        return vals;
+    }
+}
+
+std::vector<std::string> VimbaSourceSink::listOptions(FeaturePtr pFeature) {
     StringVector vals;
+    StringVector realVals;
     pFeature->GetValues(vals);
     for (uint i=0;i<vals.size();i++) {
-        qDebug()<<"Valid values: " << QString::fromStdString(vals[i]);
+        bool ok=false;
+        pFeature->IsValueAvailable(vals[i].c_str(),ok);
+        if (ok) {
+            realVals.push_back(vals[i]);
+//            qDebug()<<"Valid value: " << QString::fromStdString(vals[i]);
+        }
     }
-
+    return realVals;
 }
 
