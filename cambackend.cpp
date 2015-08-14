@@ -59,6 +59,11 @@ void CamBackend::GrabFrame()
 //        StopAcquisition();
         return;
     }
+    if (format!=currImage.pixFormat) {
+//        qDebug()<<"Switching data format";
+        format=currImage.pixFormat;
+    }
+
     if (recording && currSink) currSink->RecordFrame(currImage);
 
     // adapt image if not 8 bits
@@ -86,6 +91,8 @@ void CamBackend::GrabFrame()
             cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
             currImage.image=dummy;
         }
+    } else if (currImage.pixFormat=="RGB8"){
+        //qDebug()<<"Got a RGB8 frame";
     } else {
         qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
@@ -199,6 +206,8 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
             } else if (format=="MONO14") {
                 codec="FMF14";
             } else if (format=="BAYERRG8") {
+                codec="FMFBAYERRG8";
+            } else if (format=="RGB8") {
                 codec="FMFRGB8";
             }
 

@@ -76,6 +76,11 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
         target.seqNumber=-1;
     }
     camera >> target.image;
+    if (target.image.channels()==3) {
+        target.pixFormat="RGB8";
+    } else {
+        target.pixFormat="MONO8";
+    }
     target.timeStamp=QDateTime::currentMSecsSinceEpoch();
 
 

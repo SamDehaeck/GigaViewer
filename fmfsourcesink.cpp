@@ -46,6 +46,8 @@ bool FmfSourceSink::StartAcquisition(QString dev)
               qDebug()<<"Recognised Mono14 FMF-file";
           } else if (dataformat=="BAYERRG8") {
               qDebug()<<"Recognised BayerRG8 FMF-file";
+          } else if (dataformat=="RGB8") {
+              qDebug()<<"Recognised RGB8 FMF-file";
           } else {
               qDebug()<<"Unrecognised format "<<dataformat;
           }
@@ -128,13 +130,19 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     if (fread(&target.timeStamp,sizeof(double),1,fmf)) {
         // change CV_8U to instance variable datatype
         cv::Mat temp;
-        if (bitsperpixel==8) {
-            temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
-            fread(temp.data, 1, rows*cols, fmf);
-            target.image=temp.clone();
+        if (dataformat!="RGB8") {
+            if (bitsperpixel==8) {
+                temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
+                fread(temp.data, 1, rows*cols, fmf);
+                target.image=temp.clone();
+            } else {
+                temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
+                fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
+                target.image=temp.clone();
+            }
         } else {
-            temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
-            fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
+            temp = cv::Mat(rows,cols,CV_8UC3); // normally this implies that the data of temp is continuous
+            fread(temp.data, 1, 3*rows*cols, fmf);
             target.image=temp.clone();
         }
 
@@ -158,9 +166,13 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
         //test here what the bitdepth of the source image is
 //        if (source.image.depth()==2)
         if (source.image.channels()==3) {
+            /*
             cv::Mat dummy;
             cv::cvtColor(source.image,dummy,CV_RGB2GRAY);
             if (fwrite(dummy.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
+                return true;
+            }*/
+            if (fwrite(source.image.data,1,3*source.image.rows*source.image.cols,fmfrec)==uint(3*source.image.rows*source.image.cols)) {
                 return true;
             }
         } else {
@@ -204,10 +216,14 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         formatlen=6;
         bitsperpixel=16;
         dataformat="MONO14";
-    } else if (codec=="FMFRGB8") {
+    } else if (codec=="FMFBAYERRG8") {
         formatlen=8;
         bitsperpixel=8;
         dataformat="BAYERRG8";
+    } else if (codec=="FMFRGB8") {
+        formatlen=4;
+        bitsperpixel=8;
+        dataformat="RGB8";
     } else {
         return false;
     }
@@ -259,7 +275,12 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         exit(1);
     }
 
-    bytesperchunk=bitsperpixel*rows*cols/8+sizeof(double);
+
+    if (dataformat=="RGB8") {
+        bytesperchunk=3*bitsperpixel*rows*cols/8+sizeof(double);
+    } else {
+        bytesperchunk=bitsperpixel*rows*cols/8+sizeof(double);
+    }
     // bytes encoding a frame
     if(fwrite(&bytesperchunk,sizeofuint64,1,fmfrec)<1){
         fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
