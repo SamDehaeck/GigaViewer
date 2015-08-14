@@ -3,8 +3,8 @@
 # Project created by QtCreator 2012-01-04T15:26:37
 #
 #-------------------------------------------------
-
 QT       += core gui opengl widgets
+
 
 TARGET = GigaViewer
 TEMPLATE = app
