@@ -41,7 +41,8 @@ SOURCES += main.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp \
     vimbasourcesink.cpp \
-    vimbaframeobserver.cpp
+    vimbaframeobserver.cpp \
+    hdf5sourcesink.cpp
 #unix {
     SOURCES += avtsourcesink.cpp
 #}
@@ -96,7 +97,8 @@ HEADERS  += \
     VimbaCPP/Include/VimbaCPPCommon.h \
     VimbaCPP/Include/VimbaSystem.h \
     VimbaCPP/Include/VimbaSystem.hpp \
-    vimbaframeobserver.h
+    vimbaframeobserver.h \
+    hdf5sourcesink.h
 
 #unix {
     HEADERS +=  avtsourcesink.h \
