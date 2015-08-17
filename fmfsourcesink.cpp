@@ -133,17 +133,17 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         if (dataformat!="RGB8") {
             if (bitsperpixel==8) {
                 temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
-                fread(temp.data, 1, rows*cols, fmf);
-                target.image=temp.clone();
+                uint amread=fread(temp.data, 1, rows*cols, fmf);
+                if (amread==(uint)(rows*cols)) target.image=temp.clone();
             } else {
                 temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
-                fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
-                target.image=temp.clone();
+                uint amread=fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
+                if (amread==(uint)(rows*cols)) target.image=temp.clone();
             }
         } else {
             temp = cv::Mat(rows,cols,CV_8UC3); // normally this implies that the data of temp is continuous
-            fread(temp.data, 1, 3*rows*cols, fmf);
-            target.image=temp.clone();
+            uint amread=fread(temp.data, 1, 3*rows*cols, fmf);
+            if (amread==(uint)(3*rows*cols)) target.image=temp.clone();
         }
 
         currPos+=indexIncrement;
