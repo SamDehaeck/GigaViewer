@@ -36,8 +36,8 @@ bool ImageSourceSink::IsOpened() {
     return false;
 }
 
-bool ImageSourceSink::SetInterval(int) {
-    return false;
+int ImageSourceSink::SetInterval(int) {
+    return 0;
 }
 
 bool ImageSourceSink::SetRoiRows(int) {

@@ -188,8 +188,12 @@ void CamBackend::SetInterval(int newInt)
     reversePlay=newInt<0;
     if (needTimer) {
         timer.setInterval(abs(newInt));
+        // no need to emit fpsChanged(newInt) because interface already updated
     } else {  // the source handles the interval by itself
-        currSource->SetInterval(abs(newInt));
+        int newFps=currSource->SetInterval(abs(newInt));
+        if (newFps!=newInt) {
+            emit fpsChanged(newFps);
+        }
     }
 }
 

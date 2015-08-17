@@ -283,7 +283,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
-bool VimbaSourceSink::SetInterval(int msec)
+int VimbaSourceSink::SetInterval(int msec)
 {
     FeaturePtr pFeature;
     double acqRate=1000.0/(1.0*msec);
@@ -293,15 +293,15 @@ bool VimbaSourceSink::SetInterval(int msec)
         if (err==VmbErrorSuccess) {
             frameRate=acqRate;
 //            qDebug()<<"New frame rate is: "<<frameRate;
-            return true;
+            return msec;
         } else {
-            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
+//            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
             err=pCamera->GetFeatureByName("AcquisitionFrameRateLimit",pFeature);
             double maxRate;
             if (err==VmbErrorSuccess) {
                 err=pFeature->GetValue(maxRate);
                 if (acqRate>maxRate) {
-                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
+//                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
                     err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
                     acqRate=maxRate;
                     err=pFeature->SetValue(acqRate);
@@ -310,6 +310,9 @@ bool VimbaSourceSink::SetInterval(int msec)
                         acqRate=maxRate-1;
                         err=pFeature->SetValue(acqRate);
                     }
+                    frameRate=acqRate;
+//                    qDebug()<<"actual framerate now: "<<frameRate;
+                    return (int)(1000.0/acqRate);
                 }
             }
         }

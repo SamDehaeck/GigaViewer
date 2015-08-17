@@ -17,7 +17,7 @@ public:
     virtual bool StartRecording(QString recFold, QString codec,int fps, int cols, int rows);
     virtual bool StopRecording();
     virtual bool IsOpened();
-    virtual bool SetInterval(int msec);
+    virtual int SetInterval(int msec);
     virtual bool SetRoiRows(int rows);
     virtual bool SetRoiCols(int cols);
     virtual bool SetShutter(int shutTime);

@@ -127,6 +127,12 @@ void PlaybackDialog::newFrameNumberReceived(int nr)
     ui->RightStatus->setText(frameTxt);
 }
 
+void PlaybackDialog::showNewFps(int msec) {
+    int fps=(int)(1000.0/msec);
+    QString fpstext="1/"+QString::number(fps);
+    ui->fpsEdit->setText(fpstext);
+}
+
 void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 {
     double newFrameRate=1;

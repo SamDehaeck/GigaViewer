@@ -50,6 +50,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
+    connect(this,SIGNAL(showNewFps(int)),playDialog,SLOT(showNewFps(int)));
     connect(camDialog,SIGNAL(SetRoiRows(int)),this,SIGNAL(setRoiRows(int)));
     connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
 
@@ -103,6 +104,11 @@ void MainGui::stopButtonPressed()
 void MainGui::gotNewFps(int fps)
 {
     emit implementNewFps(fps);
+}
+
+void MainGui::gotNewFpsFromBackend(int fps)
+{
+    emit showNewFps(fps);
 }
 
 void MainGui::gotNewShutSpeed(int shut)

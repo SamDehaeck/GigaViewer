@@ -320,7 +320,7 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
-bool AvtSourceSink::SetInterval(int msec)
+int AvtSourceSink::SetInterval(int msec)
 {
     double fps = 1000.0/((double)msec);
     tPvFloat32 fpsFloat=1.0;
@@ -336,7 +336,7 @@ bool AvtSourceSink::SetInterval(int msec)
         qDebug()<<"Setting the frame rate to"<<fpsFloat<<"did not work";
         return false;
     }
-    return true;
+    return msec;
 }
 
 bool AvtSourceSink::SetShutter(int shutTime)

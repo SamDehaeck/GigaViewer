@@ -29,6 +29,7 @@ signals:
     void newAvtFeedNeeded(bool start);
     void newVimbaFeedNeeded(bool start);
     void implementNewFps(int fps);
+    void showNewFps(int msec);
     void startRecording(bool start,QString recfold,QString codec);
     void closeApplic();
     void newSampleReady(ImagePacket matrix);
@@ -47,6 +48,7 @@ public slots:
     void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);
+    void gotNewFpsFromBackend(int fps);
     void gotNewShutSpeed(int shut);
     void needNewSample();
 

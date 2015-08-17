@@ -21,6 +21,7 @@ public:
 signals:
     void NewImageReady(ImagePacket im);
     void shutterChanged(int newTime);
+    void fpsChanged(int msec);
     void startTheTimer(int interval);
     void stopTheTimer();
 

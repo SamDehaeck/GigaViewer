@@ -43,6 +43,7 @@ private slots:
 
 public slots:
     void newFrameNumberReceived(int nr);
+    void showNewFps(int msec);
 
 private:
     Ui::PlaybackDialog *ui;

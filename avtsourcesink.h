@@ -32,7 +32,7 @@ public:
     bool ReleaseCamera();
     bool GrabFrame(ImagePacket& target,int indexIncrement=1);
     bool IsOpened();
-    bool SetInterval(int msec);
+    int SetInterval(int msec);
     bool SetShutter(int shutTime);
     int SetAutoShutter(bool fitRange);
 
