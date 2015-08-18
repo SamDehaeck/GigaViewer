@@ -3,9 +3,9 @@
 
 #include "imagepacket.h"
 #include "imagesourcesink.h"
-#include <hdf5/serial/H5Cpp.h>
+#include <H5Cpp.h>
 
-class Hdf5SourceSink : public ImageSourceSink
+class Hdf5SourceSink : public ImageSourceSink  //#include <hdf5/serial/H5Cpp.h>
 {
 public:
     bool Init();
@@ -26,11 +26,14 @@ private:
     H5T_class_t dataclass;
     H5::DataSpace* memspace;
     hsize_t dims[3];
+    hsize_t recrows,reccols;
     H5::DataType readType;
+    H5::DSetCreatPropList cparms;
 
     unsigned long index;
 
     cv::Mat frame;
+    QString dataformat;
 
 };
 

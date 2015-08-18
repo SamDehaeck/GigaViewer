@@ -222,6 +222,19 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
 
         } else if (codec=="BMP" || codec=="PNG" || codec=="JPG") {
             currSink=new RegexSourceSink();
+        } else if (codec=="HDF5") {
+            currSink=new Hdf5SourceSink();
+            if (format=="MONO8") {
+                codec="HDF8";
+            } else if (format=="MONO12") {
+                codec="HDF12";
+            } else if (format=="MONO14") {
+                codec="HDF14";
+            } else if (format=="BAYERRG8") {
+                codec="HDFBAYERRG8";
+            } else if (format=="RGB8") {
+                codec="HDFRGB8";
+            }
         } else {
             currSink=new OpencvSourceSink();
         }

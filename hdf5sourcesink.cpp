@@ -1,6 +1,6 @@
 #include "hdf5sourcesink.h"
 #include "opencv2/opencv.hpp"
-#include <hdf5/serial/H5Cpp.h>
+#include <QInputDialog>
 
 using namespace H5;
 
@@ -53,23 +53,18 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
         }
 
+        // now open the selected one
         dataset=hFile->openDataSet(finalDataset);
-        dataclass = dataset.getTypeClass();
-
-
-        /*
-        * Get dataspace of the dataset.
-        */
         dataspace = dataset.getSpace();
-//        int rank = dataspace.getSimpleExtentNdims();
+
         int ndims = dataspace.getSimpleExtentDims( dims, NULL);
         if (ndims!=3) qDebug()<<"Rank is not 3: "<<ndims;
-
         /*qDebug() << "rank " << ndims << ", dimensions " <<
           (unsigned long)(dims[0]) << " x " <<
           (unsigned long)(dims[1]) << " x " <<
           (unsigned long)(dims[2]);*/
 
+        dataclass = dataset.getTypeClass();
         if( dataclass == H5T_INTEGER ) {
              IntType intype = dataset.getIntType();
              size_t size = intype.getSize();
@@ -83,11 +78,11 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
         } else if (dataclass== H5T_FLOAT){
             readType=PredType::NATIVE_FLOAT;
             frame=cv::Mat(dims[1],dims[2],CV_32F);
-        } else if (dataclass==H5T_COMPOUND) {
+        } else if (dataclass==H5T_COMPOUND) { //typically a complex number => no meaningfull way to show this so exit
             qDebug()<<"Data set has compound type - will exit";
             return false;
         } else {
-            qDebug()<<"Data set has different type - will exit";
+            qDebug()<<"Data set has unknown type - will exit";
             return false;
         }
 
@@ -153,18 +148,108 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
-bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
-{
-    return false;
-}
-
 bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
+    QDateTime mom = QDateTime::currentDateTime();
+    QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".h5";
+    std::string datasetname="data";
+    std::string timename="time";
+
+//    qDebug()<<"Init recording: "<<filenam<<" with codec "<<codec;
+
+    hFile=new H5File(filenam.toStdString(),H5F_ACC_TRUNC);
+    if (codec=="HDF8") {
+        readType=PredType::NATIVE_UCHAR;
+        dataformat="MONO8";
+    } else if (codec=="HDF12") {
+        qDebug()<<"This format not yet implemented: "<<codec;
+        dataformat="MONO12";
+    } else if (codec=="HDF14") {
+        qDebug()<<"This format not yet implemented: "<<codec;
+        dataformat="MONO14";
+    } else if (codec=="HDFBAYERRG8") {
+        qDebug()<<"This format not yet implemented: "<<codec;
+        dataformat="BAYERRG8";
+    } else if (codec=="HDFRGB8") {
+        readType=PredType::NATIVE_UCHAR;
+        dataformat="RGB8";
+        qDebug()<<"This format not yet fully implemented, will convert to gray: "<<codec;
+    } else {
+        qDebug()<<"This format not yet implemented: "<<codec;
+    }
+
+
+    /*
+     * Create the data space with unlimited size in the first dimension.
+     */
+    hsize_t      dims[3]  = { 1,(uint)rows, (uint)cols};  // dataset dimensions at creation
+    recrows=rows;
+    reccols=cols;
+    hsize_t      maxdims[3] = {H5S_UNLIMITED, (uint)rows,(uint)cols};
+    DataSpace mspace1( 3, dims, maxdims);
+    /*
+     * Modify dataset creation properties, i.e. enable chunking.
+     */
+
+    hsize_t      chunk_dims[3] ={1,(uint)rows, (uint)cols};
+    cparms.setChunk( 3, chunk_dims );
+    /*
+     * Set fill value for the dataset
+     */
+    int fill_val = 0;
+    cparms.setFillValue( readType, &fill_val);
+//  investigate if compression is usefull.
+//    cparms.setDeflate(5);
+    /*
+     * Create a new dataset within the file using cparms
+     * creation properties.
+     */
+    dataset = hFile->createDataSet( datasetname, readType, mspace1, cparms);
+
+    index=0;
     return true;
+}
+
+bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
+{
+    if (source.pixFormat=="RGB8") { // too much changes to make it work in colour for webcams=> just convert to gray.
+        cv::Mat gray(source.image.rows,source.image.cols,CV_8U);
+        cv::cvtColor(source.image,gray,CV_RGB2GRAY);
+        source.image=gray;
+    }
+    if (index==0) { // no need for slab selection or anything
+        dataset.write(source.image.data,readType);
+    } else {
+        hsize_t newdims[3]  = {index+1,recrows, reccols};
+        dataset.extend(newdims);
+        DataSpace filespace=dataset.getSpace();
+        hsize_t offset[3];
+        offset[0]=index;
+        offset[1]=0;
+        offset[2]=0;
+        hsize_t dimsIm[3];
+        dimsIm[0]=1;
+        dimsIm[1]=recrows;
+        dimsIm[2]=reccols;
+        filespace.selectHyperslab(H5S_SELECT_SET,dimsIm,offset);
+
+        hsize_t dumbIm[2];
+        dumbIm[0]=recrows;
+        dumbIm[1]=reccols;
+        DataSpace memspac(2,dumbIm,NULL);
+
+        dataset.write(source.image.data,readType,memspac,filespace);
+
+    }
+    index++;
+    return false;
 }
 
 bool Hdf5SourceSink::StopRecording()
 {
+    cparms.close();
+    hFile->close();
+    delete hFile;
     return true;
 }
 

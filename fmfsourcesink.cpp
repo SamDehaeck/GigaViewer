@@ -39,15 +39,15 @@ bool FmfSourceSink::StartAcquisition(QString dev)
           dataf[formatlen]='\0';
           dataformat=dataf;
           if (dataformat=="MONO8") {
-              qDebug()<<"Recognised Mono8 FMF-file";
+//              qDebug()<<"Recognised Mono8 FMF-file";
           } else if (dataformat=="MONO12") {
-              qDebug()<<"Recognised Mono12 FMF-file";
+//              qDebug()<<"Recognised Mono12 FMF-file";
           } else if (dataformat=="MONO14") {
-              qDebug()<<"Recognised Mono14 FMF-file";
+//              qDebug()<<"Recognised Mono14 FMF-file";
           } else if (dataformat=="BAYERRG8") {
-              qDebug()<<"Recognised BayerRG8 FMF-file";
+//              qDebug()<<"Recognised BayerRG8 FMF-file";
           } else if (dataformat=="RGB8") {
-              qDebug()<<"Recognised RGB8 FMF-file";
+//              qDebug()<<"Recognised RGB8 FMF-file";
           } else {
               qDebug()<<"Unrecognised format "<<dataformat;
           }
