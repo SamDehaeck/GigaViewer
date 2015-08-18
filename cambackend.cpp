@@ -1,6 +1,7 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
+#include "hdf5sourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
 #include "avtsourcesink.h"
@@ -104,7 +105,11 @@ void CamBackend::GrabFrame()
 // make new source
 bool CamBackend::StartAcquisition(QString dev)
 {
-    if (dev.contains(".fmf")) {
+    if (dev.contains(".h5")) {
+        currSource=new Hdf5SourceSink();
+        needTimer=true;
+        doesCallBack=false;
+    } else if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
         needTimer=true;
         doesCallBack=false;

@@ -3,6 +3,7 @@
 
 #include "imagepacket.h"
 #include "imagesourcesink.h"
+#include <hdf5/serial/H5Cpp.h>
 
 class Hdf5SourceSink : public ImageSourceSink
 {
@@ -19,6 +20,17 @@ public:
     bool SkipFrames(bool forward);
 
 private:
+    H5::H5File *hFile;
+    H5::DataSpace dataspace;
+    H5::DataSet dataset;
+    H5T_class_t dataclass;
+    H5::DataSpace* memspace;
+    hsize_t dims[3];
+    H5::DataType readType;
+
+    unsigned long index;
+
+    cv::Mat frame;
 
 };
 

@@ -22,7 +22,8 @@ win32 {
     LIBS += -lopengl32
 } else {
     LIBS += -L /usr/local/lib
-    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP
+    QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
+    LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP
 }
 
 SOURCES += main.cpp \

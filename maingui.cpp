@@ -119,9 +119,9 @@ void MainGui::gotNewShutSpeed(int shut)
 void MainGui::newMoviePressed(QString theString)
 {
     if (theString!="") {
-        showPlaybackControls(true);
-        showInputControls(false);
         emit newMovieNeeded(theString);
+        showPlaybackControls(true);
+        showInputControls(false);        
         this->parentWidget()->setWindowTitle(theString);
     }
 }
