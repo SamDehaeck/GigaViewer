@@ -33,7 +33,7 @@ void VimbaSourceSink::setFormat(QString formatstring) {
         }
         std::string form;
         err=pFeature->GetValue(form);
-        qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
+//        qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
 //                                qDebug()<<"Will work in Mono8 mode";
     }
 }

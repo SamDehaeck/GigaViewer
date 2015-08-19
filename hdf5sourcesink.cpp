@@ -22,8 +22,14 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 //        qDebug()<<"Amount datasets is: "<<amDataSets;
         std::vector<std::string> goodSets;
         QStringList items;  // only used if more than one valid dataset present
+        timepresent=false;
+        std::string timestring;
         for (uint i=0;i<amDataSets;i++) {
             std::string theName=hFile->getObjnameByIdx(i);
+            if (QString::fromStdString(theName).contains("time")) {
+                timepresent=true;
+                timestring=theName;
+            }
 //            qDebug()<<"Dataset: "<<QString::fromStdString(theName);
             DataSet dumbset=hFile->openDataSet(theName);
             DataSpace dumbspace=dumbset.getSpace();
@@ -86,6 +92,25 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
             return false;
         }
 
+        // if timestamps present, read them all at once into a matrix
+
+        if (timepresent) {
+            timestamps.clear();
+            DataSet timeset=hFile->openDataSet(timestring);
+            DataSpace timespace = timeset.getSpace();
+            hsize_t timedim[1];
+            int ndims = timespace.getSimpleExtentDims( timedim, NULL);
+            if (ndims!=1) qDebug()<<"Rank is not 1: "<<ndims;
+
+            cv::Mat timeMat=cv::Mat(1,timedim[0],CV_64F);
+            timeset.read(timeMat.data,PredType::NATIVE_DOUBLE);
+
+            for (uint i=0;i<timedim[0];i++) {
+                timestamps.push_back(timeMat.at<double>(0,i));
+            }
+        }
+
+
         index=0;
 
     } catch (Exception e) {
@@ -93,24 +118,6 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
         return false;
     }
 
-    return true;
-}
-
-bool Hdf5SourceSink::StopAcquisition()
-{
-    try {
-        hFile->close();
-        delete hFile;
-    } catch (Exception e) {
-        qDebug()<<"Error occured: "<<e.getCDetailMsg();
-        return false;
-    }
-
-    return true;
-}
-
-bool Hdf5SourceSink::ReleaseCamera()
-{
     return true;
 }
 
@@ -139,6 +146,9 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
         target.pixFormat="MONO8";
         target.seqNumber=index;
+        if (timepresent) {
+            target.timeStamp=timestamps[index];
+        }
         index=index+indexIncrement;
         return true;
     } catch (Exception e) {
@@ -148,12 +158,30 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
+bool Hdf5SourceSink::StopAcquisition()
+{
+    try {
+        hFile->close();
+        delete hFile;
+    } catch (Exception e) {
+        qDebug()<<"Error occured: "<<e.getCDetailMsg();
+        return false;
+    }
+
+    return true;
+}
+
+bool Hdf5SourceSink::ReleaseCamera()
+{
+    return true;
+}
+
 bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
     QDateTime mom = QDateTime::currentDateTime();
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".h5";
     std::string datasetname="data";
-    std::string timename="time";
+    timestamps.clear();
 
 //    qDebug()<<"Init recording: "<<filenam<<" with codec "<<codec;
 
@@ -242,11 +270,23 @@ bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
 
     }
     index++;
-    return false;
+    timestamps.push_back(source.timeStamp);
+    return true;
 }
 
 bool Hdf5SourceSink::StopRecording()
 {
+    // first record timestamps
+    cv::Mat doubleT=cv::Mat(1,timestamps.size(),CV_64F);
+    for (uint l=0;l<timestamps.size();l++) {
+        doubleT.at<double>(0,l)=timestamps[l];
+    }
+    hsize_t  hdims[1]={timestamps.size()};
+    H5::DataSpace dataspaceT=DataSpace( 1, hdims );
+    H5::DataSet datasetT = hFile->createDataSet( "time", PredType::NATIVE_DOUBLE, dataspaceT);
+    datasetT.write(doubleT.data,PredType::NATIVE_DOUBLE);
+
+    // then close everything
     cparms.close();
     hFile->close();
     delete hFile;

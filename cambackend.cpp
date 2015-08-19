@@ -158,7 +158,7 @@ bool CamBackend::StartAcquisition(QString dev)
             if (ok && !item.isEmpty()) {
                 format=item;
                 static_cast<VimbaSourceSink*>(currSource)->setFormat(format);
-                qDebug()<<"Selected "<<format;
+//                qDebug()<<"Selected "<<format;
             }
         }
         return currSource->StartAcquisition(dev);
