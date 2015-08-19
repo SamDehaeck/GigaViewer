@@ -72,16 +72,45 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
         dataclass = dataset.getTypeClass();
         if( dataclass == H5T_INTEGER ) {
+
+            /*
+            Attribute myatt_out = dataset.openAttribute("PIXFORMAT");
+            myatt_out.read(strdatatype, strreadbuf);
+
+            // Display attribute contents
+            qDebug() << "Attribute contents: " << QString::fromStdString(strreadbuf);
+            */
+
+
              IntType intype = dataset.getIntType();
              size_t size = intype.getSize();
              if (size==1) {
                 readType=PredType::NATIVE_UCHAR;
                 frame=cv::Mat(dims[1],dims[2],CV_8U);
+                dataformat="MONO8";
+             } else if (size==2) {
+                 readType=PredType::NATIVE_UINT16;
+                 frame=cv::Mat(dims[1],dims[2],CV_16U);
+                 dataformat="MONO14"; // not knowing if it is 12 or 14, 14 is the safer choice for displaying will check attribute later.
              } else {
                  qDebug()<<"Integer size not yet handled: "<<size;
                  return false;
              }
+
+             H5std_string strreadbuf ("");
+             // Open attribute and read its contents
+
+             bool hasFormat=dataset.attrExists("PIXFORMAT");
+             if (hasFormat) {
+                Attribute attr_pix=dataset.openAttribute("PIXFORMAT");
+                std::string strbuf;
+                StrType strdatatype(PredType::C_S1, 10);
+                attr_pix.read(strdatatype,strbuf);
+                dataformat=QString::fromStdString(strbuf);
+             }
+
         } else if (dataclass== H5T_FLOAT){
+            dataformat="FLOAT";
             readType=PredType::NATIVE_FLOAT;
             frame=cv::Mat(dims[1],dims[2],CV_32F);
         } else if (dataclass==H5T_COMPOUND) { //typically a complex number => no meaningfull way to show this so exit
@@ -144,7 +173,7 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         double shift=-min*stretch;
         frame.convertTo(target.image,CV_8U,stretch,shift);
 
-        target.pixFormat="MONO8";
+        target.pixFormat=dataformat;
         target.seqNumber=index;
         if (timepresent) {
             target.timeStamp=timestamps[index];
@@ -190,14 +219,14 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         readType=PredType::NATIVE_UCHAR;
         dataformat="MONO8";
     } else if (codec=="HDF12") {
-        qDebug()<<"This format not yet implemented: "<<codec;
         dataformat="MONO12";
+        readType=PredType::NATIVE_UINT16;
     } else if (codec=="HDF14") {
-        qDebug()<<"This format not yet implemented: "<<codec;
         dataformat="MONO14";
+        readType=PredType::NATIVE_UINT16;
     } else if (codec=="HDFBAYERRG8") {
-        qDebug()<<"This format not yet implemented: "<<codec;
         dataformat="BAYERRG8";
+        readType=PredType::NATIVE_UCHAR;
     } else if (codec=="HDFRGB8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="RGB8";
@@ -233,6 +262,30 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
      * creation properties.
      */
     dataset = hFile->createDataSet( datasetname, readType, mspace1, cparms);
+
+    // create an attribute to this dataset to describe the format (8, 12 or 14 bit or Bayer)
+    DataSpace attr_dataspace = DataSpace(H5S_SCALAR);
+    if (dataformat=="MONO8") {
+        StrType strdatatype(PredType::C_S1, 5); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "MONO8");
+    } else if (dataformat=="MONO12") {
+        StrType strdatatype(PredType::C_S1, 6); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "MONO12");
+    } else if (dataformat=="MONO14") {
+        StrType strdatatype(PredType::C_S1, 6); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "MONO14");
+    } else if (dataformat=="BAYERRG8") {
+        StrType strdatatype(PredType::C_S1, 8); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "BAYERRG8");
+    } else if (dataformat=="RGB8") { // this will be converted to grayscale for the moment
+        StrType strdatatype(PredType::C_S1, 5); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "MONO8");
+    }
 
     index=0;
     return true;

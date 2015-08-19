@@ -94,6 +94,8 @@ void CamBackend::GrabFrame()
         }
     } else if (currImage.pixFormat=="RGB8"){
         //qDebug()<<"Got a RGB8 frame";
+    } else if (currImage.pixFormat=="FLOAT") {
+        //qDebug()<<"Got a Float frame";
     } else {
         qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
