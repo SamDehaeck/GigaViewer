@@ -11,17 +11,16 @@ TEMPLATE = app
 
 win32 {
     INCLUDEPATH += C:\opencv\build\include
+    QMAKE_INCDIR += "C:\HDF5\1.8.15\include"  #this cannot have a space => copy installed hdf5 folder to the root
+    QMAKE_LIBDIR += "C:\HDF5\1.8.15\lib"
+    QMAKE_LIBDIR += "C:\opencv\build\x86\vc12\lib"
 
-    LIBS +=  C:\opencv\build\x86\vc12\lib\opencv_core2411.lib \
-         C:\opencv\build\x86\vc12\lib\opencv_imgproc2411.lib \
-         C:\opencv\build\x86\vc12\lib\opencv_highgui2411.lib \
-         C:\opencv\build\x86\vc12\lib\opencv_video2411.lib \
-         "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\PvAPI.lib" \
+    LIBS +=  "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\PvAPI.lib" \
          "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\ImageLib.lib" \
          "C:\Program Files\Allied Vision Technologies\AVTVimba_1.3\VimbaCPP\Lib\Win32\VimbaCPP.lib"
-    LIBS += -lopengl32
+    LIBS += -lopengl32 -lhdf5 -lhdf5_cpp -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
 } else {
-    LIBS += -L /usr/local/lib
+    LIBS += -L /usr/local/lib   # store PvAPI and VimbaCPP libraries here
     QMAKE_INCDIR += /usr/include/hdf5/serial
     QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
     LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP

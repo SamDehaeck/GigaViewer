@@ -356,7 +356,7 @@ bool Hdf5SourceSink::SkipFrames(bool forward) {
     if (forward) {
         skipping=dims[0]/10;
     } else {
-        skipping=-dims[0]/50;
+        skipping=-(int)dims[0]/50;
     }
 //    qDebug()<<"Will try to skip "<<skipping<<" frames";
 
