@@ -6,7 +6,7 @@
 #include <QDebug>
 #include "avtsourcesink.h"
 #include "vimbasourcesink.h"
-#include <QInputDialog>
+
 
 
 CamBackend::CamBackend(QObject *parent) :
@@ -49,59 +49,61 @@ void CamBackend::run()
 
 void CamBackend::GrabFrame()
 {
-    int incr=1;
-    if (reversePlay) incr=-1;
+    if (running)  {
+        int incr=1;
+        if (reversePlay) incr=-1;
 
-    if (!currSource->GrabFrame(currImage,incr)) {
-        qDebug()<<"Some error occured while grabbing the frame";
-        return;
-    }
-    if (currImage.image.rows==0) {
-//        StopAcquisition();
-        return;
-    }
-    if (format!=currImage.pixFormat) {
-//        qDebug()<<"Switching data format";
-        format=currImage.pixFormat;
-    }
+        if (!currSource->GrabFrame(currImage,incr)) {
+            qDebug()<<"Some error occured while grabbing the frame";
+            return;
+        }
+        if (currImage.image.rows==0) {
+    //        StopAcquisition();
+            return;
+        }
+        if (format!=currImage.pixFormat) {
+    //        qDebug()<<"Switching data format";
+            format=currImage.pixFormat;
+        }
 
-    if (recording && currSink) currSink->RecordFrame(currImage);
+        if (recording && currSink) currSink->RecordFrame(currImage);
 
-    // adapt image if not 8 bits
-    if (currImage.pixFormat=="") {
-        //sink does not support it yet
-        currImage.pixFormat="MONO8";
-    }
-    if (currImage.pixFormat.contains("MONO")) {
-        if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
-            double max;
-            cv::minMaxLoc(currImage.image,NULL,&max);
-            if (currImage.pixFormat=="MONO12") {
-                if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
-            } else if (currImage.pixFormat=="MONO14") {
-                if (max<16384) currImage.image=currImage.image*4;
+        // adapt image if not 8 bits
+        if (currImage.pixFormat=="") {
+            //sink does not support it yet
+            currImage.pixFormat="MONO8";
+        }
+        if (currImage.pixFormat.contains("MONO")) {
+            if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
+                double max;
+                cv::minMaxLoc(currImage.image,NULL,&max);
+                if (currImage.pixFormat=="MONO12") {
+                    if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+                } else if (currImage.pixFormat=="MONO14") {
+                    if (max<16384) currImage.image=currImage.image*4;
+                }
+                /* Alternative is to scale down to 8bits but this requires making a new Mat..
+                cv::Mat newMat;
+                currImage.image.convertTo(newMat, CV_8U, 1./16.);
+                currImage.image=newMat;*/
             }
-            /* Alternative is to scale down to 8bits but this requires making a new Mat..
-            cv::Mat newMat;
-            currImage.image.convertTo(newMat, CV_8U, 1./16.);
-            currImage.image=newMat;*/
+        } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
+            if (currImage.image.channels()==1) {
+                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+                currImage.image=dummy;
+            }
+        } else if (currImage.pixFormat=="RGB8"){
+            //qDebug()<<"Got a RGB8 frame";
+        } else if (currImage.pixFormat=="FLOAT") {
+            //qDebug()<<"Got a Float frame";
+        } else {
+            qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
         }
-    } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
-        if (currImage.image.channels()==1) {
-            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
-            currImage.image=dummy;
-        }
-    } else if (currImage.pixFormat=="RGB8"){
-        //qDebug()<<"Got a RGB8 frame";
-    } else if (currImage.pixFormat=="FLOAT") {
-        //qDebug()<<"Got a Float frame";
-    } else {
-        qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
+
+
+        emit NewImageReady(currImage);
     }
-
-
-    emit NewImageReady(currImage);
 }
 
 // make new source
@@ -124,7 +126,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
     } else if (dev=="Vimba") {
-        currSource=new VimbaSourceSink(this,format); //vimba needs the current object to connect the grabFrame signal
+        currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
     } else {
@@ -133,38 +135,15 @@ bool CamBackend::StartAcquisition(QString dev)
         doesCallBack=false;
     }
     if (currSource->Init()) {
-        if (dev=="Vimba") {
-            std::vector<std::string> pixF;
-            QStringList items;
-            pixF=static_cast<VimbaSourceSink*>(currSource)->listPixelFormats();
-            for (uint i=0;i<pixF.size();i++) {
-                if (pixF[i]=="Mono8") {
-                    items<<"MONO8";
-                } else if (pixF[i]=="Mono12") {
-                    items<<"MONO12";
-                } else if (pixF[i]=="Mono14") {
-                    items<<"MONO14";
-                } else if (pixF[i]=="BayerRG8") {
-                    items<<"BAYERRG8";
-                } else {
-                    if (!QString::fromStdString(pixF[i]).contains("Packed")) {
-                        qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
-                    }
-                }
-
-            }
-
-            bool ok;
-            QString item = QInputDialog::getItem(NULL, "Pixel format",
-                                                "Selection options:", items, 0, false, &ok);
-            if (ok && !item.isEmpty()) {
-                format=item;
-                static_cast<VimbaSourceSink*>(currSource)->setFormat(format);
-//                qDebug()<<"Selected "<<format;
-            }
+        if (currSource->StartAcquisition(dev)) {
+            running=true;
+            return true;
+        } else {
+            running=false;
+            return false;
         }
-        return currSource->StartAcquisition(dev);
     } else {
+        running=false;
         return false;
     }
 }
@@ -176,11 +155,12 @@ void CamBackend::StopAcquisition()
     if (recording) {
         StartRecording(false);
     }
-    currImage.image.release();//=cv::Mat::zeros(1024,1024,CV_8U);
+
 
     currSource->StopAcquisition();
     if (needTimer) quit();
     if (doesCallBack) quit();
+    //currImage.image.release();//=cv::Mat::zeros(1024,1024,CV_8U);
 }
 
 void CamBackend::ReleaseCamera()

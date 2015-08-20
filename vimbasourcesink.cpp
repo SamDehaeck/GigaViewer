@@ -1,10 +1,10 @@
 #include "vimbasourcesink.h"
+#include <QInputDialog>
 
 using namespace AVT::VmbAPI;
 
-VimbaSourceSink::VimbaSourceSink(CamBackend* par, QString formatstring): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
+VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
     parent=par;
-    format=formatstring;
 }
 
 void VimbaSourceSink::setFormat(QString formatstring) {
@@ -56,7 +56,7 @@ bool VimbaSourceSink::Init()
 
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
-                    qDebug() << "Cameras found: " << cameras.size();
+                    qDebug() << "Cameras found: " << cameras.size();  // should also implement Qinputdialog to let the user choose which one to use
                     for (uint i=0;i<cameras.size();i++) {
                         CameraPtr cam=cameras[i];
                         std::string namestr;
@@ -160,6 +160,36 @@ bool VimbaSourceSink::Init()
                         err=pCamera->GetFeatureByName("ExposureAuto",pFeature);
                         if (err==VmbErrorSuccess) {
                             pFeature->SetValue("Off"); // this should be manual exposure setting
+                        }
+
+                        // now let the user select the pixel format to be used
+                        std::vector<std::string> pixF;
+                        QStringList items;
+                        pixF=listPixelFormats();
+                        for (uint i=0;i<pixF.size();i++) {
+                            if (pixF[i]=="Mono8") {
+                                items<<"MONO8";
+                            } else if (pixF[i]=="Mono12") {
+                                items<<"MONO12";
+                            } else if (pixF[i]=="Mono14") {
+                                items<<"MONO14";
+                            } else if (pixF[i]=="BayerRG8") {
+                                items<<"BAYERRG8";
+                            } else {
+                                if (!QString::fromStdString(pixF[i]).contains("Packed")) {
+                                    qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
+                                }
+                            }
+
+                        }
+
+                        bool ok;
+                        QString item = QInputDialog::getItem(NULL, "Pixel format",
+                                                            "Selection options:", items, 0, false, &ok);
+                        if (ok && !item.isEmpty()) {
+                            format=item;
+                            setFormat(format);
+            //                qDebug()<<"Selected "<<format;
                         }
 
 
