@@ -121,8 +121,11 @@ bool VimbaSourceSink::Init()
                                 camFreq=79861111;
                             } else if (namestr=="GE1910") {
                                 camFreq=79861111;
+                            } else if (namestr=="GE2040") {
+                                camFreq=79861111;
                             } else {
                                 qDebug()<<"Model not yet in LUT => unreliable timestamps";
+                                camFreq=79861111;
                             }
                         }
 
