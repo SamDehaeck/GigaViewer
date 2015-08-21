@@ -32,6 +32,7 @@ void CameraControlsDialog::GotNewSample(ImagePacket imP)
     ui->ROICols->setText(QString::number(imP.image.cols));
 
     if (imP.image.channels()==1) {
+        /*
         // now do the fft to find the pattern frequency
         cv::Mat padded;                            //expand input image to optimal size
         int m = cv::getOptimalDFTSize( imP.image.rows );
@@ -86,6 +87,8 @@ void CameraControlsDialog::GotNewSample(ImagePacket imP)
         double angle=atan2((double)(cy)-maxInd.y,maxInd.x)*180.0/3.1415965359; // type conversion of cy to avoid an error with msvc10, again...
 
         ui->IntensLabel->setText("Max Intensity: "+QString::number(max)+" - Dominant period: "+QString::number(period,'f',2)+" at "+QString::number(angle,'f',2)+QChar(0xB0));
+        */
+        ui->IntensLabel->setText("Max Intensity: "+QString::number(max));
     } else {
         ui->IntensLabel->setText("Max Intensity: "+QString::number(max));
     }
