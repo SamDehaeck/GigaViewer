@@ -38,8 +38,9 @@ private slots:
     void reversePlay();
     void forwardPlay();
     void on_fpsEdit_returnPressed();
-
     void on_horizontalSlider_valueChanged(int value);
+    void on_recTimedButton_toggled(bool checked);
+    void autoShutdown();
 
 public slots:
     void newFrameNumberReceived(int nr);
@@ -49,6 +50,7 @@ private:
     Ui::PlaybackDialog *ui;
     int currentTimer;
     bool recording;
+    QTimer shutdownTimer;
 };
 
 #endif // PLAYBACKDIALOG_H

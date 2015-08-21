@@ -3,7 +3,7 @@
 
 using namespace AVT::VmbAPI;
 
-VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(50),initialStamp(0) {
+VimbaSourceSink::VimbaSourceSink(CamBackend* par): system ( AVT::VmbAPI::VimbaSystem::GetInstance() ),bufCount(500),initialStamp(0) {
     parent=par;
 }
 

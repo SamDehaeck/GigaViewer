@@ -9,6 +9,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui->setupUi(this);
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
+    connect(&shutdownTimer,SIGNAL(timeout()), this, SLOT (autoShutdown()));
 
 }
 
@@ -157,4 +158,38 @@ void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
     currentTimer=newVal;
     emit newFps(currentTimer);
     ui->playButton->setChecked(true);
+}
+
+
+// should ask user how long he wants to record
+void PlaybackDialog::on_recTimedButton_toggled(bool checked)
+{
+    recording=checked;
+    int time=0;
+    if (recording) {
+        bool ok=false;
+        time=QInputDialog::getInt(NULL,"Shutdown timer settings","Amount of seconds: ",10,1,10000000,1,&ok);
+        if (!ok) {
+            ui->recTimedButton->toggle();
+            return;
+        }
+    }
+
+    QString recf=ui->RecFolder->text();
+    QString cod=ui->codecBox->currentText();
+    emit recordNow(checked,recf,cod);
+    // perhaps also emit signal for the countdown clock
+    if (recording) {
+        ui->LeftStatus->setText("Recording");
+        shutdownTimer.setInterval(1000*time);  //start with 10 second recording
+        shutdownTimer.setSingleShot(true);
+        shutdownTimer.start();
+    } else {
+        ui->LeftStatus->setText("");
+    }
+}
+
+void PlaybackDialog::autoShutdown() {
+    ui->recTimedButton->toggle();
+    ui->stopButton->click();
 }

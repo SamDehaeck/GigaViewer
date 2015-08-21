@@ -223,9 +223,11 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
         int fps=timer.interval()/10;
         currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
     } else { // stopping recording
-        currSink->StopRecording();
-        delete currSink;
-        currSink=0;
+        if (currSink!=0) {
+            currSink->StopRecording();
+            delete currSink;
+            currSink=0;
+        }
     }
     recording=startRec;
 }
