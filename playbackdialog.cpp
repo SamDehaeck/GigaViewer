@@ -9,8 +9,8 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui->setupUi(this);
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
-    connect(&shutdownTimer,SIGNAL(timeout()), this, SLOT (autoShutdown()));
-
+    connect(&timer1,SIGNAL(timeout()), this, SLOT (finishedFirstTimer()));
+    connect(&timer2,SIGNAL(timeout()), this, SLOT (finishedSecondTimer()));
 }
 
 PlaybackDialog::~PlaybackDialog()
@@ -165,31 +165,128 @@ void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 void PlaybackDialog::on_recTimedButton_toggled(bool checked)
 {
     recording=checked;
-    int time=0;
+    QString instruct;
+    bool ok=true;
     if (recording) {
-        bool ok=false;
-        time=QInputDialog::getInt(NULL,"Shutdown timer settings","Amount of seconds: ",10,1,10000000,1,&ok);
-        if (!ok) {
+        instruct=QInputDialog::getText(NULL,"Shutdown timer instructions","Format ~ '2m10s@30fps/3h@0.5fps' : ");
+        // check if format is ok
+        QRegExp rx("(.+)/(.+)");
+        int pos=0;
+        pos=rx.indexIn(instruct);
+        if (pos==-1) {
+            config1=instruct;
+            config2="";
+        } else {
+            config1=rx.cap(1);
+            config2=rx.cap(2);
+        }
+
+        have2timers=false;
+        int tim1,msecs1;
+        if (parseInstruct(config1,tim1,msecs1)) {
+//            qDebug()<<"Got here with: "<<tim1<<" - "<<msecs1;
+            timer1.setInterval(1000*tim1);
+            timer1.setSingleShot(true);
+            if (msecs1>1) {
+                ui->fpsEdit->setText(QString::number(msecs1));
+                emit newFps(msecs1);
+            }
+        } else {
+            ok=false;
+        }
+
+        int tim2,msecs2;
+        if (parseInstruct(config2,tim2,msecs2)) {
+//            qDebug()<<"Got here also with: "<<tim2<<" - "<<msecs2;
+            if ((msecs2!=msecs1)&&msecs2>1) {
+                have2timers=true;
+                timer2.setInterval(1000*(tim1+tim2));
+                timer2.setSingleShot(true);
+                secondDelay=msecs2;
+            } else {
+                qDebug()<<"Not a correct use of second timer fps: "<<msecs2<<" vs "<<msecs1;
+            }
+
+        }
+
+        //time=instruct.toInt(&ok);
+
+        if (!ok) { //exit gracefully
             ui->recTimedButton->toggle();
             return;
         }
+
     }
 
     QString recf=ui->RecFolder->text();
     QString cod=ui->codecBox->currentText();
     emit recordNow(checked,recf,cod);
-    // perhaps also emit signal for the countdown clock
     if (recording) {
         ui->LeftStatus->setText("Recording");
-        shutdownTimer.setInterval(1000*time);  //start with 10 second recording
-        shutdownTimer.setSingleShot(true);
-        shutdownTimer.start();
+        timer1.start();
+        timer2.start();
     } else {
         ui->LeftStatus->setText("");
     }
 }
 
-void PlaybackDialog::autoShutdown() {
-    ui->recTimedButton->toggle();
-    ui->stopButton->click();
+bool PlaybackDialog::parseInstruct(QString instruct, int& sec, int& msecdelay) {
+    QRegExp secSearch("(\\d+)s");
+    QRegExp minSearch("(\\d+)m");
+    QRegExp hourSearch("(\\d+)h");
+    QRegExp adsearch("(.+)@(.+)");
+    QRegExp fpsSearch("(.+)fps");
+    bool ok=false;
+    sec=0;
+    msecdelay=-1;
+    int pos;
+    pos=secSearch.indexIn(instruct);
+    if (pos!=-1) {
+        int newsec=secSearch.cap(1).toInt(&ok);
+        if (ok) sec+=newsec;
+    }
+    pos=minSearch.indexIn(instruct);
+    if (pos!=-1) {
+        int newmin=minSearch.cap(1).toInt(&ok);
+        if (ok) sec+=(newmin*60);
+    }
+    pos=hourSearch.indexIn(instruct);
+    if (pos!=-1) {
+        int newhour=hourSearch.cap(1).toInt(&ok);
+        if (ok) sec+=(newhour*3600);
+    }
+
+    pos=adsearch.indexIn(instruct);
+    if (pos!=-1) {
+        QString fpsstring=adsearch.cap(2);
+        pos=fpsSearch.indexIn(fpsstring);
+        if (pos!=-1) {
+            double fp=fpsSearch.cap(1).toDouble(&ok);
+            if (ok) {
+                msecdelay=1000.0/fp;
+            }
+        }
+    }
+
+    return (sec>0);
+}
+
+void PlaybackDialog::finishedFirstTimer() {
+    if (recording) {
+        if (have2timers) {
+            // don't stop recording, just change fps
+            ui->fpsEdit->setText(QString::number(secondDelay));
+            emit newFps(secondDelay);
+        } else {
+            ui->recTimedButton->toggle();
+            ui->stopButton->click();
+        }
+    }
+}
+
+void PlaybackDialog::finishedSecondTimer() {
+    if (recording) {
+        ui->recTimedButton->toggle();
+        ui->stopButton->click();
+    }
 }

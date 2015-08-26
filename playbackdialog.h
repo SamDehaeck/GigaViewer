@@ -40,17 +40,24 @@ private slots:
     void on_fpsEdit_returnPressed();
     void on_horizontalSlider_valueChanged(int value);
     void on_recTimedButton_toggled(bool checked);
-    void autoShutdown();
+    void finishedFirstTimer();
+    void finishedSecondTimer();
 
 public slots:
     void newFrameNumberReceived(int nr);
     void showNewFps(int msec);
 
 private:
+    bool parseInstruct(QString instruct,int& sec,int& msecdelay);
+
+
     Ui::PlaybackDialog *ui;
     int currentTimer;
     bool recording;
-    QTimer shutdownTimer;
+    bool have2timers;
+    int secondDelay;
+    QTimer timer1,timer2;  // typical use case only requires two timers
+    QString config1,config2; // to go with the two timers
 };
 
 #endif // PLAYBACKDIALOG_H

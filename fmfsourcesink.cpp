@@ -166,12 +166,6 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
         //test here what the bitdepth of the source image is
 //        if (source.image.depth()==2)
         if (source.image.channels()==3) {
-            /*
-            cv::Mat dummy;
-            cv::cvtColor(source.image,dummy,CV_RGB2GRAY);
-            if (fwrite(dummy.data,1,source.image.rows*source.image.cols,fmfrec)==uint(source.image.rows*source.image.cols)) {
-                return true;
-            }*/
             if (fwrite(source.image.data,1,3*source.image.rows*source.image.cols,fmfrec)==uint(3*source.image.rows*source.image.cols)) {
                 return true;
             }
