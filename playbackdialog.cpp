@@ -224,7 +224,7 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
     if (recording) {
         ui->LeftStatus->setText("Recording");
         timer1.start();
-        timer2.start();
+        if (have2timers) timer2.start();
     } else {
         ui->LeftStatus->setText("");
     }
