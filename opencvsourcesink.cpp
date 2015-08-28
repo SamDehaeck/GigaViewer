@@ -10,7 +10,11 @@ bool OpencvSourceSink::StartAcquisition(QString dev) {
         nFrames=0;
         liveFeed=true;
     } else {
+#ifdef Q_OS_WIN32
+        camera.open(dev.toStdString().c_str());
+#else
         camera.open(dev.toUtf8().data());
+#endif
         nFrames=camera.get(CV_CAP_PROP_FRAME_COUNT);
         liveFeed=false;
     }
@@ -28,7 +32,11 @@ bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,in
     } else {
         fourcc=0;// uncompressed raw format
     }
+#ifdef Q_OS_WIN32
+    recFile=cv::VideoWriter(filenam.toStdString().c_str(),fourcc,fps,cv::Size(cols,rows));
+#else
     recFile=cv::VideoWriter(filenam.toUtf8().data(),fourcc,fps,cv::Size(cols,rows));
+#endif
     return true;
 }
 

@@ -14,7 +14,11 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 //    H5std_string FILE_NAME=dev.toStdString();
 //    H5std_string DATASET_NAME( "data" );
     try {
+#ifdef Q_OS_WIN32
+        hFile = new H5File( dev.toStdString().c_str(), H5F_ACC_RDONLY );
+#else
         hFile = new H5File( dev.toUtf8().data(), H5F_ACC_RDONLY );
+#endif
 
         // first find the name of the dataset. This opens all of them to see which ones have 3 dimensions
         // if there are multiple datasets. Give the option to the user which one to choose.
@@ -38,6 +42,8 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
                 goodSets.push_back(theName);
                 items<<QString::fromStdString(theName);
             }
+            dumbspace.close();
+            dumbset.close();
         }
 
         std::string finalDataset;
@@ -213,8 +219,11 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     timestamps.clear();
 
 //    qDebug()<<"Init recording: "<<filenam<<" with codec "<<codec;
-
+#ifdef Q_OS_WIN32
+    hFile=new H5File(filenam.toStdString().c_str(),H5F_ACC_TRUNC);
+#else
     hFile=new H5File(filenam.toUtf8().data(),H5F_ACC_TRUNC);
+#endif
     if (codec=="HDF8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="MONO8";

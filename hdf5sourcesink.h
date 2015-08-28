@@ -3,7 +3,7 @@
 
 #include "imagepacket.h"
 #include "imagesourcesink.h"
-#include <H5Cpp.h>
+#include "H5Cpp.h"
 
 
 class Hdf5SourceSink : public ImageSourceSink  //#include <hdf5/serial/H5Cpp.h>
