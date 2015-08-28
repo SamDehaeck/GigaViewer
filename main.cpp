@@ -31,8 +31,9 @@ int main(int argc, char *argv[])
     win.showMaximized();
 
     if (argc==2) {
-        if (QFile::exists(argv[1])) {
-            view.newMoviePressed(argv[1]);
+        QString theFile=QString::fromUtf8(argv[1]);
+        if (QFile::exists(theFile)) {
+            view.newMoviePressed(theFile);
         }
     }
 

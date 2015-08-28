@@ -7,6 +7,6 @@ PicBackend::PicBackend(QObject *parent) :
 
 void PicBackend::LoadNewImage(QString theName)
 {
-    Image.image=cv::imread(theName.toStdString(),0);
+    Image.image=cv::imread(theName.toUtf8().data(),0);
     emit NewImageReady(Image);
 }

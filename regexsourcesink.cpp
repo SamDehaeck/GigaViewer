@@ -63,7 +63,7 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         index+=indexIncrement;
         QFile dum(dir+"/"+goodFiles->at(index));
         if (dum.exists()) {
-            target.image=cv::imread(dum.fileName().toStdString().c_str());
+            target.image=cv::imread(dum.fileName().toUtf8().data());
             target.seqNumber=index;
             return true;
         } else {
@@ -78,7 +78,7 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 bool RegexSourceSink::RecordFrame(ImagePacket &source)
 {
     QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(index,8,10,QLatin1Char('0'));
-    if (cv::imwrite(filenam.toStdString().c_str(),source.image)) {
+    if (cv::imwrite(filenam.toUtf8().data(),source.image)) {
         index++;
         return true;
     }

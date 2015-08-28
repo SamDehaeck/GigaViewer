@@ -10,7 +10,7 @@ bool OpencvSourceSink::StartAcquisition(QString dev) {
         nFrames=0;
         liveFeed=true;
     } else {
-        camera.open(dev.toStdString());
+        camera.open(dev.toUtf8().data());
         nFrames=camera.get(CV_CAP_PROP_FRAME_COUNT);
         liveFeed=false;
     }
@@ -28,7 +28,7 @@ bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,in
     } else {
         fourcc=0;// uncompressed raw format
     }
-    recFile=cv::VideoWriter(filenam.toStdString(),fourcc,fps,cv::Size(cols,rows));
+    recFile=cv::VideoWriter(filenam.toUtf8().data(),fourcc,fps,cv::Size(cols,rows));
     return true;
 }
 

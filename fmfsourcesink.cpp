@@ -17,7 +17,8 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 //    ListIndex=0;
 //    lastPrinted=0;
 
-    fmf = fopen(dev.toStdString().c_str(),"rb");
+    char* thename=dev.toUtf8().data();
+    fmf = fopen(thename,"rb");
 
     if(fread(&version,sizeofuint32,1,fmf) < 1){
         fprintf(stderr,"Error reading version number of input fmf file.\n");
@@ -228,9 +229,9 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
 
 
 //    ListIndex=0;
-//    lastPrinted=0;
+//    lastPrinted=0;;
 
-    fmfrec = fopen(filenam.toStdString().c_str(),"wb");
+    fmfrec = fopen(filenam.toUtf8().data(),"wb");
 
     if(fwrite(&version,sizeofuint32,1,fmfrec) < 1){
         fprintf(stderr,"Error writing version number of input fmf file.\n");

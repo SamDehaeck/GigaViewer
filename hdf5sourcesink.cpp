@@ -11,10 +11,10 @@ bool Hdf5SourceSink::Init()
 
 bool Hdf5SourceSink::StartAcquisition(QString dev)
 {
-    H5std_string FILE_NAME=dev.toStdString();
+//    H5std_string FILE_NAME=dev.toStdString();
 //    H5std_string DATASET_NAME( "data" );
     try {
-        hFile = new H5File( FILE_NAME, H5F_ACC_RDONLY );
+        hFile = new H5File( dev.toUtf8().data(), H5F_ACC_RDONLY );
 
         // first find the name of the dataset. This opens all of them to see which ones have 3 dimensions
         // if there are multiple datasets. Give the option to the user which one to choose.
@@ -214,7 +214,7 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
 
 //    qDebug()<<"Init recording: "<<filenam<<" with codec "<<codec;
 
-    hFile=new H5File(filenam.toStdString(),H5F_ACC_TRUNC);
+    hFile=new H5File(filenam.toUtf8().data(),H5F_ACC_TRUNC);
     if (codec=="HDF8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="MONO8";
