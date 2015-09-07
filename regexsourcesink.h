@@ -27,6 +27,9 @@ private:
     int index;
     int nFrames;
 
+    QVector<double> timestamps;
+    double startTime;
+
 };
 
 #endif // REGEXSOURCESINK_H

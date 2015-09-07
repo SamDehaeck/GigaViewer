@@ -111,7 +111,7 @@ bool VimbaSourceSink::Init()
                         if (err==VmbErrorSuccess) {
                             err=pFeature->GetValue(camFreq);
                             if (err==VmbErrorSuccess) {
-                                //qDebug()<<"Camera freq is "<<(1.0*camFreq);
+//                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
                             } else {
                                 qDebug()<<"Could not extract freq: "<<err;
                             }

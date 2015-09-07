@@ -1,5 +1,6 @@
 #include "regexsourcesink.h"
 #include <opencv2/opencv.hpp>
+#include <QVector>
 
 bool RegexSourceSink::Init()
 {
@@ -95,6 +96,11 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
     if (cv::imwrite(filenam.toUtf8().data(),source.image)) {
 #endif
         index++;
+        if (startTime==-1) {
+            startTime=source.timeStamp;
+        }
+
+        timestamps.push_back((source.timeStamp-startTime));
         return true;
     }
     return false;
@@ -111,11 +117,26 @@ bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, 
     }
     basename="image-";
     index=0;
+    timestamps.clear();
+    startTime=-1;
     return true;
 }
 
 bool RegexSourceSink::StopRecording()
 {
+    QString filename=QString(dir+"/"+"timestamps.txt");
+//    QString filename = "/home/sam/times.txt";
+    QFile fileout(filename);
+    if (fileout.open(QFile::ReadWrite | QFile::Text| QFile::Truncate)){
+     QTextStream out(&fileout);
+     for (QVector<double>::iterator iter = timestamps.begin(); iter != timestamps.end(); iter++){
+         out << *iter<<"\n";
+     }
+     fileout.close();
+    }
+
+
+
     return true;
 }
 
