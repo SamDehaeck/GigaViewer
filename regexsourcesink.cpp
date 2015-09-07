@@ -81,6 +81,13 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 bool RegexSourceSink::RecordFrame(ImagePacket &source)
 {
+    if (source.pixFormat=="BayerRG8") {
+        cv::Mat dummy(source.image.rows,source.image.cols,CV_8UC3);
+        cv::cvtColor(source.image,dummy,CV_BayerRG2RGB);
+        source.image=dummy;
+    }
+
+
     QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(index,8,10,QLatin1Char('0'));
 #ifdef Q_OS_WIN32
     if (cv::imwrite(filenam.toStdString().c_str(),source.image)) {
