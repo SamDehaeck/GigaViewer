@@ -25,6 +25,8 @@ void VimbaSourceSink::setFormat(QString formatstring) {
             err = pFeature->SetValue( VmbPixelFormatMono14 );
         } else if (format=="BAYERRG8") {
             err=pFeature->SetValue(VmbPixelFormatBayerRG8);
+        } else if (format=="BAYERGB8") {
+            err=pFeature->SetValue(VmbPixelFormatBayerGB8);
         } else {
             qDebug()<<"Pixel Format not yet working in Gigaviewer: "<<format;
         }
@@ -178,6 +180,8 @@ bool VimbaSourceSink::Init()
                                 items<<"MONO14";
                             } else if (pixF[i]=="BayerRG8") {
                                 items<<"BAYERRG8";
+                            } else if (pixF[i]=="BayerGB8") {
+                                items<<"BAYERGB8";
                             } else {
                                 if (!QString::fromStdString(pixF[i]).contains("Packed")) {
                                     qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
@@ -274,7 +278,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     err=pFrame->GetPixelFormat(pixFormat);
     err=pFrame->GetHeight(height);
     err=pFrame->GetWidth(width);
-    if ((pixFormat==VmbPixelFormatMono8)||(pixFormat==VmbPixelFormatBayerRG8)) {
+    if ((pixFormat==VmbPixelFormatMono8)||(pixFormat==VmbPixelFormatBayerRG8)||(pixFormat==VmbPixelFormatBayerGB8)) {
         target.image=cv::Mat(height,width,CV_8U);
         err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
         if (err!=VmbErrorSuccess) {
@@ -282,6 +286,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         }
         if (pixFormat==VmbPixelFormatMono8) target.pixFormat="MONO8";
         if (pixFormat==VmbPixelFormatBayerRG8) target.pixFormat="BAYERRG8";
+        if (pixFormat==VmbPixelFormatBayerGB8) target.pixFormat="BAYERGB8";
     } else if ((pixFormat==VmbPixelFormatMono12)||(pixFormat=VmbPixelFormatMono14)) {
         target.image=cv::Mat(height,width,CV_16U);
         err=pFrame->GetImage(target.image.data);

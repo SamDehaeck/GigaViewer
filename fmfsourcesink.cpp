@@ -53,6 +53,8 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 //              qDebug()<<"Recognised Mono14 FMF-file";
           } else if (dataformat=="BAYERRG8") {
 //              qDebug()<<"Recognised BayerRG8 FMF-file";
+          } else if (dataformat=="BAYERGB8") {
+//              qDebug()<<"Recognised BayerGB8 FMF-file";
           } else if (dataformat=="RGB8") {
 //              qDebug()<<"Recognised RGB8 FMF-file";
           } else {
@@ -221,6 +223,10 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         formatlen=8;
         bitsperpixel=8;
         dataformat="BAYERRG8";
+    } else if (codec=="FMFBAYERGB8") {
+        formatlen=8;
+        bitsperpixel=8;
+        dataformat="BAYERGB8";
     } else if (codec=="FMFRGB8") {
         formatlen=4;
         bitsperpixel=8;

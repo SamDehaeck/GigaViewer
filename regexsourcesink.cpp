@@ -82,9 +82,13 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 bool RegexSourceSink::RecordFrame(ImagePacket &source)
 {
-    if (source.pixFormat=="BayerRG8") {
+    if (source.pixFormat=="BAYERRG8") {
         cv::Mat dummy(source.image.rows,source.image.cols,CV_8UC3);
         cv::cvtColor(source.image,dummy,CV_BayerRG2RGB);
+        source.image=dummy;
+    } else if (source.pixFormat=="BAYERGB8") {
+        cv::Mat dummy(source.image.rows,source.image.cols,CV_8UC3);
+        cv::cvtColor(source.image,dummy,CV_BayerGB2RGB);
         source.image=dummy;
     }
 

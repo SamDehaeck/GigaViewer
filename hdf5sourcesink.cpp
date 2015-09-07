@@ -236,6 +236,9 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     } else if (codec=="HDFBAYERRG8") {
         dataformat="BAYERRG8";
         readType=PredType::NATIVE_UCHAR;
+    } else if (codec=="HDFBAYERGB8") {
+        dataformat="BAYERGB8";
+        readType=PredType::NATIVE_UCHAR;
     } else if (codec=="HDFRGB8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="RGB8";
@@ -290,6 +293,10 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         StrType strdatatype(PredType::C_S1, 8); // of length 6 characters => MONO8, MONO12, MONO14
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
         myatt_in.write(strdatatype, "BAYERRG8");
+    } else if (dataformat=="BAYERGB8") {
+        StrType strdatatype(PredType::C_S1, 8); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "BAYERGB8");
     } else if (dataformat=="RGB8") { // this will be converted to grayscale for the moment
         StrType strdatatype(PredType::C_S1, 5); // of length 6 characters => MONO8, MONO12, MONO14
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);

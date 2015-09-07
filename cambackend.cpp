@@ -93,6 +93,12 @@ void CamBackend::GrabFrame()
                 cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
                 currImage.image=dummy;
             }
+        } else if (currImage.pixFormat=="BAYERGB8") { // do colour interpolation but only for showing to screen!
+            if (currImage.image.channels()==1) {
+                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+                cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
+                currImage.image=dummy;
+            }
         } else if (currImage.pixFormat=="RGB8"){
             //qDebug()<<"Got a RGB8 frame";
         } else if (currImage.pixFormat=="FLOAT") {
@@ -198,6 +204,8 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
                 codec="FMF14";
             } else if (format=="BAYERRG8") {
                 codec="FMFBAYERRG8";
+            } else if (format=="BAYERGB8") {
+                codec="FMFBAYERGB8";
             } else if (format=="RGB8") {
                 codec="FMFRGB8";
             }
@@ -214,6 +222,8 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
                 codec="HDF14";
             } else if (format=="BAYERRG8") {
                 codec="HDFBAYERRG8";
+            } else if (format=="BAYERGB8") {
+                codec="HDFBAYERGB8";
             } else if (format=="RGB8") {
                 codec="HDFRGB8";
             }
