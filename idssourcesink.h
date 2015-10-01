@@ -27,7 +27,9 @@ private:
     int memId;
     int flagIDS;
     UEYEIMAGEINFO ImageInfo;
+#ifdef Q_OS_WIN32
     HANDLE hEvent;
+#endif
 
     int Index;
     unsigned long Last;
