@@ -62,3 +62,8 @@ void FileInputDialog::on_vimbaButton_clicked()
 {
     emit VimbaFeedPressed();
 }
+
+void FileInputDialog::on_idsButton_clicked()
+{
+    emit IdsFeedPressed();
+}

@@ -28,6 +28,7 @@ signals:
     void newOpencvFeedNeeded(bool start);
     void newAvtFeedNeeded(bool start);
     void newVimbaFeedNeeded(bool start);
+    void newIdsFeedNeeded(bool start);
     void implementNewFps(int fps);
     void showNewFps(int msec);
     void startRecording(bool start,QString recfold,QString codec);
@@ -45,6 +46,7 @@ public slots:
     void openCvFeedPressed();
     void AVTFeedPressed();
     void VimbaFeedPressed();
+    void IdsFeedPressed();
     void newMoviePressed(QString theString);
     void stopButtonPressed();
     void gotNewFps(int fps);

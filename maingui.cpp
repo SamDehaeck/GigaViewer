@@ -40,6 +40,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(OpencvFeedPressed()),this,SLOT(openCvFeedPressed()));
     connect(fileDialog,SIGNAL(AvtFeedPressed()),this,SLOT(AVTFeedPressed()));
     connect(fileDialog,SIGNAL(VimbaFeedPressed()),this,SLOT(VimbaFeedPressed()));
+    connect(fileDialog,SIGNAL(IdsFeedPressed()),this,SLOT(IdsFeedPressed()));
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
@@ -169,6 +170,15 @@ void MainGui::VimbaFeedPressed()
     showInputControls(false);
     showCameraControls(true);
     this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
+}
+
+void MainGui::IdsFeedPressed()
+{
+    emit newIdsFeedNeeded(true);  // if this fails, the controls will be reset but this will be 'undone' by next commands
+    showPlaybackControls(true);
+    showInputControls(false);
+    showCameraControls(true);
+    this->parentWidget()->setWindowTitle("Ids Live Camera Feed");
 }
 
 void MainGui::needNewSample()

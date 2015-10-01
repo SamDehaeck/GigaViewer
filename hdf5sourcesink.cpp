@@ -87,13 +87,33 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
             qDebug() << "Attribute contents: " << QString::fromStdString(strreadbuf);
             */
 
+            //H5std_string strreadbuf ("");
+            // Open attribute and read its contents
+
+            bool hasFormat=dataset.attrExists("PIXFORMAT");
+            if (hasFormat) {
+               Attribute attr_pix=dataset.openAttribute("PIXFORMAT");
+               std::string strbuf;
+               StrType strdatatype(PredType::C_S1, 10);
+               attr_pix.read(strdatatype,strbuf);
+               dataformat=QString::fromStdString(strbuf);
+            }
+            qDebug()<<"Attribute contents: "<<dataformat;
+
 
              IntType intype = dataset.getIntType();
              size_t size = intype.getSize();
              if (size==1) {
-                readType=PredType::NATIVE_UCHAR;
-                frame=cv::Mat(dims[1],dims[2],CV_8U);
-                dataformat="MONO8";
+                 if (dataformat=="RGB8") {
+                     dims[2]=dims[2]/3;
+                     readType=PredType::NATIVE_UCHAR;
+                     frame=cv::Mat(dims[1],dims[2],CV_8UC3);
+                     dataformat="RGB8";
+                 } else {
+                    readType=PredType::NATIVE_UCHAR;
+                    frame=cv::Mat(dims[1],dims[2],CV_8U);
+                    dataformat="MONO8";
+                 }
              } else if (size==2) {
                  readType=PredType::NATIVE_UINT16;
                  frame=cv::Mat(dims[1],dims[2],CV_16U);
@@ -103,17 +123,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
                  return false;
              }
 
-             H5std_string strreadbuf ("");
-             // Open attribute and read its contents
 
-             bool hasFormat=dataset.attrExists("PIXFORMAT");
-             if (hasFormat) {
-                Attribute attr_pix=dataset.openAttribute("PIXFORMAT");
-                std::string strbuf;
-                StrType strdatatype(PredType::C_S1, 10);
-                attr_pix.read(strdatatype,strbuf);
-                dataformat=QString::fromStdString(strbuf);
-             }
 
         } else if (dataclass== H5T_FLOAT){
             dataformat="FLOAT";
@@ -162,9 +172,15 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         return true;
     }
     try {
-        hsize_t dimsSlab[3]={1,dims[1],dims[2]};
-        hsize_t offset[3]={index,0,0};
-        dataspace.selectHyperslab(H5S_SELECT_SET, dimsSlab, offset);
+        if (dataformat=="RGB8") {
+            hsize_t dimsSlab[3]={1,dims[1],dims[2]*3};
+            hsize_t offset[3]={index,0,0};
+            dataspace.selectHyperslab(H5S_SELECT_SET, dimsSlab, offset);
+        } else {
+            hsize_t dimsSlab[3]={1,dims[1],dims[2]};
+            hsize_t offset[3]={index,0,0};
+            dataspace.selectHyperslab(H5S_SELECT_SET, dimsSlab, offset);
+        }
 
         hsize_t readDims[2]={dims[1],dims[2]};
         DataSpace memspace(2,readDims);

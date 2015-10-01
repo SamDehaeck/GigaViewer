@@ -19,6 +19,7 @@ public slots:
     void LoadNewMovie(QString);
     void StartNewAVT(bool startNew);
     void StartNewVimba(bool startNew);
+    void StartNewIds(bool startNew);
     void changeFps(int newFps);
     void stopAcquisition();
     void changeShutter (int time);

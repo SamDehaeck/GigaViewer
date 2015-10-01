@@ -15,6 +15,7 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(theGui,SIGNAL(startRecording(bool,QString,QString)),&camBack,SLOT(StartRecording(bool,QString,QString)));
         connect(theGui,SIGNAL(newAvtFeedNeeded(bool)),this,SLOT(StartNewAVT(bool)));
         connect(theGui,SIGNAL(newVimbaFeedNeeded(bool)),this,SLOT(StartNewVimba(bool)));
+        connect(theGui,SIGNAL(newIdsFeedNeeded(bool)),this,SLOT(StartNewIds(bool)));
         connect(theGui,SIGNAL(setShutter(int)),this,SLOT(changeShutter(int)));
         connect(theGui,SIGNAL(setAutoShutter(bool)),this,SLOT(setAutoShutter(bool)));
         connect(&camBack,SIGNAL(shutterChanged(int)),theGui,SLOT(gotNewShutSpeed(int)));
@@ -78,6 +79,11 @@ void Coordinator::StartNewAVT(bool startNew)
 void Coordinator::StartNewVimba(bool startNew)
 {
     controlCameraThread(startNew,"Vimba");
+}
+
+void Coordinator::StartNewIds(bool startNew)
+{
+    controlCameraThread(startNew,"IDS");
 }
 
 void Coordinator::changeShutter(int time)

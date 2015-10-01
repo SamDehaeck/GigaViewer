@@ -22,6 +22,7 @@ signals:
     void MoviePressed(QString namegiven);
     void AvtFeedPressed();
     void VimbaFeedPressed();
+    void IdsFeedPressed();
     void CloseApp();
 
 private slots:
@@ -35,6 +36,8 @@ private slots:
     void on_AvtButton_clicked();
 
     void on_vimbaButton_clicked();
+
+    void on_idsButton_clicked();
 
 private:
     Ui::FileInputDialog *ui;

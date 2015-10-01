@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "avtsourcesink.h"
 #include "vimbasourcesink.h"
+#include "idssourcesink.h"
 
 
 
@@ -36,7 +37,7 @@ void CamBackend::run()
             emit stopTheTimer();
         } else if (doesCallBack) { // Vimba does this and we should just wait till quit is called
             exec();
-        } else {  // the AVT backend will block itself when waiting for the next frame. No need for an extra timer
+        } else {  // the AVT and IDS backend will block itself when waiting for the next frame. No need for an extra timer
             running=true;
             while (running) {
                 GrabFrame();
@@ -135,6 +136,10 @@ bool CamBackend::StartAcquisition(QString dev)
         currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
+    } else if (dev=="IDS") {
+        currSource=new IdsSourceSink();
+        needTimer=false;
+        doesCallBack=false;
     } else {
         currSource=new OpencvSourceSink();
         needTimer=true;

@@ -8,6 +8,10 @@ bool ImageSourceSink::StartAcquisition(QString) {
     return false;
 }
 
+bool ImageSourceSink::GrabFrame(ImagePacket&,int) {
+    return false;
+}
+
 bool ImageSourceSink::StopAcquisition() {
     return false;
 }
@@ -16,15 +20,11 @@ bool ImageSourceSink::ReleaseCamera() {
     return false;
 }
 
-bool ImageSourceSink::GrabFrame(ImagePacket&,int) {
+bool ImageSourceSink::StartRecording(QString,QString,int,int,int) {
     return false;
 }
 
 bool ImageSourceSink::RecordFrame(ImagePacket&) {
-    return false;
-}
-
-bool ImageSourceSink::StartRecording(QString,QString,int,int,int) {
     return false;
 }
 
