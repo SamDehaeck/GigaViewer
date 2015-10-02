@@ -1,7 +1,7 @@
 #ifndef IDSSOURCESINK_H
 #define IDSSOURCESINK_H
 
-#include <uEye.h>
+#include <ueye.h>
 
 #include <QThread>
 #include "imagepacket.h"

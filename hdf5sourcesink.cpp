@@ -168,7 +168,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
 bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    if ((index+indexIncrement >= dims[0]-1)||((int)index+indexIncrement <0)) {
+    if ((index+indexIncrement >= dims[0])||((int)index+indexIncrement <-1)) {
         return true;
     }
     try {

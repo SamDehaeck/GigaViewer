@@ -6,9 +6,8 @@
 #include <QDebug>
 #include "avtsourcesink.h"
 #include "vimbasourcesink.h"
+
 #include "idssourcesink.h"
-
-
 
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),needTimer(true),running(false)

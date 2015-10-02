@@ -1,4 +1,5 @@
 #include "idssourcesink.h"
+#include "avtsourcesink.h"
 
 bool IdsSourceSink::IsOpened()
 {
@@ -70,9 +71,11 @@ bool IdsSourceSink::Init()
     imgMem = NULL;
     is_AllocImageMem(hCam, img_width/factorSMP, img_height/factorSMP, img_bpp, &imgMem, &memId);
     is_SetImageMem (hCam, imgMem, memId);
-    is_SetDisplayMode (hCam, IS_SET_DM_DIB);
-//    is_SetColorMode (hCam, IS_SET_CM_Y8);
 //    is_SetImageSize (hCam, img_width/factorSMP, img_height/factorSMP);
+
+    is_SetColorMode (hCam, IS_CM_MONO8);
+
+    is_SetDisplayMode (hCam, IS_SET_DM_DIB); // Direct buffer mode writes to RAM which is the only option on Linux
 
     //OpenCV variables: REMEMBER THE SUBSAMPLING
     buffer=cv::Mat::zeros(img_width/factorSMP,img_height/factorSMP, CV_8UC1);
@@ -137,18 +140,19 @@ bool IdsSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 
 bool IdsSourceSink::StopAcquisition() {
-    is_DisableEvent (hCam, IS_SET_EVENT_FRAME); //added by Sam
     is_StopLiveVideo(hCam, IS_WAIT);
-//    is_FreeImageMem (hCam, imgMem, memId);
-    qDebug()<<"Ok for stopping";
+    is_DisableEvent (hCam, IS_SET_EVENT_FRAME); //added by Sam
+#ifdef Q_OS_WIN32
+    is_ExitEvent(hCam, hEvent);
+#endif
+    is_FreeImageMem (hCam, imgMem, memId);
+    Sleeper::msleep(10*camTimeStep); // NEEDS some sleep to stop all internal events
     return true;
 }
 
 bool IdsSourceSink::ReleaseCamera() {
-    qDebug()<<"This also ok";
     is_ExitCamera(hCam);
     hCam=(HIDS)0;
-    qDebug()<<"Even this";
     return true;
 }
 

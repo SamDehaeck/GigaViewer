@@ -23,8 +23,14 @@ win32 {
     LIBS += -L /usr/local/lib   # store PvAPI and VimbaCPP libraries here
     QMAKE_INCDIR += /usr/include/hdf5/serial
     QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
-    LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lopencv_imgcodecs -lopencv_videoio -lPvAPI -lVimbaCPP -lueye_api
+    LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video -lPvAPI -lVimbaCPP
+    LIBS += -lopencv_imgcodecs -lopencv_videoio
+    LIBS += -lueye_api
 }
+
+    SOURCES += idssourcesink.cpp
+    HEADERS += idssourcesink.h \
+    ueye.h
 
 SOURCES += main.cpp \
     imagepacket.cpp \
@@ -43,8 +49,8 @@ SOURCES += main.cpp \
     cameracontrolsdialog.cpp \
     vimbasourcesink.cpp \
     vimbaframeobserver.cpp \
-    hdf5sourcesink.cpp \
-    idssourcesink.cpp
+    hdf5sourcesink.cpp
+
 #unix {
     SOURCES += avtsourcesink.cpp
 #}
@@ -101,7 +107,7 @@ HEADERS  += \
     VimbaCPP/Include/VimbaSystem.hpp \
     vimbaframeobserver.h \
     hdf5sourcesink.h \
-    idssourcesink.h
+
 
 #unix {
     HEADERS +=  avtsourcesink.h \
