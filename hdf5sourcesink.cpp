@@ -98,16 +98,15 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
                attr_pix.read(strdatatype,strbuf);
                dataformat=QString::fromStdString(strbuf);
             }
-            qDebug()<<"Attribute contents: "<<dataformat;
+//            qDebug()<<"Attribute contents: "<<dataformat;
 
 
              IntType intype = dataset.getIntType();
              size_t size = intype.getSize();
              if (size==1) {
                  if (dataformat=="RGB8") {
-                     dims[2]=dims[2]/3;
                      readType=PredType::NATIVE_UCHAR;
-                     frame=cv::Mat(dims[1],dims[2],CV_8UC3);
+                     frame=cv::Mat(dims[1],dims[2]/3.,CV_8UC3);
                      dataformat="RGB8";
                  } else {
                     readType=PredType::NATIVE_UCHAR;
@@ -173,7 +172,7 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     }
     try {
         if (dataformat=="RGB8") {
-            hsize_t dimsSlab[3]={1,dims[1],dims[2]*3};
+            hsize_t dimsSlab[3]={1,dims[1],dims[2]};
             hsize_t offset[3]={index,0,0};
             dataspace.selectHyperslab(H5S_SELECT_SET, dimsSlab, offset);
         } else {
@@ -258,7 +257,6 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     } else if (codec=="HDFRGB8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="RGB8";
-        qDebug()<<"This format not yet fully implemented, will convert to gray: "<<codec;
     } else {
         qDebug()<<"This format not yet implemented: "<<codec;
     }
@@ -267,16 +265,23 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     /*
      * Create the data space with unlimited size in the first dimension.
      */
-    hsize_t      dims[3]  = { 1,(uint)rows, (uint)cols};  // dataset dimensions at creation
+
+
+
     recrows=rows;
     reccols=cols;
-    hsize_t      maxdims[3] = {H5S_UNLIMITED, (uint)rows,(uint)cols};
+    if (dataformat=="RGB8") {
+        reccols=cols*3;
+    }
+    hsize_t      dims[3]  = { 1,(uint)recrows, (uint)reccols};  // dataset dimensions at creation
+
+    hsize_t      maxdims[3] = {H5S_UNLIMITED, (uint)recrows,(uint)reccols};
     DataSpace mspace1( 3, dims, maxdims);
     /*
      * Modify dataset creation properties, i.e. enable chunking.
      */
 
-    hsize_t      chunk_dims[3] ={1,(uint)rows, (uint)cols};
+    hsize_t      chunk_dims[3] ={1,(uint)recrows, (uint)reccols};
     cparms.setChunk( 3, chunk_dims );
     /*
      * Set fill value for the dataset
@@ -314,9 +319,9 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
         myatt_in.write(strdatatype, "BAYERGB8");
     } else if (dataformat=="RGB8") { // this will be converted to grayscale for the moment
-        StrType strdatatype(PredType::C_S1, 5); // of length 6 characters => MONO8, MONO12, MONO14
+        StrType strdatatype(PredType::C_S1, 4); // of length 6 characters => MONO8, MONO12, MONO14
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
-        myatt_in.write(strdatatype, "MONO8");
+        myatt_in.write(strdatatype, "RGB8");
     }
 
     index=0;
@@ -325,11 +330,16 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
 
 bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
 {
+/*    cv::Mat temp;
     if (source.pixFormat=="RGB8") { // too much changes to make it work in colour for webcams=> just convert to gray.
-        cv::Mat gray(source.image.rows,source.image.cols,CV_8U);
-        cv::cvtColor(source.image,gray,CV_RGB2GRAY);
-        source.image=gray;
+        cv::Mat temp(recrows,reccols,CV_8U);
+        temp.data=source.image.data;
+        //cv::cvtColor(source.image,gray,CV_RGB2GRAY);
+//        source.image=Fakegray;
+    } else {
+        temp=source.image;
     }
+*/
     if (index==0) { // no need for slab selection or anything
         dataset.write(source.image.data,readType);
     } else {
