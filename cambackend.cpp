@@ -49,7 +49,7 @@ void CamBackend::run()
 
 void CamBackend::GrabFrame()
 {
-    if (running)  {
+    if ((running)&&(!isPaused))  {
         int incr=1;
         if (reversePlay) incr=-1;
 
@@ -106,90 +106,6 @@ void CamBackend::GrabFrame()
         } else {
             qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
         }
-
-        // START ANALYSIS
-        bool doAnalysis=false;
-
-        if (doAnalysis) {
-            cv::Mat intImage=currImage.image;
-            cv::Mat mask;
-        //    cv::threshold(intImage,mask,0,255,cv::THRESH_OTSU|cv::THRESH_BINARY_INV);
-            cv::threshold(intImage,mask,100,255,cv::THRESH_BINARY_INV);
-        //    cv::threshold(intImage,mask,200,255,cv::THRESH_BINARY);
-
-        //    nMat=mask.mul(intImage);
-            std::vector<std::vector<cv::Point> > magContours;
-            cv::findContours(mask,magContours,cv::RETR_LIST,cv::CHAIN_APPROX_NONE);
-            int maxi(0);
-            double maxA(0.0);
-            for (uint i=0;i<magContours.size();i++) {
-                double temp=contourArea(magContours[i]);
-                if (temp>maxA) {
-                    maxi=i;
-                    maxA=temp;
-                }
-            }
-        //    std::cout<<"MaxArea is "<<maxA<<" at "<<maxi<<std::endl;
-            cv::Mat mask2=cv::Mat::zeros(mask.rows,mask.cols,CV_8U);
-            cv::drawContours(mask2,magContours,maxi,255,-1);
-
-
-
-
-
-            cv::Moments caract;
-            caract=cv::moments(mask2);
-        //    cv::Size nsiz=nMat.size();
-        //    std::cout<<"Moment: "<<caract.m00/nsiz.width<<std::endl;//" - "<<caract.m00%nsiz.width<<std::endl;
-            cv::Point mc;
-            mc=cv::Point(caract.m10/caract.m00,caract.m01/caract.m00);
-            cv::circle(mask2,mc,4,100,-1);
-
-            // once the object is detected, I could use for instance cv::phaseCorrelate in a local neighbourhood
-            // of the pixel (128x128 pix) to find the new location? => but need an old image => not so interesting
-            //
-        /*
-            cv::Mat nMat;
-            intImage.copyTo(nMat,mask);
-            currImage.image=nMat.clone();
-        */
-
-        /*
-            //Only if the current area is bigger replace, otherwise keep the value
-            for( int i = 1; i < contours.size() ; i++ )
-            { if (  contourArea(contours[i]) > contourArea(contours[findcont]) )
-                 {  //area1 = contourArea(contours[i]); area2 = contourArea(contours[findcont]);
-                   findcont = i; }
-            }
-
-            //contoursf.push_back(contours[findcont]);
-             contoursf.insert(contoursf.begin(), contours.begin() + findcont, contours.begin() + findcont+1);
-
-
-
-            //contours[findcont], 0);
-               /// Get the moments
-              vector<Moments> mu(contoursf.size() );
-              for( int i = 0; i < contoursf.size(); i++ )
-                 { mu[i] = moments( contoursf[i], false ); }
-
-              ///  Get the mass centers:
-              vector<Point2f> mc( contoursf.size() );
-              for( int i = 0; i < contoursf.size(); i++ )
-                 { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
-
-
-
-
-              Ppoint[0] = mc[0].x;
-              Ppoint[1] = mc[0].y;
-        */
-
-
-            currImage.image=mask2.clone();
-        }
-
-
         emit NewImageReady(currImage);
     }
 
@@ -266,13 +182,16 @@ void CamBackend::ReleaseCamera()
 void CamBackend::SetInterval(int newInt)
 {
     reversePlay=newInt<0;
-    if (needTimer) {
-        timer.setInterval(abs(newInt));
-        // no need to emit fpsChanged(newInt) because interface already updated
-    } else {  // the source handles the interval by itself
-        int newFps=currSource->SetInterval(abs(newInt));
-        if (newFps!=newInt) {
-            emit fpsChanged(newFps);
+    isPaused=newInt>3000000;
+    if (!isPaused) {
+        if (needTimer) {
+            timer.setInterval(abs(newInt));
+            // no need to emit fpsChanged(newInt) because interface already updated
+        } else {  // the source handles the interval by itself
+            int newFps=currSource->SetInterval(abs(newInt));
+            if (newFps!=newInt) {
+                emit fpsChanged(newFps);
+            }
         }
     }
 }

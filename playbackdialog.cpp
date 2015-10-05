@@ -42,7 +42,7 @@ void PlaybackDialog::on_playButton_toggled(bool checked)
     if (checked) {
          emit newFps(currentTimer);
     } else {
-        emit newFps(3600000);
+        emit newFps(3600000); // such a long time that it appears paused
     }
 }
 
