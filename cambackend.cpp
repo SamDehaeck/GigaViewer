@@ -68,6 +68,7 @@ void CamBackend::GrabFrame()
 
         if (recording && currSink) currSink->RecordFrame(currImage);
 
+        // ADAPT IMAGE FOR DISPLAY PURPOSES
         // adapt image if not 8 bits
         if (currImage.pixFormat=="") {
             //sink does not support it yet
@@ -102,6 +103,13 @@ void CamBackend::GrabFrame()
         } else if (currImage.pixFormat=="RGB8"){
             //qDebug()<<"Got a RGB8 frame";
         } else if (currImage.pixFormat=="FLOAT") {
+            double min,max;
+            cv::minMaxLoc(currImage.image,&min,&max);
+            double stretch=255.0/(max-min);
+            double shift=-min*stretch;
+            cv::Mat temp;
+            currImage.image.convertTo(temp,CV_8U,stretch,shift);
+            currImage.image=temp.clone();
             //qDebug()<<"Got a Float frame";
         } else {
             qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;

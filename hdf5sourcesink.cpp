@@ -187,12 +187,14 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         dataset.read(frame.data,readType,memspace,dataspace);
 
         dataspace.selectNone();
-
+/*
         double min,max;
         cv::minMaxLoc(frame,&min,&max);
         double stretch=255.0/(max-min);
         double shift=-min*stretch;
         frame.convertTo(target.image,CV_8U,stretch,shift);
+*/
+        target.image=frame.clone();
 
         target.pixFormat=dataformat;
         target.seqNumber=index;
