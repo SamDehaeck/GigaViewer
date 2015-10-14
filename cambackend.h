@@ -17,6 +17,7 @@ public:
     void SetInterval(int newInt);
     void SetShutter(int shut);
     void SetAutoShutter(bool fitRange);
+    void AdaptForDisplay(ImagePacket& newIm);
 
 signals:
     void NewImageReady(ImagePacket im);

@@ -28,9 +28,11 @@ win32 {
     LIBS += -lueye_api
 }
 
-    SOURCES += idssourcesink.cpp
+    SOURCES += idssourcesink.cpp \
+    marangonitracking.cpp
     HEADERS += idssourcesink.h \
-    ueye.h
+    ueye.h \
+    marangonitracking.h
 
 SOURCES += main.cpp \
     imagepacket.cpp \

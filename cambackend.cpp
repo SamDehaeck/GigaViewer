@@ -9,6 +9,8 @@
 
 #include "idssourcesink.h"
 
+#include "marangonitracking.h"
+
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),needTimer(true),running(false)
 {
@@ -66,54 +68,23 @@ void CamBackend::GrabFrame()
             format=currImage.pixFormat;
         }
 
+        // RECORD FRAME TO DISC
         if (recording && currSink) currSink->RecordFrame(currImage);
 
-        // ADAPT IMAGE FOR DISPLAY PURPOSES
-        // adapt image if not 8 bits
-        if (currImage.pixFormat=="") {
-            //sink does not support it yet
-            currImage.pixFormat="MONO8";
+        // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
+        bool analyse=true;
+        if (analyse) {
+            cv::Point newLoc;
+            MarangoniTracking newTracker(150,1);
+            newLoc=newTracker.FindParticle(currImage.image);
+            cv::ellipse(currImage.image,newLoc,cv::Size(5,5),0,0,360,150,-1);
         }
-        if (currImage.pixFormat.contains("MONO")) {
-            if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
-                double max;
-                cv::minMaxLoc(currImage.image,NULL,&max);
-                if (currImage.pixFormat=="MONO12") {
-                    if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
-                } else if (currImage.pixFormat=="MONO14") {
-                    if (max<16384) currImage.image=currImage.image*4;
-                }
-                /* Alternative is to scale down to 8bits but this requires making a new Mat..
-                cv::Mat newMat;
-                currImage.image.convertTo(newMat, CV_8U, 1./16.);
-                currImage.image=newMat;*/
-            }
-        } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
-            if (currImage.image.channels()==1) {
-                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
-                currImage.image=dummy;
-            }
-        } else if (currImage.pixFormat=="BAYERGB8") { // do colour interpolation but only for showing to screen!
-            if (currImage.image.channels()==1) {
-                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-                cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
-                currImage.image=dummy;
-            }
-        } else if (currImage.pixFormat=="RGB8"){
-            //qDebug()<<"Got a RGB8 frame";
-        } else if (currImage.pixFormat=="FLOAT") {
-            double min,max;
-            cv::minMaxLoc(currImage.image,&min,&max);
-            double stretch=255.0/(max-min);
-            double shift=-min*stretch;
-            cv::Mat temp;
-            currImage.image.convertTo(temp,CV_8U,stretch,shift);
-            currImage.image=temp.clone();
-            //qDebug()<<"Got a Float frame";
-        } else {
-            qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
-        }
+
+
+
+        // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
+        AdaptForDisplay(currImage);
+
         emit NewImageReady(currImage);
     }
 
@@ -299,6 +270,54 @@ void CamBackend::setRoiRows(int rows) {
 
 void CamBackend::setRoiCols(int cols) {
     currSource->SetRoiCols(cols);
+}
+
+// only 8-bit/16-bit gray or 8-bit RGB can be displayed to screen => adjust if a different format
+void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
+    if (currImage.pixFormat=="") {
+        //sink does not support it yet
+        currImage.pixFormat="MONO8";
+    }
+    if (currImage.pixFormat.contains("MONO")) {
+        if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
+            double max;
+            cv::minMaxLoc(currImage.image,NULL,&max);
+            if (currImage.pixFormat=="MONO12") {
+                if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+            } else if (currImage.pixFormat=="MONO14") {
+                if (max<16384) currImage.image=currImage.image*4;
+            }
+            /* Alternative is to scale down to 8bits but this requires making a new Mat..
+            cv::Mat newMat;
+            currImage.image.convertTo(newMat, CV_8U, 1./16.);
+            currImage.image=newMat;*/
+        }
+    } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
+        if (currImage.image.channels()==1) {
+            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+            currImage.image=dummy;
+        }
+    } else if (currImage.pixFormat=="BAYERGB8") { // do colour interpolation but only for showing to screen!
+        if (currImage.image.channels()==1) {
+            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+            cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
+            currImage.image=dummy;
+        }
+    } else if (currImage.pixFormat=="RGB8"){
+        //qDebug()<<"Got a RGB8 frame"; //Nothing to do
+    } else if (currImage.pixFormat=="FLOAT") {
+        double min,max;
+        cv::minMaxLoc(currImage.image,&min,&max);
+        double stretch=255.0/(max-min);
+        double shift=-min*stretch;
+        cv::Mat temp;
+        currImage.image.convertTo(temp,CV_8U,stretch,shift);
+        currImage.image=temp.clone();
+        //qDebug()<<"Got a Float frame";
+    } else {
+        qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
+    }
 }
 
 
