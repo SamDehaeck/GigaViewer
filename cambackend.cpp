@@ -10,7 +10,7 @@
 #include "idssourcesink.h"
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),needTimer(true),running(false)
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));

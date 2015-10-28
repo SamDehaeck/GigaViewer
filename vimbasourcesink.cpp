@@ -58,17 +58,30 @@ bool VimbaSourceSink::Init()
 
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
+                    QStringList cams;
                     qDebug() << "Cameras found: " << cameras.size();  // should also implement Qinputdialog to let the user choose which one to use
                     for (uint i=0;i<cameras.size();i++) {
                         CameraPtr cam=cameras[i];
                         std::string namestr;
                         err=cam->GetName(namestr);
+                        cams<<QString::fromStdString(namestr);
                         qDebug()<<"Next Camera is: "<<QString::fromStdString(namestr);
                     }
+
+                    bool camok;
+                    QString theOne = QInputDialog::getItem(NULL, "Multiple cameras present",
+                                                        "Selection options:", cams, 0, false, &camok);
+                    if (camok && !theOne.isEmpty()) {
+                        int index = cams.indexOf(theOne);
+                        pCamera=cameras[index];
+                    }
+
+                } else {
+                    // now open the first one only
+                    pCamera=cameras[0];
                 }
 
-                // now open the first one only
-                pCamera=cameras[0];
+
                 std::string camID;
                 std::string namestr;
                 err=pCamera->GetName(namestr);
@@ -371,6 +384,18 @@ bool VimbaSourceSink::SetShutter(int shutTime)
 //            qDebug()<<"New shutter time is: "<<dShut;
             return true;
         }
+    } else {
+        // perhaps an old firewire camera (AVT Firepackage)
+        err=pCamera->GetFeatureByName("Exposure",pFeature);
+        if (err==VmbErrorSuccess) {
+            err=pFeature->SetValue(dShut);
+            if (err==VmbErrorSuccess) {
+                exposure=shutTime;
+    //            qDebug()<<"New shutter time is: "<<dShut;
+                return true;
+            }
+        }
+
     }
     qDebug()<<"Setting shutter did not work: "<<err;
     return false;
