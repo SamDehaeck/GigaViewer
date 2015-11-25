@@ -4,11 +4,18 @@
 #include "hdf5sourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
+
+#ifdef PVAPI
 #include "avtsourcesink.h"
+#endif
+
+#ifdef VIMBA
 #include "vimbasourcesink.h"
+#endif
 
+#ifdef IDS
 #include "idssourcesink.h"
-
+#endif
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
 {
@@ -135,17 +142,32 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=true;
         doesCallBack=false;
     } else if (dev=="AVT") {
+#ifdef PVAPI
         currSource=new AvtSourceSink();
         needTimer=false;
         doesCallBack=false;
+#else
+        qDebug()<<"AVT source not compiled";
+        return false;
+#endif
     } else if (dev=="Vimba") {
+#ifdef VIMBA
         currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
         doesCallBack=true;
+#else
+        qDebug()<<"Vimba source not compiled";
+        return false;
+#endif
     } else if (dev=="IDS") {
+#ifdef IDS
         currSource=new IdsSourceSink();
         needTimer=false;
         doesCallBack=false;
+#else
+        qDebug()<<"IDS source not compiled";
+        return false;
+#endif
     } else {
         currSource=new OpencvSourceSink();
         needTimer=true;
