@@ -1,0 +1,51 @@
+* Skipping images that will be saved. Image acquisition with framerates below 1/2 seem not so stable => Plus not visually smooth => Easier to define 1fps and skip 9 to have 0.1 fps. Also will be used for Ronald where tracking is at maximum fps and storing only as a backup.
+   => perhaps extra line under rec folder with skip and subsample options. Perhaps compression settings?
+
+* Allow for image processing extensions (PLUGINS): accessible from right click menu. Check wich dialogs to show
+        - Ronald's tracking and beam steering => will also require output of txt file with positions
+                >> could be achieved with different outputsink which embodies two different outputs: saving unmodified images with 			   some skipping (lower fps is ok) + high fps x,y pair saving to csv file.
+
+        - Ellipse Detection => will also require output to csv file
+        - Background substraction (Schlieren applications): Another checkbox to activate
+        - Colour Processing
+        - Microscopy Toolbox:
+                - Calibration + Scale bar? => with variable frequency target display scale bar on screen (+ stamped on images)
+                - Imprint timestamp?
+        - Opencv GoodFeaturesToTrack + optical flow?
+        - Perhaps stack multiple post-processing options (pipeline) => ellipseDetection+track vs GoodFeatures+track vs Background + optical flow
+
+Interface for plugins:
+
+function startProcess(frame) -> bool : initialise the processing plugin (perhaps plan some fft's...)
+
+function process(frame) -> frame : analyse the data and return result that will be displayed
+
+function startRecording(filename) -> bool : could be used for emptying the vectors/lists where we will push the results
+
+function endRecording() -> bool : could be used for saving the final csv file with all results
+
+function endProcess() -> bool : deinitialise everything
+
+
+
+
+=> Single Snapshot capability: If Gigaviewer will be used for microscope applications => Snapshot often handy (also for calibration)
+=> Play back by default in real-time.
+=> Show histogram of current image
+=> Allow zooming by scrolling
+=> When only a single image present, it is not shown: Not starting at beginning/ending with last image?
+=> Reading bitmaplist named image1.tif,...image10.tif in the correct order => typically (d+).ext
+
+=> Ronald's USB camera: make it work for windows + implement FRAME QUEUE!! + clock frequency lijkt toch belangrijk hier
+
+=> Could create a RAM-sink to store a maximum of images in the system RAM => Can I poll for available RAM-memory? (=> can be used to decide on queue size in current backends to minimize data loss which would render this option unimportant). When finished ask where to store. => could solve issues when using a laptop for storing data. => polling is platform dependent but could be implemented.
+ -- or could have this as an option (amount of GB of RAM that can be used).
+=> kind of 'extra' options which are hidden by default like for the recording location dialog?
+=> Min and Max fps and min and max exposure times should be shown
+=> Allow modifying gain.
+=> Allow modifying binning and skipping of lines
+=> Allow cropping with offset X and Y
+
+
+=> Play XVI movies directly (Xenics IR camera)
+=> Play High speed camera images directly (Multi-page Tiff?)

@@ -7,6 +7,20 @@ FileInputDialog::FileInputDialog(QWidget *parent) :
     ui(new Ui::FileInputDialog)
 {
     ui->setupUi(this);
+
+#ifndef PVAPI
+    ui->AvtButton->setEnabled(false);
+#endif
+
+
+#ifndef IDS
+    ui->idsButton->setEnabled(false);
+#endif
+
+#ifndef VIMBA
+    ui->vimbaButton->setEnabled(false);
+#endif
+
     currentDir=QDir::home();
 }
 
