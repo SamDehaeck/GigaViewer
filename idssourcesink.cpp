@@ -110,7 +110,7 @@ bool IdsSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     if (indexIncrement<0) qDebug()<<"Cannot stream backwards";
 
 #ifdef Q_OS_WIN32
-    if (WaitForSingleObject(hEvent, EVENTTHREAD_WAIT_TIMEOUT) == WAIT_OBJECT_0) {
+    if (WaitForSingleObject(hEvent, camTimeStep*5) == WAIT_OBJECT_0) {
 #else
     if (is_WaitEvent (hCam, IS_SET_EVENT_FRAME, camTimeStep*5) == IS_SUCCESS) {
 #endif
@@ -143,7 +143,7 @@ bool IdsSourceSink::StopAcquisition() {
     is_StopLiveVideo(hCam, IS_WAIT);
     is_DisableEvent (hCam, IS_SET_EVENT_FRAME); //added by Sam
 #ifdef Q_OS_WIN32
-    is_ExitEvent(hCam, hEvent);
+    is_ExitEvent(hCam, IS_SET_EVENT_FRAME);
 #endif
     is_FreeImageMem (hCam, imgMem, memId);
     Sleeper::msleep(10*camTimeStep); // NEEDS some sleep to stop all internal events

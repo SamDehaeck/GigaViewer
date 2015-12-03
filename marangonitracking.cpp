@@ -12,7 +12,6 @@ Point MarangoniTracking::FindParticle(Mat image) {
 }
 
 void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
-    bool ok;
     targetX=settings["targetX"].toInt();
     targetY=settings["targetY"].toInt();
     threshold=settings["threshold"].toInt();
@@ -31,17 +30,14 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
         std::vector<std::vector<cv::Point> > contours;
         cv::Mat hierarchy;
         cv::findContours( processed, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-        cv::drawContours(currIm.image,contours,-1,255,2);
 
-
-
-
-
-
-//        currIm.image=processed;
+        cv::Mat outImage=currIm.image.clone(); // use a clone to avoid storing on raw image which is stored.
+        cv::drawContours(outImage,contours,-1,255,2);
 
         cv::Point newLoc(targetX*currIm.image.cols/100.0,targetY*currIm.image.rows/100.0);
-        cv::ellipse(currIm.image,newLoc,cv::Size(5,5),0,0,360,150,-1);
+        cv::ellipse(outImage,newLoc,cv::Size(5,5),0,0,360,150,-1);
+
+        currIm.image=outImage;
     }
     return true;
 }

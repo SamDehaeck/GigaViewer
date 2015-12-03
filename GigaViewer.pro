@@ -42,6 +42,9 @@ win32 {
     VIMBA {
         LIBS += "C:\Program Files\Allied Vision Technologies\AVTVimba_1.3\VimbaCPP\Lib\Win32\VimbaCPP.lib"
     }
+    IDS {
+        LIBS += "C:\Program Files\IDS\uEye\Develop\Lib\uEye_api.lib"
+    }
     LIBS += -lopengl32 -lhdf5 -lhdf5_cpp -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
 }
 
