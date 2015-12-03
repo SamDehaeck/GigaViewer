@@ -6,6 +6,9 @@
 #include "imagepacket.h"
 #include "imagesourcesink.h"
 
+#include "marangonitracking.h"
+
+
 class CamBackend : public QThread
 {
     Q_OBJECT
@@ -18,6 +21,12 @@ public:
     void SetShutter(int shut);
     void SetAutoShutter(bool fitRange);
     void AdaptForDisplay(ImagePacket& newIm);
+    bool initProcPlugin();
+    bool endProcPlugin();
+    bool DoProcPlugin(ImagePacket& newIm);
+    bool startRecPlugin(QString RecName);
+    bool endRecPlugin();
+    bool setSettingsPlugin(ImagePacket& newIm,QStringList settings);
 
 signals:
     void NewImageReady(ImagePacket im);
@@ -34,6 +43,7 @@ public slots:
     void willStopTheTimer();
     void setRoiRows(int rows);
     void setRoiCols(int cols);
+    void changedPluginSettings(QMap<QString,QVariant> settings);
 
 private:
     void run();
@@ -52,6 +62,9 @@ private:
     bool doesCallBack;
     bool running;
     QString format;
+
+    MarangoniTracking tracker;
+    bool doPluginProcessing;
 
 };
 

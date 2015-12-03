@@ -51,9 +51,9 @@ unix:!macx {
     QMAKE_INCDIR += /usr/include/hdf5/serial
     QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
     LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
-    packagesExist(opencv_videoio) { # when Opencv3 is used, these libraries are necessary
+#    packagesExist(opencv_videoio) { # when Opencv3 is used, these libraries are necessary
         LIBS += -lopencv_imgcodecs -lopencv_videoio
-    }
+#    }
     PVAPI {
         LIBS += -lPvAPI
     }
@@ -139,7 +139,8 @@ SOURCES += main.cpp \
     imagesourcesink.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp \
-    hdf5sourcesink.cpp
+    hdf5sourcesink.cpp \
+    marangonitrackingdialog.cpp
 
 SOURCES += marangonitracking.cpp
 
@@ -158,14 +159,16 @@ HEADERS  += \
     imagesourcesink.h \
     cameracontrolsdialog.h \
     regexsourcesink.h \
-    hdf5sourcesink.h
+    hdf5sourcesink.h \
+    marangonitrackingdialog.h
 
 HEADERS += marangonitracking.h
 
 FORMS += \
     fileinputdialog.ui \
     playbackdialog.ui \
-    cameracontrolsdialog.ui
+    cameracontrolsdialog.ui \
+    marangonitrackingdialog.ui
 
 OTHER_FILES += \
     README.txt \

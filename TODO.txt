@@ -1,7 +1,7 @@
 * Skipping images that will be saved. Image acquisition with framerates below 1/2 seem not so stable => Plus not visually smooth => Easier to define 1fps and skip 9 to have 0.1 fps. Also will be used for Ronald where tracking is at maximum fps and storing only as a backup.
    => perhaps extra line under rec folder with skip and subsample options. Perhaps compression settings?
 
-* Allow for image processing extensions (PLUGINS): accessible from right click menu. Check wich dialogs to show
+* Allow for image processing extensions (PLUGINS): accessible from right click menu. Check which dialogs to show
         - Ronald's tracking and beam steering => will also require output of txt file with positions
                 >> could be achieved with different outputsink which embodies two different outputs: saving unmodified images with 			   some skipping (lower fps is ok) + high fps x,y pair saving to csv file.
 
@@ -16,7 +16,9 @@
 
 Interface for plugins:
 
-function startProcess(frame) -> bool : initialise the processing plugin (perhaps plan some fft's...)
+function startProcess() -> bool : initialise the processing plugin (perhaps plan some fft's...)
+
+function setSettings(sampleFrame,othersettings) -> bool : set the parameters (can change a lot)
 
 function process(frame) -> frame : analyse the data and return result that will be displayed
 
@@ -26,7 +28,7 @@ function endRecording() -> bool : could be used for saving the final csv file wi
 
 function endProcess() -> bool : deinitialise everything
 
-
++ dialog to input these settings
 
 
 => Single Snapshot capability: If Gigaviewer will be used for microscope applications => Snapshot often handy (also for calibration)

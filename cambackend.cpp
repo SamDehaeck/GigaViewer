@@ -21,7 +21,7 @@
 
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),tracker(50,1),doPluginProcessing(false)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
@@ -34,7 +34,7 @@ CamBackend::CamBackend(QObject *parent) :
 // this run method. Three use cases here for the moment:
 // 1. you need a timer: this is for sources which don't provide one (fmf, regex, opencv). In this case, we start a Qtimer
 //    which calls the Grabframe method each time the timer ticks
-// 2. you don't need a timer (Prosilica): you can get correct timing from the camera. Therefore, do a continuous loop
+// 2. you don't need a timer (Prosilica & IDS): you can get correct timing from the camera. Therefore, do a continuous loop
 //    in which you directly call GrabFrame. This grabframe method blocks for the avtsource until the timing is right
 //    (Function waitForQueuedFrame)
 // 3. you don't need a timer but the SDK uses callbacks when the frame is ready (VIMBA). Just idle till somebody says to quit
@@ -83,10 +83,7 @@ void CamBackend::GrabFrame()
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
         bool analyse=true;
         if (analyse) {
-            cv::Point newLoc;
-            MarangoniTracking newTracker(150,1);
-            newLoc=newTracker.FindParticle(currImage.image);
-            cv::ellipse(currImage.image,newLoc,cv::Size(5,5),0,0,360,150,-1);
+            tracker.processImage(currImage);
         }
 
 
@@ -146,6 +143,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=true;
         doesCallBack=false;
     }
+
     if (currSource->Init()) {
         if (currSource->StartAcquisition(dev)) {
             running=true;
@@ -344,5 +342,35 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
     }
 }
 
+bool CamBackend::initProcPlugin() {
+    doPluginProcessing=true; // if init successfull, switch on the processing
+    return true;
+}
 
+bool CamBackend::endProcPlugin() {
+    return true;
+}
 
+bool CamBackend::DoProcPlugin(ImagePacket& newIm) {
+    return true;
+}
+
+bool CamBackend::startRecPlugin(QString RecName) {
+    return true;
+}
+
+bool CamBackend::endRecPlugin() {
+    return true;
+}
+
+bool CamBackend::setSettingsPlugin(ImagePacket& newIm,QStringList settings) {
+    return true;
+}
+
+void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
+    if (settings["pluginName"]=="MarangoniTracking") {
+//        qDebug()<<"should inform marangoni";
+        tracker.ChangeSettings(settings);
+    }
+
+}

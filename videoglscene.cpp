@@ -7,41 +7,43 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     QGraphicsScene(parent)
 {
     QDialog* dial;
-
+    int ini=0;
+    QPointF pos(10, 10);
     foreach (dial, controlDialogs) {
         //now make the control dialogues
         QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
         proxy->setWidget(dial);
         addItem(proxy);
-    }
 
-    QPointF pos(10, 10);
-    int i(0);
-
-    foreach (QGraphicsItem *item, items()) {
-        item->setFlag(QGraphicsItem::ItemIsMovable);
-        item->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-        switch (i) {
+        switch (ini) {
             case 0:
-                item->setData(0,"INPUT");
+                proxy->setData(0,"INPUT");
                 break;
             case 1:
-                item->setData(0,"PLAYBACK");
+                proxy->setData(0,"PLAYBACK");
                 break;
             case 2:
-                item->setData(0,"CAMERA");
+                proxy->setData(0,"CAMERA");
+                break;
+            case 3:
+                proxy->setData(0,"PLUGIN");
                 break;
         }
+        proxy->setFlag(QGraphicsItem::ItemIsMovable);
+        proxy->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
 
-        if (i!=0) item->setVisible(false);
-        const QRectF rect = item->boundingRect();
-        item->setPos(pos.x() - rect.x(), pos.y() - rect.y());
-        if (i==0) pos += QPointF(0,550);             // This is the base Y offset for the extra panels
-        pos += QPointF(10 + rect.width(),0);
-        i++;
+        if (ini!=0) proxy->setVisible(false);
+
+        const QRectF rect = proxy->boundingRect();
+        proxy->setPos(pos.x() - rect.x(), pos.y() - rect.y());
+
+        // now will add the offset for placing the next dialog as we have the size now
+        if (ini==0) pos += QPointF(650,-350);  //This is the base Y offset for the extra panels
+        pos += QPointF(0,10 + rect.height());
+
+        ini=ini+1;
     }
-
 }
 
 void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
