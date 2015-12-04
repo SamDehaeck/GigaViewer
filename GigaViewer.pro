@@ -9,13 +9,14 @@ QT       += core gui opengl widgets
 TARGET = GigaViewer
 TEMPLATE = app
 
-#CONFIG += IDS       # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
+CONFIG += HDF5       # enable HDF5 format for storing and reading files
+#CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
 #CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
-CONFIG += IDS PVAPI VIMBA
+#CONFIG += IDS PVAPI VIMBA
 # uncomment the CONFIG lines for the camera modules you want compiled, available options: IDS PVAPI VIMBA
-# when you want no cameras, comment al CONFIG lines above
+# when you want no cameras, comment al CONFIG lines above (except HDF5)
 
 IDS {
     DEFINES *= IDS
@@ -26,14 +27,20 @@ PVAPI {
 VIMBA {
     DEFINES *= VIMBA
 }
+HDF5 {
+    DEFINES *= ENABLE_HDF5
+}
+
 #message(The Defines are $$DEFINES)
 
 win32 {
     message(Compiling for windows)
     INCLUDEPATH += C:\opencv\build\include
-    QMAKE_INCDIR += "C:\HDF5\1.8.15\include"  #this cannot have a space => copy installed hdf5 folder to the root
-    QMAKE_LIBDIR += "C:\HDF5\1.8.15\lib"
     QMAKE_LIBDIR += "C:\opencv\build\x86\vc12\lib"
+    HDF5 {
+        QMAKE_INCDIR += "C:\HDF5\1.8.15\include"  #this cannot have a space => copy installed hdf5 folder to the root
+        QMAKE_LIBDIR += "C:\HDF5\1.8.15\lib"
+    }
 
     PVAPI {
         LIBS +=  "C:\Program Files\Allied Vision Technologies\GigESDK\lib-pc\PvAPI.lib" \
@@ -51,11 +58,15 @@ win32 {
 unix:!macx {
     message(Compiling for Linux)
     LIBS += -L /usr/local/lib   # store PvAPI and VimbaCPP libraries here
-    QMAKE_INCDIR += /usr/include/hdf5/serial
-    QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
-    LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+
+    HDF5 {
+        QMAKE_INCDIR += /usr/include/hdf5/serial
+        QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
+        LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
+    }
+    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
 #    packagesExist(opencv_videoio) { # when Opencv3 is used, these libraries are necessary
-        LIBS += -lopencv_imgcodecs -lopencv_videoio
+#        LIBS += -lopencv_imgcodecs -lopencv_videoio
 #    }
     PVAPI {
         LIBS += -lPvAPI
@@ -72,7 +83,10 @@ macx {
     VIMBA|IDS|PVAPI {
         message(No camera modules support so far!!! Change configuration in GigaViewer.pro.)
     }
-    LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+    HDF5 {
+        LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
+    }
+    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
 }
 
 PVAPI {
@@ -127,6 +141,11 @@ VIMBA {
     vimbaframeobserver.h
 }
 
+HDF5 {
+    SOURCES += hdf5sourcesink.cpp
+    HEADERS += hdf5sourcesink.h
+}
+
 SOURCES += main.cpp \
     imagepacket.cpp \
     videoglscene.cpp \
@@ -142,7 +161,6 @@ SOURCES += main.cpp \
     imagesourcesink.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp \
-    hdf5sourcesink.cpp \
     marangonitrackingdialog.cpp
 
 SOURCES += marangonitracking.cpp
@@ -162,7 +180,6 @@ HEADERS  += \
     imagesourcesink.h \
     cameracontrolsdialog.h \
     regexsourcesink.h \
-    hdf5sourcesink.h \
     marangonitrackingdialog.h
 
 HEADERS += marangonitracking.h

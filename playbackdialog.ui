@@ -351,16 +351,16 @@
                </size>
               </property>
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <item>
                <property name="text">
-                <string>FMF</string>
+                <string>HDF5</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>HDF5</string>
+                <string>FMF</string>
                </property>
               </item>
               <item>

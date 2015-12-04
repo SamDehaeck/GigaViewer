@@ -20,7 +20,7 @@ bool MarangoniTrackingDialog::extractData() {
     settings["targetY"]=ui->vertPosition->value();
     settings["shouldTrack"]=ui->trackButton->isChecked();
 
-    stateChanged(settings);
+    emit stateChanged(settings);
 
 /*
     QMap<QString, QVariant>::const_iterator i = settings.constBegin();

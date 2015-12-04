@@ -1,7 +1,6 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
-#include "hdf5sourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
 
@@ -15,6 +14,10 @@
 
 #ifdef IDS
 #include "idssourcesink.h"
+#endif
+
+#ifdef ENABLE_HDF5
+#include "hdf5sourcesink.h"
 #endif
 
 #include "marangonitracking.h"
@@ -100,9 +103,14 @@ void CamBackend::GrabFrame()
 bool CamBackend::StartAcquisition(QString dev)
 {
     if (dev.contains(".h5")) {
+#ifdef ENABLE_HDF5
         currSource=new Hdf5SourceSink();
         needTimer=true;
         doesCallBack=false;
+#else
+        qDebug()<<"HDF5 source/sink not compiled";
+        return false;
+#endif
     } else if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
         needTimer=true;
@@ -220,6 +228,7 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
         } else if (codec=="BMP" || codec=="PNG" || codec=="JPG") {
             currSink=new RegexSourceSink();
         } else if (codec=="HDF5") {
+#ifdef ENABLE_HDF5
             currSink=new Hdf5SourceSink();
             if (format=="MONO8") {
                 codec="HDF8";
@@ -234,6 +243,9 @@ void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
             } else if (format=="RGB8") {
                 codec="HDFRGB8";
             }
+#else
+            qDebug()<<"Hdf5 source/sink not compiled in";
+#endif
         } else {
             currSink=new OpencvSourceSink();
         }

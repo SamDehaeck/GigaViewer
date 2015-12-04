@@ -9,6 +9,10 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     ui->setupUi(this);
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
+#ifndef ENABLE_HDF5
+    ui->codecBox->removeItem(0);
+#endif
+
     connect(&timer1,SIGNAL(timeout()), this, SLOT (finishedFirstTimer()));
     connect(&timer2,SIGNAL(timeout()), this, SLOT (finishedSecondTimer()));
 }

@@ -14,6 +14,7 @@ private:
     int targetY;
     bool activated;
     bool shouldTrack;
+    QStringList dataToSave;
 public:
     MarangoniTracking(int thresh,int nrParticles);
     cv::Point FindParticle(cv::Mat image);
