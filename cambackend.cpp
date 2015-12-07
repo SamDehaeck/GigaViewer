@@ -20,11 +20,15 @@
 #include "hdf5sourcesink.h"
 #endif
 
+#ifdef TRACKING
 #include "marangonitracking.h"
-
+#endif
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),tracker(50,1),doPluginProcessing(false)
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
+#ifdef TRACKING
+  ,tracker(50,1),doPluginProcessing(false)
+#endif
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
@@ -83,13 +87,10 @@ void CamBackend::GrabFrame()
         // RECORD FRAME TO DISC
         if (recording && currSink) currSink->RecordFrame(currImage);
 
+#ifdef TRACKING
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
-        bool analyse=true;
-        if (analyse) {
-            tracker.processImage(currImage);
-        }
-
-
+        tracker.processImage(currImage);
+#endif
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         AdaptForDisplay(currImage);
@@ -378,7 +379,7 @@ bool CamBackend::endRecPlugin() {
 bool CamBackend::setSettingsPlugin(ImagePacket& newIm,QStringList settings) {
     return true;
 }
-
+#ifdef TRACKING
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     if (settings["pluginName"]=="MarangoniTracking") {
 //        qDebug()<<"should inform marangoni";
@@ -386,3 +387,4 @@ void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     }
 
 }
+#endif

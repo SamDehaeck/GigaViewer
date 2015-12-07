@@ -12,17 +12,18 @@ MainGui::MainGui(QWidget *parent) :
     fileDialog = new FileInputDialog;
     playDialog = new PlaybackDialog;
     camDialog = new CameraControlsDialog;
-
+#ifdef TRACKING
     trackDialog = new MarangoniTrackingDialog;
-
+#endif
 
 
     QList<QDialog*> controlDialogs;
     controlDialogs.append(fileDialog);
     controlDialogs.append(playDialog);
     controlDialogs.append(camDialog);
+#ifdef TRACKING
     controlDialogs.append(trackDialog);
-
+#endif
 
 //    const QSize rect =parent->frameSize();
 //    qDebug()<<"Frame size: "<<rect.height()<<" "<<rect.width();
@@ -61,9 +62,9 @@ MainGui::MainGui(QWidget *parent) :
     connect(this,SIGNAL(showNewFps(int)),playDialog,SLOT(showNewFps(int)));
     connect(camDialog,SIGNAL(SetRoiRows(int)),this,SIGNAL(setRoiRows(int)));
     connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
-
+#ifdef TRACKING
     connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
-
+#endif
 
     setScene(theScene);
     getNewSample=false;
@@ -74,7 +75,9 @@ void MainGui::returnToStart()
     showPlaybackControls(false);
     showCameraControls(false);
     showInputControls(true);
+#ifdef TRACKING
     showTrackingDialog(false);
+#endif
 }
 
 void MainGui::resizeEvent(QResizeEvent *event)
@@ -98,7 +101,9 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 void MainGui::openCvFeedPressed()
 {
     showPlaybackControls(true);
+#ifdef TRACKING
     showTrackingDialog(true);
+#endif
     showInputControls(false);
     emit newOpencvFeedNeeded(true);
     this->parentWidget()->setWindowTitle("OpenCV Feed");
@@ -110,7 +115,9 @@ void MainGui::stopButtonPressed()
     showPlaybackControls(false);
     showCameraControls(false);
     showInputControls(true);
+#ifdef TRACKING
     showTrackingDialog(false);
+#endif
     this->parentWidget()->setWindowTitle("GigaViewer");
 }
 
@@ -135,7 +142,9 @@ void MainGui::newMoviePressed(QString theString)
         emit newMovieNeeded(theString);
         showPlaybackControls(true);
         showInputControls(false);        
+#ifdef TRACKING
         showTrackingDialog(true);
+#endif
         this->parentWidget()->setWindowTitle(theString);
     }
 }
@@ -166,7 +175,7 @@ void MainGui::showCameraControls(bool visible)
         }
     }
 }
-
+#ifdef TRACKING
 void MainGui::showTrackingDialog(bool visible) {
     foreach (QGraphicsItem *item,theScene->items()) {
         if (item->data(0)=="PLUGIN") {
@@ -174,12 +183,15 @@ void MainGui::showTrackingDialog(bool visible) {
         }
     }
 }
-
+#endif
 void MainGui::AVTFeedPressed()
 {
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
+#ifdef TRACKING
+    showTrackingDialog(true);
+#endif
     emit newAvtFeedNeeded(true);
     this->parentWidget()->setWindowTitle("AVT Live Camera Feed");
 }
@@ -190,7 +202,9 @@ void MainGui::VimbaFeedPressed()
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
+#ifdef TRACKING
     showTrackingDialog(true);
+#endif
     this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
 }
 
@@ -200,7 +214,9 @@ void MainGui::IdsFeedPressed()
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
+#ifdef TRACKING
     showTrackingDialog(true);
+#endif
     this->parentWidget()->setWindowTitle("Ids Live Camera Feed");
 }
 

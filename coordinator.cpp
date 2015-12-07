@@ -23,8 +23,9 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
         connect(theGui,SIGNAL(skipFrames(bool)),&camBack,SLOT(skipForwardBackward(bool)));
         connect(theGui,SIGNAL(setRoiRows(int)),&camBack,SLOT(setRoiRows(int)));
         connect(theGui,SIGNAL(setRoiCols(int)),&camBack,SLOT(setRoiCols(int)));
-
+#ifdef TRACKING
         connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
+#endif
     }
 }
 

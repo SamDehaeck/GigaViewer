@@ -13,8 +13,9 @@
 #include "playbackdialog.h"
 #include "fileinputdialog.h"
 
+#ifdef TRACKING
 #include "marangonitrackingdialog.h"
-
+#endif
 
 
 class MainGui : public QGraphicsView
@@ -42,8 +43,9 @@ signals:
     void skipFrames(bool forward);
     void setRoiRows(int rows);
     void setRoiCols(int cols);
+#ifdef TRACKING
     void pluginSettingsChanged(QMap<QString,QVariant> settings);
-
+#endif
 public slots:
     void newImageReceived(ImagePacket theMatrix);
     void openCvFeedPressed();
@@ -63,8 +65,10 @@ protected:
     void showPlaybackControls(bool visible);
     void showInputControls(bool visible);
     void showCameraControls(bool visible);
-    void showTrackingDialog(bool visible);
 
+#ifdef TRACKING
+    void showTrackingDialog(bool visible);
+#endif
 
 private:
     VideoGlScene* theScene;
@@ -72,9 +76,9 @@ private:
     PlaybackDialog* playDialog;
     CameraControlsDialog* camDialog;
     bool getNewSample;
-
+#ifdef TRACKING
     MarangoniTrackingDialog* trackDialog;
-
+#endif
 };
 
 #endif // MAINGUI_H

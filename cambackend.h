@@ -5,9 +5,9 @@
 #include <QtGui>
 #include "imagepacket.h"
 #include "imagesourcesink.h"
-
+#ifdef TRACKING
 #include "marangonitracking.h"
-
+#endif
 
 class CamBackend : public QThread
 {
@@ -43,8 +43,9 @@ public slots:
     void willStopTheTimer();
     void setRoiRows(int rows);
     void setRoiCols(int cols);
+#ifdef TRACKING
     void changedPluginSettings(QMap<QString,QVariant> settings);
-
+#endif
 private:
     void run();
     void record();
@@ -62,8 +63,9 @@ private:
     bool doesCallBack;
     bool running;
     QString format;
-
+#ifdef TRACKING
     MarangoniTracking tracker;
+#endif
     bool doPluginProcessing;
 
 };
