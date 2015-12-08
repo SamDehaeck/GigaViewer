@@ -18,11 +18,6 @@
 #include "imagesourcesink.h"
 #include <opencv2/opencv.hpp>
 
-class Sleeper : public QThread {
-public:
-    static void msleep(unsigned long msecs){QThread::msleep(msecs);}
-};
-
 class AvtSourceSink : public ImageSourceSink
 {
 public:

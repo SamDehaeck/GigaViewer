@@ -21,7 +21,7 @@
 #include "vimbaframeobserver.h"
 #include <opencv2/opencv.hpp>
 #include "cambackend.h"
-#include "avtsourcesink.h"
+
 
 class VimbaSourceSink : public ImageSourceSink
 {

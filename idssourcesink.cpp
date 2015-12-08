@@ -145,7 +145,7 @@ bool IdsSourceSink::StopAcquisition() {
     is_ExitEvent(hCam, IS_SET_EVENT_FRAME);
 #endif
     is_FreeImageMem (hCam, imgMem, memId);
-    idsSleeper::msleep(10*camTimeStep); // NEEDS some sleep to stop all internal events
+    Sleeper::msleep(10*camTimeStep); // NEEDS some sleep to stop all internal events
     return true;
 }
 

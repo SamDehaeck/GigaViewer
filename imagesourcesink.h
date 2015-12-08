@@ -4,6 +4,11 @@
 #include "imagepacket.h"
 #include "QtGui"
 
+class Sleeper : public QThread {
+public:
+    static void msleep(unsigned long msecs){QThread::msleep(msecs);}
+};
+
 class ImageSourceSink
 {
 public:
