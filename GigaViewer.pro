@@ -10,7 +10,7 @@ TARGET = GigaViewer
 TEMPLATE = app
 
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
-#CONFIG += TRACKING   # enable tracking of Marangoni-driven particles
+CONFIG += TRACKING   # enable tracking of Marangoni-driven particles
 #CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
 #CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
@@ -69,9 +69,8 @@ unix:!macx {
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
     LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
-#    packagesExist(opencv_videoio) { # when Opencv3 is used, these libraries are necessary
-#        LIBS += -lopencv_imgcodecs -lopencv_videoio
-#    }
+#        LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
+
     PVAPI {
         LIBS += -lPvAPI
     }
@@ -96,52 +95,19 @@ macx {
 PVAPI {
     message(Including PVAPI libraries)
     SOURCES += avtsourcesink.cpp
-    HEADERS += avtsourcesink.h PvApi.h
+    HEADERS += avtsourcesink.h
 }
 
 IDS {
     message(Including IDS libraries)
     SOURCES += idssourcesink.cpp
-    HEADERS += idssourcesink.h ueye.h
+    HEADERS += idssourcesink.h
 }
 
 VIMBA {
     message(Including VIMBA libraries)
     SOURCES +=  vimbasourcesink.cpp vimbaframeobserver.cpp
     HEADERS +=  vimbasourcesink.h \
-    VimbaC/Include/VimbaC.h \
-    VimbaC/Include/VmbCommonTypes.h \
-    VimbaCPP/Include/AncillaryData.h \
-    VimbaCPP/Include/BasicLockable.h \
-    VimbaCPP/Include/Camera.h \
-    VimbaCPP/Include/Camera.hpp \
-    VimbaCPP/Include/EnumEntry.h \
-    VimbaCPP/Include/EnumEntry.hpp \
-    VimbaCPP/Include/Feature.h \
-    VimbaCPP/Include/Feature.hpp \
-    VimbaCPP/Include/FeatureContainer.h \
-    VimbaCPP/Include/FeatureContainer.hpp \
-    VimbaCPP/Include/FileLogger.h \
-    VimbaCPP/Include/Frame.h \
-    VimbaCPP/Include/ICameraFactory.h \
-    VimbaCPP/Include/ICameraListObserver.h \
-    VimbaCPP/Include/IFeatureObserver.h \
-    VimbaCPP/Include/IFrameObserver.h \
-    VimbaCPP/Include/IInterfaceListObserver.h \
-    VimbaCPP/Include/Interface.h \
-    VimbaCPP/Include/Interface.hpp \
-    VimbaCPP/Include/IRegisterDevice.h \
-    VimbaCPP/Include/LoggerDefines.h \
-    VimbaCPP/Include/Mutex.h \
-    VimbaCPP/Include/SharedPointer.h \
-    VimbaCPP/Include/SharedPointer_impl.h \
-    VimbaCPP/Include/SharedPointerDefines.h \
-    VimbaCPP/Include/UserLoggerDefines.h \
-    VimbaCPP/Include/UserSharedPointerDefines.h \
-    VimbaCPP/Include/VimbaCPP.h \
-    VimbaCPP/Include/VimbaCPPCommon.h \
-    VimbaCPP/Include/VimbaSystem.h \
-    VimbaCPP/Include/VimbaSystem.hpp \
     vimbaframeobserver.h
 }
 
