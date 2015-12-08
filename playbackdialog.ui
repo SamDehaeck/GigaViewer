@@ -159,6 +159,23 @@
              </widget>
             </item>
             <item>
+             <widget class="QToolButton" name="snapshotButton">
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="icons.qrc">
+                <normaloff>:/new/png/icons/snapshot.png</normaloff>:/new/png/icons/snapshot.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="recButton">
               <property name="text">
                <string>...</string>
@@ -442,9 +459,9 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>horizontalSlider</tabstop>
-  <tabstop>stopButton</tabstop>
   <tabstop>playButton</tabstop>
+  <tabstop>stopButton</tabstop>
+  <tabstop>horizontalSlider</tabstop>
   <tabstop>ffwdButton</tabstop>
   <tabstop>recButton</tabstop>
   <tabstop>RecSettings</tabstop>
@@ -454,6 +471,7 @@
   <tabstop>RecFolder</tabstop>
   <tabstop>toolButton</tabstop>
   <tabstop>codecBox</tabstop>
+  <tabstop>recTimedButton</tabstop>
  </tabstops>
  <resources>
   <include location="icons.qrc"/>

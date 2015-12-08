@@ -16,5 +16,6 @@
         <file>icons/gtk-go-back-ltr.png</file>
         <file>icons/gtk-open.png</file>
         <file>icons/gtk-media-record-timed.png</file>
+        <file>icons/snapshot.png</file>
     </qresource>
 </RCC>

@@ -9,7 +9,7 @@
     #include <time.h>
 #endif
 
-#include "VimbaCPP/Include/VimbaCPP.h"
+#include <VimbaCPP/Include/VimbaCPP.h>
 
 
 // now other imports
