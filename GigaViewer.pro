@@ -64,6 +64,8 @@ win32 {
 
 unix:!macx {
     message(Compiling for Linux)
+    CONFIG += c++11
+
     LIBS += -L /usr/local/lib   # store PvAPI and VimbaCPP libraries here
 
     HDF5 {
@@ -86,13 +88,19 @@ unix:!macx {
 }
 macx {
     message(Compiling for Mac) # No camera modules supported so far!
+    CONFIG += c++11
+    QMAKE_INCDIR += /usr/local/include
+    QMAKE_LIBDIR += /usr/local/lib
     VIMBA|IDS|PVAPI {
         message(No camera modules support so far!!! Change configuration in GigaViewer.pro.)
     }
     HDF5 {
-        LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
+        QMAKE_INCDIR += /usr/local/HDF_Group/HDF5/1.8.16/include
+        QMAKE_LIBDIR += /usr/local/HDF_Group/HDF5/1.8.16/lib
+        LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -lhdf5_hl_cpp
     }
-    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+    LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 }
 
 PVAPI {
