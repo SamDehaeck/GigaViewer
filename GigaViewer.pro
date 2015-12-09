@@ -9,11 +9,11 @@ QT       += core gui opengl widgets
 TARGET = GigaViewer
 TEMPLATE = app
 
-CONFIG += HDF5       # enable HDF5 format for storing and reading files
+#CONFIG += HDF5       # enable HDF5 format for storing and reading files
 CONFIG += TRACKING   # enable tracking of Marangoni-driven particles
 CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
-CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+#CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
+#CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
 #CONFIG += IDS PVAPI VIMBA HDF5
 # uncomment the CONFIG lines for the camera modules you want compiled, available options: IDS PVAPI VIMBA
@@ -39,11 +39,14 @@ TRACKING {
 
 win32 {
     message(Compiling for windows)
-    INCLUDEPATH += C:\opencv\build\include
-    QMAKE_LIBDIR += "C:\opencv\build\x86\vc12\lib"
+    INCLUDEPATH += C:\OpenCV2411\opencv\build\include
+    QMAKE_LIBDIR += "C:\OpenCV2411\opencv\build\x86\vc12\lib"
+    LIBS += -lopengl32 -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
+
     HDF5 {
         QMAKE_INCDIR += "C:\HDF5\1.8.15\include"  #this cannot have a space => copy installed hdf5 folder to the root
         QMAKE_LIBDIR += "C:\HDF5\1.8.15\lib"
+        LIBS += -lhdf5 -lhdf5_cpp
     }
 
     PVAPI {
@@ -59,7 +62,11 @@ win32 {
         INCLUDEPATH += "C:\Program Files\IDS\uEye\Develop\include"
         LIBS += "C:\Program Files\IDS\uEye\Develop\Lib\uEye_api.lib"
     }
-    LIBS += -lopengl32 -lhdf5 -lhdf5_cpp -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
+    TRACKING {
+        QMAKE_INCDIR += "C:\MirrorcleTech\SDK-Cpp\Include"
+        QMAKE_LIBDIR += "C:\MirrorcleTech\SDK-Cpp\Lib"
+        LIBS += -lMTIDataGenerator -lMTIDevice
+    }
 }
 
 unix:!macx {
@@ -145,10 +152,12 @@ SOURCES += main.cpp \
 
 TRACKING {
     SOURCES += marangonitracking.cpp \
-        marangonitrackingdialog.cpp
+        marangonitrackingdialog.cpp \
+        mirrorcontrol.cpp
 
     HEADERS += marangonitracking.h \
-        marangonitrackingdialog.h
+        marangonitrackingdialog.h \
+        mirrorcontrol.h
 
     FORMS += marangonitrackingdialog.ui
 }
