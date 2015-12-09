@@ -5,6 +5,8 @@
 #include <QtCore>
 #include "imagepacket.h"
 
+#include "mirrorcontrol.h"
+
 class MarangoniTracking
 {
 private:
@@ -15,6 +17,7 @@ private:
     bool activated;
     bool shouldTrack;
     QStringList dataToSave;
+    MirrorControl mirCtrl;
 public:
     MarangoniTracking(int thresh,int nrParticles);
     cv::Point FindParticle(cv::Mat image);

@@ -3,7 +3,7 @@
 
 using namespace cv;
 
-MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false){
+MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false),mirCtrl(){
 
 }
 
@@ -17,6 +17,8 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     threshold=settings["threshold"].toInt();
     if ((!activated)&&(settings["activated"].toBool())) {
         qDebug()<<"Should initialise";
+
+//         mirCtrl.drawCircleAt(targetX,targetX);
     }
     if (activated&&(!settings["activated"].toBool())) {
         qDebug()<<"Should write to disk";
@@ -24,7 +26,9 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 
     activated=settings["activated"].toBool();
     shouldTrack=settings["shouldTrack"].toBool();
+
 //    qDebug()<<"threshold="<<threshold;
+
 }
 
 bool MarangoniTracking::processImage(ImagePacket& currIm) {

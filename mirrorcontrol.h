@@ -7,6 +7,9 @@
 
 class MirrorControl
 {
+
+private:
+    MTIDevice theMirror;
 public:
     MirrorControl();
     bool Connection();

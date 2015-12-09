@@ -1,8 +1,10 @@
 #include "mirrorcontrol.h"
+#include <QDebug>
 
 MirrorControl::MirrorControl()
 {
-
+    bool success=Connection();
+    qDebug()<<"it worked: "<<success;
 }
 
 bool MirrorControl::Connection() {
