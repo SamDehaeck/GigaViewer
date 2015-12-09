@@ -179,7 +179,10 @@ OTHER_FILES += \
     README.txt \
     gigaviewer.desktop \
     GigaViewer.svg \
-    video-fmf.xml
+    video-fmf.xml \
+    CompilingLinux.txt \
+    CompilingMac.txt \
+    CompilingWindows.txt
 
 RESOURCES += \
     icons.qrc

@@ -1,0 +1,10 @@
+Compiling on Linux
+------------------
+* install gcc (build-essentials)
+* install qtcreator
+* install git
+* install opencv (development version)
+* install hdf5 (development version)
+* Now open QtCreator and click New Project - Import Project - Git Clone and for repository type:
+  https://github.com/SamDehaeck/GigaViewer . Now select where you want to save and click continue.
+* Take a look at the configuration options mentionned in the Gigaviewer.pro file, to select the options you want to include. For the different camera backends, you need to install their 'drivers' first (to be found on their websites).
