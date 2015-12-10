@@ -3,7 +3,11 @@
 
 using namespace cv;
 
-MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false),mirCtrl(){
+MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false)
+#ifdef Q_OS_WIN32
+  ,mirCtrl()
+#endif
+{
 
 }
 
