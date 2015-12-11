@@ -2,12 +2,24 @@ Compiling on Windows
 --------------------
 * Install VisualStudio2012 (later version might work as well, but 32-bit vc12 mode allows to use precompiled versions of qt and opencv)
 * Install Qt (version 5.4.2 including Opengl extension)
-* Install Cmake (Executing it should be allowed by ctrl-clicking on it and selecting open, double-clicking will not work.)
+* Install Git (Github desktop is an easy solution)
 * Opencv: Download and install in C:\opencv . It should have a build\x86\vc12\lib subdirectory
 * Add the corresponding 'bin'-directory to the windows path (the lib directory is only for linking)
 * HDF5: this is optional but allows to record into and read from HDF5 containers
   - Download and install. Copy installed files to C:\HDF5\1.8.15
-* Add the 'bin' directory to the windows path
+  - Add the 'bin' directory to the windows path
 * Now open QtCreator (located in /users/tips/Qt) and click New Project - Import Project - Git Clone and for repository type:
   https://github.com/SamDehaeck/GigaViewer . Now select where you want to save and click continue.
-* Take a look at the configuration options mentionned in the Gigaviewer.pro file, to select the options you want to include. For the different camera backends, you need to install their 'drivers' first (to be found on their websites).
+* If you installed Github desktop instead, clone the repository through its interface instead and open the .pro file from qtcreator afterwards.
+* Take a look at the configuration options mentionned in the Gigaviewer.pro file, to select the options you want to include.
+For the first compilation tests, it is best to leave all extra features turned off. In this way, the correct functioning of the Qt and Opencv libraries is checked.
+The Hdf5 option is a usefull extension, as it gives access to a more 'universal' single container movie format which is easily accessible from many different programs.
+The 'Tracking' option is work in progress to illustrate real time processing of the recorded images. It has no real use for the moment
+Before you enable the different camera backends, you need to install their respective 'drivers' first (to be found on their websites).
+
+********
+* If you want/need to recompile opencv or hdf5 you will also need to install cmake
+* Open cmake and locate the source directory and define a build directory.
+* Press configure and if no problems are detected, press generate
+* Go into the build directory and build it (typing make or with visualstudio)
+* Install it (by typing make install or with visualstudio)
