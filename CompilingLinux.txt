@@ -8,10 +8,12 @@ Compiling on Linux
 * Now open QtCreator and click New Project - Import Project - Git Clone and for repository type:
   https://github.com/SamDehaeck/GigaViewer . Now select where you want to save and click continue.
 * Take a look at the configuration options mentionned in the Gigaviewer.pro file, to select the options you want to include. For the different camera backends, you need to install their 'drivers' first (to be found on their websites).
-For the first compilation tests, it is best to leave all extra features turned off. In this way, the correct functioning of the Qt and Opencv libraries is checked.
-The Hdf5 option is a usefull extension, as it gives access to a more 'universal' single container movie format which is easily accessible from many different programs.
-The 'Tracking' option is work in progress to illustrate real time processing of the recorded images. It has no real use for the moment
-Before you enable the different camera backends, you need to install their respective 'drivers' first (to be found on their websites).
+  For the first compilation tests, it is best to leave all extra features turned off. In this way, the correct functioning of the Qt and Opencv libraries is checked.
+  The Hdf5 option is a usefull extension, as it gives access to a more 'universal' single container movie format which is easily accessible from many different programs.
+  The 'Tracking' option is work in progress to illustrate real time processing of the recorded images. It has no real use for the moment
+  Before you enable the different camera backends, you need to install their respective 'drivers' first (to be found on their websites).
+* Inside this GigaViewer.pro file you can also find the compilation instructions for each platform. If the compilation does not work, check here if all the
+  include directories are correct and library linking directories.
 
 Post-install tips for Linux:
 ----------------------------

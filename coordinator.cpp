@@ -7,10 +7,10 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
     if (guiMode) {
         connect(theGui,SIGNAL(newPicNeeded(QString)),&picBack,SLOT(LoadNewImage(QString)));
         connect(&picBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
-        connect(theGui,SIGNAL(newMovieNeeded(QString)),this,SLOT(LoadNewMovie(QString)));
-
-        connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlCameraThread(bool)));
         connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
+
+        connect(theGui,SIGNAL(newMovieNeeded(QString)),this,SLOT(LoadNewMovie(QString)));
+        connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlCameraThread(bool)));
         connect(theGui,SIGNAL(implementNewFps(int)),this,SLOT(changeFps(int)));
         connect(theGui,SIGNAL(startRecording(bool,QString,QString)),&camBack,SLOT(StartRecording(bool,QString,QString)));
         connect(theGui,SIGNAL(newAvtFeedNeeded(bool)),this,SLOT(StartNewAVT(bool)));

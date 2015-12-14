@@ -44,6 +44,7 @@ win32 {
     HDF5 {
         QMAKE_INCDIR += "C:\HDF5\1.8.15\include"  #this cannot have a space => copy installed hdf5 folder to the root
         QMAKE_LIBDIR += "C:\HDF5\1.8.15\lib"
+        LIBS += -lhdf5 -lhdf5_cpp
     }
 
     PVAPI {
@@ -59,7 +60,8 @@ win32 {
         INCLUDEPATH += "C:\Program Files\IDS\uEye\Develop\include"
         LIBS += "C:\Program Files\IDS\uEye\Develop\Lib\uEye_api.lib"
     }
-    LIBS += -lopengl32 -lhdf5 -lhdf5_cpp -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
+    LIBS += -lopengl32 -lopencv_core2411 -lopencv_imgproc2411 -lopencv_highgui2411 -lopencv_video2411
+#    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary modify for correct suffix
 }
 
 unix:!macx {
@@ -73,8 +75,9 @@ unix:!macx {
         QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
-    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
-    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
+    LIBS += `pkg-config --libs opencv`
+#    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
+#    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 
     PVAPI {
         LIBS += -lPvAPI

@@ -1,8 +1,8 @@
 Compiling on Mac:
 -----------------
 * Install XCode (mac store)
-* Install Qt (latest version for clang 64-bit work fine)
-* Install Cmake (Executing it should be allowed by ctrl-clicking on it and selecting open, double-clicking will not work.)
+* Install Qt (latest version for clang 64-bit works fine)
+* Install Cmake (Executing it for the first time should be allowed by ctrl-clicking on it and selecting open, double-clicking will not work.)
 * Opencv
   - Download and unzip
   - Make build directory
@@ -14,12 +14,12 @@ Compiling on Mac:
   - Download and unzip
   - Make build directory
   - With CMake locate the source code directory and the build directory: press configure 
-  - switch on the OsXFrameworks option (not sure if necessary)
+  - switch on the OsXFrameworks option (not sure if this is necessary)
   - now press generate in the cmake interface
   - go with terminal to build directory
   - type: make (or make -j 4 if you want it to go faster)
   - type: sudo make install
-  - Stopping here should be ok but for me the compilation then worked but launching Gigaviewer failed due to some library mismatch problem 
+  - Stopping here should be ok but for me, the compilation then worked but launching Gigaviewer failed due to some library mismatch problem
     => remove some faulty(?) symbolic links by typing the following (or rename them if you prefer):
     sudo rm /usr/local/HDF_Group/HDF5/1.8.16/lib/libhdf5.10.1.0.dylib to remove this symbolic link. Also type similar things to remove libhdf5_hl.10.1.0.dylib, libhdf5_cpp.10.1.0.dylib and libhdf5_hl_cpp.10.1.0.dylib
 * Now open QtCreator (located in /users/tips/Qt) and click New Project - Import Project - Git Clone and for repository type:
@@ -28,3 +28,5 @@ Compiling on Mac:
   But for the first compilation tests, it is best to leave all extra features turned off (also HDF5 and Tracking). In this way, the correct functioning of the Qt and Opencv libraries is checked.
   The Hdf5 option is a usefull extension, as it gives access to a more 'universal' single container movie format which is easily accessible from many different programs.
   The 'Tracking' option is work in progress to illustrate real time processing of the recorded images. It has no real use for the moment.
+* Inside this GigaViewer.pro file you can also find the compilation instructions for each platform. If the compilation does not work, check here if all the
+  include directories are correct and library linking directories.
