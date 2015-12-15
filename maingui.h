@@ -58,6 +58,7 @@ public slots:
     void gotNewFpsFromBackend(int fps);
     void gotNewShutSpeed(int shut);
     void needNewSample();
+    void getSnapshot(QString location);
 
 
 protected:
@@ -76,6 +77,11 @@ private:
     PlaybackDialog* playDialog;
     CameraControlsDialog* camDialog;
     bool getNewSample;
+    bool recordSnapshot;
+    QString snapshotLocation;
+
+    bool saveSnapshot(ImagePacket theImage);
+
 #ifdef TRACKING
     MarangoniTrackingDialog* trackDialog;
 #endif

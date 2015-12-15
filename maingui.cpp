@@ -50,24 +50,29 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(VimbaFeedPressed()),this,SLOT(VimbaFeedPressed()));
     connect(fileDialog,SIGNAL(IdsFeedPressed()),this,SLOT(IdsFeedPressed()));
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
+
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
     connect(playDialog,SIGNAL(recordNow(bool,QString,QString)),this,SIGNAL(startRecording(bool,QString,QString)));
     connect(playDialog,SIGNAL(jumpFrames(bool)),this,SIGNAL(skipFrames(bool)));
+    connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
+    connect(this,SIGNAL(showNewFps(int)),playDialog,SLOT(showNewFps(int)));
+    connect(playDialog,SIGNAL(recordSnapshot(QString)),this,SLOT(getSnapshot(QString)));
+
     connect(camDialog,SIGNAL(NeedNewSample()),this,SLOT(needNewSample()));
     connect(this,SIGNAL(newSampleReady(ImagePacket)),camDialog,SLOT(GotNewSample(ImagePacket)));
     connect(camDialog,SIGNAL(SetShutterSpeed(int)),this,SIGNAL(setShutter(int)));
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
-    connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
-    connect(this,SIGNAL(showNewFps(int)),playDialog,SLOT(showNewFps(int)));
     connect(camDialog,SIGNAL(SetRoiRows(int)),this,SIGNAL(setRoiRows(int)));
     connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
+
 #ifdef TRACKING
     connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
 #endif
 
     setScene(theScene);
     getNewSample=false;
+    recordSnapshot=false;
 }
 
 void MainGui::returnToStart()
@@ -95,6 +100,9 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
     if (getNewSample) {
         emit newSampleReady(theMatrix);
         getNewSample=false;
+    }
+    if (recordSnapshot) {
+        bool succ=saveSnapshot(theMatrix);
     }
 }
 
@@ -223,6 +231,26 @@ void MainGui::IdsFeedPressed()
 void MainGui::needNewSample()
 {
     getNewSample=true;
+}
+
+void MainGui::getSnapshot(QString location) {
+    if (location.endsWith(".png")) {
+//        qDebug()<<"Ends in png";
+    } else if (location.endsWith(".bmp")) {
+//        qDebug()<<"Ends in bmp";
+    } else if (location.endsWith(".jpg")) {
+//        qDebug()<<"Ends in jpg";
+    } else {
+        location=location+".png";
+    }
+    snapshotLocation=location;
+    recordSnapshot=true;
+}
+
+bool MainGui::saveSnapshot(ImagePacket theImage) {
+    bool succ=cv::imwrite(snapshotLocation.toStdString().c_str(),theImage.image);
+    recordSnapshot=false;
+    return succ;
 }
 
 

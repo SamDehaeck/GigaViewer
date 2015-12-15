@@ -29,6 +29,7 @@ CamBackend::CamBackend(QObject *parent) :
 #ifdef TRACKING
   ,tracker(50,1),doPluginProcessing(false)
 #endif
+   ,skipImages(0)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
@@ -195,9 +196,28 @@ void CamBackend::SetInterval(int newInt)
     isPaused=newInt>3000000;
     if (!isPaused) {
         if (needTimer) {
+            double maxInterval=1000.0; // ask from camera
+            if (newInt>maxInterval) {
+                    double ratio=newInt/maxInterval;
+                    int skip=int(ceil(ratio));
+                    double newNewInt=1.0*newInt/skip;
+                    qDebug()<<"Would skip: "<<skip-1<<" images with interval of: "<<newNewInt;
+
+            }
+
             timer.setInterval(abs(newInt));
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
+            // ask for fps-limits and decide if a skip is needed
+            double maxInterval=1000.0; // ask from camera
+            if (newInt>maxInterval) {
+                    double ratio=newInt/maxInterval;
+                    int skip=int(ceil(ratio));
+                    double newNewInt=1.0*newInt/skip;
+                    qDebug()<<"Would skip: "<<skip-1<<" images with interval of: "<<newNewInt;
+            }
+
+            //
             int newFps=currSource->SetInterval(abs(newInt));
             if (newFps!=newInt) {
                 emit fpsChanged(newFps);

@@ -120,9 +120,14 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
         }
         if (valStr.at(0)=='-') currentTimer=-currentTimer;
     } else {
-        currentTimer=valStr.toInt();
+        int tim1,msecs1;
+        if (parseInstruct(valStr,tim1,msecs1)) {
+            currentTimer=tim1*1000;
+        } else {
+            currentTimer=valStr.toInt();
+        }
     }
-
+//  qDebug()<<"delay="<<currentTimer;
     emit newFps(currentTimer);
 }
 
@@ -292,5 +297,16 @@ void PlaybackDialog::finishedSecondTimer() {
     if (recording) {
         ui->recTimedButton->toggle();
         ui->stopButton->click();
+    }
+}
+
+void PlaybackDialog::on_snapshotButton_clicked()
+{
+    QString fold= QFileDialog::getSaveFileName(0,QString("Where should I save the snapshot?"));
+    //qDebug()<<"Gotten this output: "<<fold;
+    if (fold=="") {
+    //    qDebug()<<"Was cancelled, do nothing.";
+    } else {
+        emit recordSnapshot(fold);
     }
 }

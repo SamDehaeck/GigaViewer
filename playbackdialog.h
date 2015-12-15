@@ -24,6 +24,7 @@ signals:
     void newFps(int fps);
     void jumpFrames(bool forward);
     void recordNow(bool checked,QString recFold, QString codec);
+    void recordSnapshot(QString SnapshotName);
 
 private slots:
     void on_stopButton_clicked();
@@ -42,6 +43,8 @@ private slots:
     void on_recTimedButton_toggled(bool checked);
     void finishedFirstTimer();
     void finishedSecondTimer();
+
+    void on_snapshotButton_clicked();
 
 public slots:
     void newFrameNumberReceived(int nr);

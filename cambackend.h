@@ -63,6 +63,9 @@ private:
     bool doesCallBack;
     bool running;
     QString format;
+    int skipImages;
+
+
 #ifdef TRACKING
     MarangoniTracking tracker;
 #endif
