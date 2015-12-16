@@ -76,7 +76,7 @@ unix:!macx {
         QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
-    LIBS += `pkg-config --libs opencv`
+    LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
 #    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
 #    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 
@@ -95,6 +95,8 @@ macx {
     CONFIG += c++11
     QMAKE_INCDIR += /usr/local/include
     QMAKE_LIBDIR += /usr/local/lib
+    QMAKE_INCDIR += /sw/include  # added in case opencv or Hdf5 were obtained from Fink
+    QMAKE_LIBDIR += /sw/lib      # added in case opencv or Hdf5 were obtained from Fink
     VIMBA|IDS|PVAPI {
         message(No camera modules support so far!!! Change configuration in GigaViewer.pro.)
     }
@@ -104,7 +106,7 @@ macx {
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp -lhdf5_hl_cpp
     }
     LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
-    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
+#    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary so uncomment
 }
 
 PVAPI {
