@@ -38,7 +38,7 @@ TRACKING {
 #message(The Defines are $$DEFINES)
 
 win32 {
-    CONFIG += console      # switch this on if you want to see some debug output to the console.
+#    CONFIG += console      # switch this on if you want to see some debug output to the console.
     message(Compiling for windows)
     INCLUDEPATH += C:\opencv\build\include
     QMAKE_LIBDIR += "C:\opencv\build\x86\vc12\lib"
@@ -95,8 +95,8 @@ macx {
     CONFIG += c++11
     QMAKE_INCDIR += /usr/local/include
     QMAKE_LIBDIR += /usr/local/lib
-    QMAKE_INCDIR += /sw/include  # added in case opencv or Hdf5 were obtained from Fink
-    QMAKE_LIBDIR += /sw/lib      # added in case opencv or Hdf5 were obtained from Fink
+#    QMAKE_INCDIR += /sw/include  # in case opencv or Hdf5 were obtained from Fink uncomment this line
+#    QMAKE_LIBDIR += /sw/lib      # in case opencv or Hdf5 were obtained from Fink uncomment this line
     VIMBA|IDS|PVAPI {
         message(No camera modules support so far!!! Change configuration in GigaViewer.pro.)
     }

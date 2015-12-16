@@ -382,11 +382,11 @@ bool CamBackend::endProcPlugin() {
     return true;
 }
 
-bool CamBackend::DoProcPlugin(ImagePacket& newIm) {
+bool CamBackend::DoProcPlugin(ImagePacket& ) {
     return true;
 }
 
-bool CamBackend::startRecPlugin(QString RecName) {
+bool CamBackend::startRecPlugin(QString ) {
     return true;
 }
 
@@ -394,7 +394,7 @@ bool CamBackend::endRecPlugin() {
     return true;
 }
 
-bool CamBackend::setSettingsPlugin(ImagePacket& newIm,QStringList settings) {
+bool CamBackend::setSettingsPlugin(ImagePacket& ,QStringList ) {
     return true;
 }
 #ifdef TRACKING

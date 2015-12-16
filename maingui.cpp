@@ -103,6 +103,9 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
     }
     if (recordSnapshot) {
         bool succ=saveSnapshot(theMatrix);
+        if (!succ) {
+            qDebug()<<"Snapshot failed";
+        }
     }
 }
 
