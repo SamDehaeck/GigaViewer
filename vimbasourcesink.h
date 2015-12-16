@@ -54,7 +54,7 @@ private:
     VmbInt64_t maxHeight,maxWidth;
     double frameRate,exposure;
     VmbInt64_t camFreq,initialStamp;
-    int timeOffset;
+    double timeOffset;
     QString format;
 
 

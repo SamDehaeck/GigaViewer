@@ -324,6 +324,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         initialStamp=stamp;
         qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
         timeOffset=currMsec;
+//        qDebug()<<"StartTime: "<<currMsec<<" vs "<<timeOffset;
     }
     target.timeStamp=timeOffset+1000.0*(stamp-initialStamp)/(1.0*camFreq);
 //        qDebug()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
@@ -386,12 +387,12 @@ bool VimbaSourceSink::SetShutter(int shutTime)
         }
     } else {
         // perhaps an old firewire camera (AVT Firepackage)
-        err=pCamera->GetFeatureByName("Exposure",pFeature);
+        err=pCamera->GetFeatureByName("ExposureTime",pFeature);
         if (err==VmbErrorSuccess) {
             err=pFeature->SetValue(dShut);
             if (err==VmbErrorSuccess) {
                 exposure=shutTime;
-    //            qDebug()<<"New shutter time is: "<<dShut;
+                qDebug()<<"ExposureTime worked";
                 return true;
             }
         }

@@ -81,7 +81,7 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     if (!liveFeed) {
         target.seqNumber=camera.get(CV_CAP_PROP_POS_FRAMES);
     } else {
-        target.seqNumber=-1;
+        target.seqNumber=target.seqNumber+1;
     }
     camera >> target.image;
     if (target.image.channels()==3) {

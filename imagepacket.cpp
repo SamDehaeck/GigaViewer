@@ -1,6 +1,6 @@
 #include "imagepacket.h"
 
-ImagePacket::ImagePacket():pixFormat("")
+ImagePacket::ImagePacket():pixFormat(""),seqNumber(0)
 {
 }
 
