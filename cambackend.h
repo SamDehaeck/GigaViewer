@@ -37,7 +37,7 @@ signals:
 
 public slots:
     void GrabFrame();
-    void StartRecording(bool start, QString recFold="", QString codec="");
+    void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
     void skipForwardBackward(bool forward);
     void willStartTheTimer(int interval);
     void willStopTheTimer();
@@ -64,6 +64,7 @@ private:
     bool running;
     QString format;
     int skipImages;
+    int recSkip;
 
 
 #ifdef TRACKING

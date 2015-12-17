@@ -55,7 +55,8 @@ void PlaybackDialog::on_recButton_toggled(bool checked)
     recording=checked;
     QString recf=ui->RecFolder->text();
     QString cod=ui->codecBox->currentText();
-    emit recordNow(checked,recf,cod);
+    int recSk=ui->recSkippingEdit->text().toInt();
+    emit recordNow(checked,recf,cod,recSk);
     if (recording) {
         ui->LeftStatus->setText("Recording");
     } else {
@@ -229,7 +230,8 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
 
     QString recf=ui->RecFolder->text();
     QString cod=ui->codecBox->currentText();
-    emit recordNow(checked,recf,cod);
+    int recSk=ui->recSkippingEdit->text().toInt();
+    emit recordNow(checked,recf,cod,recSk);
     if (recording) {
         ui->LeftStatus->setText("Recording");
         timer1.start();
@@ -300,8 +302,7 @@ void PlaybackDialog::finishedSecondTimer() {
     }
 }
 
-void PlaybackDialog::on_snapshotButton_clicked()
-{
+void PlaybackDialog::on_snapshotButton_clicked() {
     QString fold= QFileDialog::getSaveFileName(0,QString("Where should I save the snapshot?"));
     //qDebug()<<"Gotten this output: "<<fold;
     if (fold=="") {

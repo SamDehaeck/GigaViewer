@@ -34,7 +34,7 @@ signals:
     void newIdsFeedNeeded(bool start);
     void implementNewFps(int fps);
     void showNewFps(int msec);
-    void startRecording(bool start,QString recfold,QString codec);
+    void startRecording(bool start,QString recfold,QString codec,int skipping);
     void closeApplic();
     void newSampleReady(ImagePacket matrix);
     void newFrameNrShowing(int nr);

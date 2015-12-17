@@ -23,7 +23,7 @@ signals:
     void stopPlayback();
     void newFps(int fps);
     void jumpFrames(bool forward);
-    void recordNow(bool checked,QString recFold, QString codec);
+    void recordNow(bool checked,QString recFold, QString codec,int recordSkip);
     void recordSnapshot(QString SnapshotName);
 
 private slots:

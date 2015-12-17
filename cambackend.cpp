@@ -29,7 +29,7 @@ CamBackend::CamBackend(QObject *parent) :
 #ifdef TRACKING
   ,tracker(50,1),doPluginProcessing(false)
 #endif
-   ,skipImages(0)
+   ,skipImages(0),recSkip(0)
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
@@ -91,7 +91,16 @@ void CamBackend::GrabFrame()
                 return; // skip recording and showing the image
             }
         }
-        if (recording && currSink) currSink->RecordFrame(currImage);
+
+        if (recSkip>0) {
+            int newSkip=recSkip;
+            if (skipImages>0) newSkip=newSkip*skipImages;
+            if (currImage.seqNumber%newSkip==0) {
+                if (recording && currSink) currSink->RecordFrame(currImage);
+            }
+        } else {
+            if (recording && currSink) currSink->RecordFrame(currImage);
+        }
 
 #ifdef TRACKING
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
@@ -225,9 +234,10 @@ void CamBackend::SetInterval(int newInt) {
 }
 
 //make new sink
-void CamBackend::StartRecording(bool startRec,QString recFold, QString codec)
+void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, int skip)
 {
     if (startRec) {
+        recSkip=skip+1;
         if (codec.contains("FMF")) {
             currSink=new FmfSourceSink();
             if (format=="MONO8") {
