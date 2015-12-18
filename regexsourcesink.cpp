@@ -9,7 +9,7 @@ bool RegexSourceSink::Init()
 
 bool RegexSourceSink::StartAcquisition(QString dev)
 {
-    QRegExp rx("(.+)/(.+)(\\..+)");
+    QRegExp rx("(.+)/(.+)(\\..+)"); //somepath/somename.someextension
     int pos=0;
 
     pos=rx.indexIn(dev);
@@ -17,13 +17,13 @@ bool RegexSourceSink::StartAcquisition(QString dev)
     basename=rx.cap(2);
     extension=rx.cap(3);
 
-    QRegExp rt("(\\d+$)");
+    QRegExp rt("(\\d+$)");  // now look for digits in the basename
     pos=rt.indexIn(basename);
     basename.truncate(pos);
 
 //    qDebug()<<dir<<basename<<rt.cap(1)<<extension;
 
-    QString regexString=basename+"\\d+"+extension;
+    QString regexString=basename+"(\\d+)"+extension;
 
 //    qDebug()<<"Will load files that match"<<regexString;
     QRegExp movieRegex(regexString);
@@ -34,13 +34,24 @@ bool RegexSourceSink::StartAcquisition(QString dev)
     filt<<"*"+extension;
     basedir.setNameFilters(filt);
     QStringList files=basedir.entryList();
-    goodFiles=new QStringList;
+
+    QMap<int, QString> map;
+
+
     for (int i=0;i<files.count();i++) {
         if (movieRegex.indexIn(files.at(i))!=-1) {
-            goodFiles->append(files.at(i));
+            int newnr=movieRegex.cap(1).toInt();
+            map.insert(newnr,files.at(i));
         }
     }
-    if (goodFiles->count()==0) qDebug()<<"No matching files found";
+    if (map.count()==0) {
+        qDebug()<<"No matching files found";
+        return false;
+    }
+
+    // now sort along captured number
+    goodFiles= new QStringList(map.values());
+
     index=0;
     nFrames=goodFiles->count();
 

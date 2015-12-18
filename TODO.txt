@@ -1,3 +1,28 @@
+=> Reading bitmaplist named image1.tif,...image10.tif in the correct order => typically (d+).ext
+=> Play back by default in real-time.
+=> Allow zooming by scrolling
+=> Allow cropping with offset X and Y
+=> When only a single image present, it is not shown: Not starting at beginning/ending with last image?
+
+=> IDS camera: implement FRAME QUEUE!! + clock frequency lijkt toch belangrijk hier, cropping, ..
+
+=> Could create a RAM-sink to store a maximum of images in the system RAM => Can I poll for available RAM-memory? (=> can be used to decide on queue size in current backends to minimize data loss which would render this option unimportant). When finished ask where to store. => could solve issues when using a laptop for storing data. => polling is platform dependent but could be implemented.
+ -- or could have this as an option (amount of GB of RAM that can be used).
+=> kind of 'extra' options which are hidden by default like for the recording location dialog?
+=> Min and Max fps and min and max exposure times should be shown
+=> Allow modifying gain.
+=> Allow modifying binning and skipping of lines
+=> allow recording with subsample options or perhaps some compression settings?
+
+=> Play High speed camera images directly (Multi-page Tiff?) From IDT.
+
+=> Make display options pane to allow dynamic rescaling (uint16=>to min-max), colour interpolation,
+   fixed scale, HISTOGRAM (=> Show histogram of current image).
+
+
+PLUGINS
+*******
+
 * Allow for image processing extensions (PLUGINS): accessible from right click menu. Check which dialogs to show
         - Ronald's tracking and beam steering => will also require output of txt file with positions
                 >> could be achieved with different outputsink which embodies two different outputs: saving unmodified images with 			   some skipping (lower fps is ok) + high fps x,y pair saving to csv file.
@@ -26,24 +51,3 @@ function endRecording() -> bool : could be used for saving the final csv file wi
 function endProcess() -> bool : deinitialise everything
 
 + dialog to input these settings
-
-
-=> Play back by default in real-time.
-=> Show histogram of current image
-=> Allow zooming by scrolling
-=> When only a single image present, it is not shown: Not starting at beginning/ending with last image?
-=> Reading bitmaplist named image1.tif,...image10.tif in the correct order => typically (d+).ext
-
-=> IDS camera: implement FRAME QUEUE!! + clock frequency lijkt toch belangrijk hier
-
-=> Could create a RAM-sink to store a maximum of images in the system RAM => Can I poll for available RAM-memory? (=> can be used to decide on queue size in current backends to minimize data loss which would render this option unimportant). When finished ask where to store. => could solve issues when using a laptop for storing data. => polling is platform dependent but could be implemented.
- -- or could have this as an option (amount of GB of RAM that can be used).
-=> kind of 'extra' options which are hidden by default like for the recording location dialog?
-=> Min and Max fps and min and max exposure times should be shown
-=> Allow modifying gain.
-=> Allow modifying binning and skipping of lines
-=> Allow cropping with offset X and Y
-=> allow recording with subsample options or perhaps some compression settings?
-
-=> Play XVI movies directly (Xenics IR camera)
-=> Play High speed camera images directly (Multi-page Tiff?)

@@ -12,7 +12,7 @@ bool XviSourceSink::StartAcquisition(QString dev)
 //    uint32_t version = 3;
 //    char dataf[15];
     int sizeofuint32 = 4;
-    int sizeofuint64 = 8;
+//    int sizeofuint64 = 8;
 
 //    ListIndex=0;
 //    lastPrinted=0;
