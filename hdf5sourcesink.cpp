@@ -261,6 +261,7 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         dataformat="RGB8";
     } else {
         qDebug()<<"This format not yet implemented: "<<codec;
+        return false;
     }
 
 

@@ -1,6 +1,7 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
+#include "xvisourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
 
@@ -129,6 +130,10 @@ bool CamBackend::StartAcquisition(QString dev)
 #endif
     } else if (dev.contains(".fmf")) {
         currSource=new FmfSourceSink();
+        needTimer=true;
+        doesCallBack=false;
+    } else if (dev.contains(".xvi")) {
+        currSource=new XviSourceSink();
         needTimer=true;
         doesCallBack=false;
     } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG")) || (dev.contains(".tif")) || (dev.contains(".TIF"))) {
@@ -279,7 +284,14 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
             currSink=new OpencvSourceSink();
         }
         int fps=timer.interval()/10;
-        currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
+        bool succ=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
+        if (!succ) {
+            qDebug()<<"Start recording failed!";
+            delete currSink;
+            currSink=0;
+            recording=false;
+            return;
+        }
     } else { // stopping recording
         if (currSink!=0) {
             currSink->StopRecording();
