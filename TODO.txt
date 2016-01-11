@@ -1,4 +1,3 @@
-=> Reading bitmaplist named image1.tif,...image10.tif in the correct order => typically (d+).ext
 => Play back by default in real-time.
 => Allow zooming by scrolling
 => Allow cropping with offset X and Y

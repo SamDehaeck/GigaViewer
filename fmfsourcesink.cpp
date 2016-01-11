@@ -101,6 +101,7 @@ bool FmfSourceSink::StartAcquisition(QString dev)
         exit(1);
     }
     headersize = ftell(fmf);
+//    qDebug()<<"Header size of fmf is: "<<headersize;
 
     fseek(fmf,0,SEEK_END);
     nFrames=(ftell(fmf)-headersize)/bytesperchunk;

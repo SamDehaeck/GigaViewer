@@ -1,0 +1,5 @@
+FlyMovieFormat is the work of at least the following individuals:
+
+Andrew Straw
+Kristin Branson
+John Bender
