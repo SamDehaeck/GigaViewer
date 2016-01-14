@@ -101,6 +101,10 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
         cv::Mat dummy(source.image.rows,source.image.cols,CV_8UC3);
         cv::cvtColor(source.image,dummy,CV_BayerGB2RGB);
         source.image=dummy;
+    } else if (source.pixFormat=="BAYERRG12") {
+        cv::Mat dummy(source.image.rows,source.image.cols,CV_16UC3);
+        cv::cvtColor(source.image,dummy,CV_BayerRG2RGB);
+        source.image=dummy;
     }
 
 

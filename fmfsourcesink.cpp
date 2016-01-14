@@ -53,10 +53,12 @@ bool FmfSourceSink::StartAcquisition(QString dev)
 //              qDebug()<<"Recognised Mono14 FMF-file";
           } else if (dataformat=="BAYERRG8") {
 //              qDebug()<<"Recognised BayerRG8 FMF-file";
+          } else if (dataformat=="BAYERRG12") {
+              qDebug()<<"Recognised BayerRG12 FMF-file";
           } else if (dataformat=="BAYERGB8") {
 //              qDebug()<<"Recognised BayerGB8 FMF-file";
           } else if (dataformat=="RGB8") {
-//              qDebug()<<"Recognised RGB8 FMF-file";
+              qDebug()<<"Recognised RGB8 FMF-file";
           } else {
               qDebug()<<"Unrecognised format "<<dataformat;
           }
@@ -172,6 +174,13 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
         qDebug()<<"Image pixel format different from written fmf-header: "<<source.pixFormat<<" - "<<dataformat;
         return false;
     }
+
+    if (startTime==-1) {
+        startTime=source.timeStamp;
+    }
+
+    timestamps.push_back((source.timeStamp-startTime));
+
     if (fwrite(&source.timeStamp,sizeof(double),1,fmfrec)==1) {
         //test here what the bitdepth of the source image is
 //        if (source.image.depth()==2)
@@ -196,6 +205,7 @@ bool FmfSourceSink::RecordFrame(ImagePacket &source)
             }
         }
     }
+
     return false;
 }
 
@@ -228,6 +238,10 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         formatlen=8;
         bitsperpixel=8;
         dataformat="BAYERGB8";
+    } else if (codec=="FMFBAYERRG12") {
+        formatlen=9;
+        bitsperpixel=16;
+        dataformat="BAYERRG12";
     } else if (codec=="FMFRGB8") {
         formatlen=4;
         bitsperpixel=8;
@@ -236,8 +250,12 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
         return false;
     }
 
+    timestamps.clear();
+    startTime=-1;
+
     QDateTime mom = QDateTime::currentDateTime();
-    QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".fmf";
+    basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+    QString filenam=basename+".fmf";
 
 
 
@@ -321,6 +339,21 @@ bool FmfSourceSink::StopRecording()
     fseek(fmfrec,recNframespos,SEEK_SET);
     if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
+
+    QString filename=basename+"_timestamps.txt";
+//    QString filename = "/home/sam/times.txt";
+    QFile fileout(filename);
+    if (fileout.open(QFile::ReadWrite | QFile::Text| QFile::Truncate)){
+     QTextStream out(&fileout);
+     for (QVector<double>::iterator iter = timestamps.begin(); iter != timestamps.end(); iter++){
+         out << *iter<<"\n";
+     }
+     fileout.close();
+    }
+
+
+
+
     return true;
 }
 

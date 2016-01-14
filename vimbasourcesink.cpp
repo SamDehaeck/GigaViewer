@@ -27,6 +27,10 @@ void VimbaSourceSink::setFormat(QString formatstring) {
             err=pFeature->SetValue(VmbPixelFormatBayerRG8);
         } else if (format=="BAYERGB8") {
             err=pFeature->SetValue(VmbPixelFormatBayerGB8);
+        } else if (format=="BAYERRG12") {
+            err=pFeature->SetValue(VmbPixelFormatBayerRG12);
+        } else if (format=="RGB8Packed") {
+            err=pFeature->SetValue(VmbPixelFormatRgb8);
         } else {
             qDebug()<<"Pixel Format not yet working in Gigaviewer: "<<format;
         }
@@ -195,8 +199,12 @@ bool VimbaSourceSink::Init()
                                 items<<"BAYERRG8";
                             } else if (pixF[i]=="BayerGB8") {
                                 items<<"BAYERGB8";
+                            } else if (pixF[i]=="BayerRG12") {
+                                items<<"BAYERRG12";
+                            } else if (pixF[i]=="RGB8Packed") {
+                                items<<"RGB8Packed";
                             } else {
-                                if (!QString::fromStdString(pixF[i]).contains("Packed")) {
+                                if (!QString::fromStdString(pixF[i]).contains("12Packed")) {
                                     qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
                                 }
                             }
@@ -209,7 +217,7 @@ bool VimbaSourceSink::Init()
                         if (ok && !item.isEmpty()) {
                             format=item;
                             setFormat(format);
-            //                qDebug()<<"Selected "<<format;
+                            qDebug()<<"Selected "<<format;
                         }
 
 
@@ -282,6 +290,7 @@ bool VimbaSourceSink::ReleaseCamera()
 
 bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
+//    qDebug()<<"Format is: "<<format;
     if (indexIncrement<0) qDebug()<<"Cannot stream backwards";
 
     AVT::VmbAPI::FramePtr pFrame=frameWatcher->GetFrame();
@@ -300,7 +309,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         if (pixFormat==VmbPixelFormatMono8) target.pixFormat="MONO8";
         if (pixFormat==VmbPixelFormatBayerRG8) target.pixFormat="BAYERRG8";
         if (pixFormat==VmbPixelFormatBayerGB8) target.pixFormat="BAYERGB8";
-    } else if ((pixFormat==VmbPixelFormatMono12)||(pixFormat=VmbPixelFormatMono14)) {
+    } else if ((pixFormat==VmbPixelFormatMono12)||(pixFormat==VmbPixelFormatMono14)||(pixFormat==VmbPixelFormatBayerRG12)) {
         target.image=cv::Mat(height,width,CV_16U);
         err=pFrame->GetImage(target.image.data);
         if (err!=VmbErrorSuccess) {
@@ -310,9 +319,20 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         }
         if (pixFormat==VmbPixelFormatMono12) target.pixFormat="MONO12";
         if (pixFormat==VmbPixelFormatMono14) target.pixFormat="MONO14";
+        if (pixFormat==VmbPixelFormatBayerRG12) target.pixFormat="BAYERRG12";
+    } else if (pixFormat==VmbPixelFormatRgb8) {
+        target.image=cv::Mat(height,width,CV_8UC3);
+        err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
+        if (err!=VmbErrorSuccess) {
+            qDebug()<<"Something went wrong assigning the data";
+        }
+        if (pixFormat==VmbPixelFormatRgb8) target.pixFormat="RGB8";
+
     } else {
         qDebug()<<"Other pixel formats not yet working";
     }
+
+//    qDebug()<<"target format is: "<<target.pixFormat;
 
     VmbUint64_t id;
     err=pFrame->GetFrameID(id);

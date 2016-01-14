@@ -16,7 +16,7 @@
 => Play High speed camera images directly (Multi-page Tiff?) From IDT.
 
 => Make display options pane to allow dynamic rescaling (uint16=>to min-max), colour interpolation,
-   fixed scale, HISTOGRAM (=> Show histogram of current image).
+   fixed scale, HISTOGRAM (=> Show histogram of current image). Or plot along one row/column.
 
 
 PLUGINS

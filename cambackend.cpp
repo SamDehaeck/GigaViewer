@@ -255,7 +255,11 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
                 codec="FMFBAYERRG8";
             } else if (format=="BAYERGB8") {
                 codec="FMFBAYERGB8";
+            } else if (format=="BAYERRG12") {
+                codec="FMFBAYERRG12";
             } else if (format=="RGB8") {
+                codec="FMFRGB8";
+            } else if (format=="RGB8Packed") {
                 codec="FMFRGB8";
             }
 
@@ -272,9 +276,13 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
                 codec="HDF14";
             } else if (format=="BAYERRG8") {
                 codec="HDFBAYERRG8";
+            } else if (format=="BAYERRG12") {
+                codec="HDFBAYERRG12";
             } else if (format=="BAYERGB8") {
                 codec="HDFBAYERGB8";
             } else if (format=="RGB8") {
+                codec="HDFRGB8";
+            } else if (format=="RGB8Packed") {
                 codec="HDFRGB8";
             }
 #else
@@ -349,6 +357,7 @@ void CamBackend::setRoiCols(int cols) {
 
 // only 8-bit/16-bit gray or 8-bit RGB can be displayed to screen => adjust if a different format
 void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
+
     if (currImage.pixFormat=="") {
         //sink does not support it yet
         currImage.pixFormat="MONO8";
@@ -379,8 +388,23 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
             cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
             currImage.image=dummy;
         }
-    } else if (currImage.pixFormat=="RGB8"){
-        //qDebug()<<"Got a RGB8 frame"; //Nothing to do
+    } else if (currImage.pixFormat=="BAYERRG12") {
+        double max;
+        cv::minMaxLoc(currImage.image,NULL,&max);
+        if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
+
+        if (currImage.image.channels()==1) {
+            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_16UC3);
+            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+            currImage.image=dummy;
+        }
+
+
+    } else if ((currImage.pixFormat=="RGB8")||(currImage.pixFormat=="RGB8Packed")) {
+//        cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+//        cv::cvtColor(currImage.image,dummy,CV_RGB2BGR);
+//        currImage.image=dummy;
+//        qDebug()<<"Got a RGB8 frame"; //Nothing to do
     } else if (currImage.pixFormat=="FLOAT") {
         double min,max;
         cv::minMaxLoc(currImage.image,&min,&max);

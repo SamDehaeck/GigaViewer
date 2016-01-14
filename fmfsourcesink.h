@@ -31,6 +31,10 @@ private:
     int rows,cols;
     int nFrames;
     int currPos;
+    QString basename;
+
+    QVector<double> timestamps;
+    double startTime;
 };
 
 #endif // FMFBACKEND_H

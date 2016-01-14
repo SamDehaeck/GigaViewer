@@ -107,16 +107,20 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
                  if (dataformat=="RGB8") {
                      readType=PredType::NATIVE_UCHAR;
                      frame=cv::Mat(dims[1],dims[2]/3.,CV_8UC3);
-                     dataformat="RGB8";
+//                     dataformat="RGB8";
                  } else {
                     readType=PredType::NATIVE_UCHAR;
                     frame=cv::Mat(dims[1],dims[2],CV_8U);
-                    dataformat="MONO8";
+                    if (!hasFormat) {
+                        dataformat="MONO8";
+                    }
                  }
              } else if (size==2) {
                  readType=PredType::NATIVE_UINT16;
                  frame=cv::Mat(dims[1],dims[2],CV_16U);
-                 dataformat="MONO14"; // not knowing if it is 12 or 14, 14 is the safer choice for displaying will check attribute later.
+                 if (!hasFormat) {
+                    dataformat="MONO14"; // not knowing if it is 12 or 14, 14 is the safer choice for displaying will check attribute later.
+                 }
              } else {
                  qDebug()<<"Integer size not yet handled: "<<size;
                  return false;
@@ -256,6 +260,9 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     } else if (codec=="HDFBAYERGB8") {
         dataformat="BAYERGB8";
         readType=PredType::NATIVE_UCHAR;
+    } else if (codec=="HDFBAYERRG12") {
+        dataformat="BAYERRG12";
+        readType=PredType::NATIVE_UINT16;
     } else if (codec=="HDFRGB8") {
         readType=PredType::NATIVE_UCHAR;
         dataformat="RGB8";
@@ -321,6 +328,10 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         StrType strdatatype(PredType::C_S1, 8); // of length 6 characters => MONO8, MONO12, MONO14
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
         myatt_in.write(strdatatype, "BAYERGB8");
+    } else if (dataformat=="BAYERRG12") {
+        StrType strdatatype(PredType::C_S1, 9); // of length 6 characters => MONO8, MONO12, MONO14
+        Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
+        myatt_in.write(strdatatype, "BAYERRG12");
     } else if (dataformat=="RGB8") { // this will be converted to grayscale for the moment
         StrType strdatatype(PredType::C_S1, 4); // of length 6 characters => MONO8, MONO12, MONO14
         Attribute myatt_in = dataset.createAttribute("PIXFORMAT", strdatatype, attr_dataspace);
