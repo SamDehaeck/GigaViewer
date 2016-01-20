@@ -105,8 +105,13 @@ bool FmfSourceSink::StartAcquisition(QString dev)
     headersize = ftell(fmf);
 //    qDebug()<<"Header size of fmf is: "<<headersize;
 
+#ifdef Q_OS_WIN32
+    _fseeki64(fmf,0,SEEK_END);
+    nFrames=(_ftelli64(fmf)-headersize)/bytesperchunk;
+#else
     fseek(fmf,0,SEEK_END);
     nFrames=(ftell(fmf)-headersize)/bytesperchunk;
+#endif
     if (abs(nFrames)!=int(nRead)) qDebug()<<"Wrong number of frames reported"<<nRead<<"versus calculated"<<nFrames;
     fseek(fmf,headersize,SEEK_SET);
     currPos=0;
@@ -133,7 +138,11 @@ bool FmfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         return true;
     }
     if (indexIncrement!=1) {
+#ifdef Q_OS_WIN32
+                _fseeki64(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
+#else
                 fseek(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
+#endif
     }
 //    if (index!=-1) {
 //        fseek(fmf,headersize+index*bytesperchunk,SEEK_SET); //modify this to use currPos to jump around less
@@ -334,8 +343,13 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
 bool FmfSourceSink::StopRecording()
 {
     int sizeofuint64 = 8;
+#ifdef Q_OS_WIN32
+    uint64_t posNow=_ftelli64(fmfrec);
+#else
     uint64_t posNow=ftell(fmfrec);
+#endif
     uint64_t nWritten=(posNow-recheadersize)/bytesperchunk;
+    qDebug()<<"Number of frames: "<<nWritten;
     fseek(fmfrec,recNframespos,SEEK_SET);
     if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
@@ -375,8 +389,11 @@ bool FmfSourceSink::SkipFrames(bool forward) {
         return true;
     }
 
-
+#ifdef Q_OS_WIN32
+    _fseeki64(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
+#else
     fseek(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
+#endif
     currPos+=skipping;
     return true;
 }
