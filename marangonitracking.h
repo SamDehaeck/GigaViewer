@@ -6,11 +6,14 @@
 #include "imagepacket.h"
 
 #ifdef Q_OS_WIN32
-#include "mirrorcontrol.h"
+    #include "regulation.h"
 #endif
 class MarangoniTracking
 {
 private:
+    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
+    float center;
+    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
     int threshold;
     int nrParts;
     int targetX;
@@ -19,7 +22,7 @@ private:
     bool shouldTrack;
     QStringList dataToSave;
 #ifdef Q_OS_WIN32
-    MirrorControl mirCtrl;
+    Regulation myRegulator;
 #endif
 public:
     MarangoniTracking(int thresh,int nrParticles);
