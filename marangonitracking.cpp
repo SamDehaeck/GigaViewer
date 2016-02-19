@@ -21,28 +21,30 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     targetY=settings["targetY"].toInt();
     threshold=settings["threshold"].toInt();
 
-    if ((!activated)&&(settings["activated"].toBool())) {                   //Activation of the tracking
-        myRegulator.Initialisation();                                       //Initialisation of the mirror
-        if (myRegulator.properConnection == false){                         //Verification that the connection with the MEMs is ok
-            qDebug()<<"Problem with the MEM conection - Closing the program";
-            //exit(0);                                                        //...if no proper connection, exits the programme
-        }
+    if ((!activated)&&(settings["activated"].toBool())) {                       //Activation of the tracking
         qDebug()<<"Activation of the tracking";
-        myRegulator.Figure(1, targetX, targetY);                           //Creation of the figure. For the future, need a button to choose which type of figure is used
-    }
-    if (activated&&(!settings["activated"].toBool())) {//Desactivation of the tracking
+#ifdef Q_OS_WIN32
+        myRegulator.Initialisation();                                           //Initialisation of the mirror
+        if (myRegulator.properConnection == false){                             //Verification that the connection with the MEMs is ok
+            qDebug()<<"Problem with the MEM conection - Closing the program";
+            //exit(0);                                                          //...if no proper connection, exits the programme
+        }
+        myRegulator.Figure(1, targetX, targetY);                                //Creation of the figure. For the future, need a button to choose which type of figure is used
+#endif
+        }
+
+    if (activated&&(!settings["activated"].toBool())) {                         //Desactivation of the tracking
         qDebug()<<"Desactivation of the traking";
         activated=settings["activated"].toBool();
         Sleep(100);
+#ifdef Q_OS_WIN32
         myRegulator.closeRegulation();
+#endif
         qDebug()<<"Should write to disc now";
     }
 
     activated=settings["activated"].toBool();
     shouldTrack=settings["shouldTrack"].toBool();
-
-//    qDebug()<<"threshold="<<threshold;
-
 }
 
 bool MarangoniTracking::processImage(ImagePacket& currIm) {
@@ -77,7 +79,9 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 //            currIm.timeStamp+" "+threshold+" "+targetX+""
 //            dataToSave.append(outst);
 
+            //Image processing here --> gives x_pos and y_pos: (x,y) position of the particule
 
+#ifdef Q_OS_WIN32
             /*
                 myRegulator.Regulator(x_pos, y_pos);
             }*/
@@ -89,8 +93,8 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             //center = center + (rand()%10)/100.;
             if (center>=0.75){center=0.75;}
             //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
+#endif
         }
     }
     return true;
 }
-

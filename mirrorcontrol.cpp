@@ -1,4 +1,4 @@
-#include "mirrorControl.h"
+#include "mirrorcontrol.h"
 #include <QDebug>
 
 MirrorControl::MirrorControl()
@@ -63,6 +63,8 @@ void MirrorControl::Closing(){
     mti->DeleteDevice();
     LastError = mti->GetLastError();
     qDebug()<<"Error on DeleteDevice: " <<LastError;
+
+    delete mti;
 }
 
 

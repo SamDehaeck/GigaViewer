@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#include "mirrorControl.h"
+#include "mirrorcontrol.h"
 
 class Regulation
 {

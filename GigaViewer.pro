@@ -72,6 +72,8 @@ win32 {
         LIBS += -lMTIDataGenerator -lMTIDevice
         SOURCES += mirrorcontrol.cpp
         HEADERS += mirrorcontrol.h
+        SOURCES += regulation.cpp
+        HEADERS += regulation.h
     }
 }
 
