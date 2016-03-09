@@ -1,8 +1,6 @@
 #ifndef REGULATION_H
 #define REGULATION_H
 
-#include <math.h>
-
 #include "mirrorcontrol.h"
 
 class Regulation

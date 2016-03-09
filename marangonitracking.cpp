@@ -1,5 +1,9 @@
 #include "marangonitracking.h"
 
+#include <QList>
+#include <QStringList>
+#include <QDir>
+
 using namespace cv;
 
 MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false)
@@ -21,7 +25,8 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     targetY=settings["targetY"].toInt();
     threshold=settings["threshold"].toInt();
 
-    if ((!activated)&&(settings["activated"].toBool())) {                       //Activation of the tracking
+    //Activation of the tracking
+    if ((!activated)&&(settings["activated"].toBool())) {
         qDebug()<<"Activation of the tracking";
 #ifdef Q_OS_WIN32
         myRegulator.Initialisation();                                           //Initialisation of the mirror
@@ -31,16 +36,19 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
         }
         myRegulator.Figure(1, targetX, targetY);                                //Creation of the figure. For the future, need a button to choose which type of figure is used
 #endif
-        }
+    }
 
-    if (activated&&(!settings["activated"].toBool())) {                         //Desactivation of the tracking
+    //Desactivation of the tracking
+    if (activated&&(!settings["activated"].toBool())) {
         qDebug()<<"Desactivation of the traking";
-        activated=settings["activated"].toBool();
-        Sleep(100);
+        activated=settings["activated"].toBool();                               //Update and sleep to avoid conflict with the MEM:...
+        Sleep(100);                                                             //... No new postion of the laser is required when closing connection
 #ifdef Q_OS_WIN32
         myRegulator.closeRegulation();
 #endif
-        qDebug()<<"Should write to disc now";
+        qDebug()<<"Writing data to disc...";
+        savingData();                                                           //Writting dataToSave which contains every parameters on disc
+        qDebug()<<"Data saved";
     }
 
     activated=settings["activated"].toBool();
@@ -73,12 +81,6 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
             currIm.image=outImage;
 
-            // now make string to save                                                  //Save the positions in the vector at each new image
-            //QString outst(""
-//            outst=""+
-//            currIm.timeStamp+" "+threshold+" "+targetX+""
-//            dataToSave.append(outst);
-
             //Image processing here --> gives x_pos and y_pos: (x,y) position of the particule
 
 #ifdef Q_OS_WIN32
@@ -94,7 +96,24 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             if (center>=0.75){center=0.75;}
             //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
 #endif
+
+            //Adding all parameters in the 'dataToSave' vector at each new image
+            QString currentData(QString::number(center)
+                                +","
+                                +QString::number(targetX)
+                                +",");
+            dataToSave.append(currentData);
         }
     }
     return true;
+}
+
+void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
+
+    QString filename = "Data.txt";
+    QFile file (filename);
+    file.open(QIODevice::WriteOnly);
+    QTextStream out(&file);
+    out << dataToSave;
+    file.close();
 }

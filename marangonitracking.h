@@ -20,7 +20,8 @@ private:
     int targetY;
     bool activated;
     bool shouldTrack;
-    QStringList dataToSave;
+    QString dataToSave;
+    void savingData ();
 #ifdef Q_OS_WIN32
     Regulation myRegulator;
 #endif
