@@ -22,6 +22,8 @@ private:
     bool shouldTrack;
     QString dataToSave;
     void savingData ();
+    void readMappingParameters();
+    float a,b,c,d,e,f;
 #ifdef Q_OS_WIN32
     Regulation myRegulator;
 #endif

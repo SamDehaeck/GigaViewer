@@ -11,6 +11,7 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
   ,myRegulator()
 #endif
 {
+    readMappingParameters();                                                    //Reading and saving the parameters of the mirror/laser mapping
     //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
     center = -0.75;
     //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
@@ -49,6 +50,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
         qDebug()<<"Writing data to disc...";
         savingData();                                                           //Writting dataToSave which contains every parameters on disc
         qDebug()<<"Data saved";
+        readMappingParameters();
     }
 
     activated=settings["activated"].toBool();
@@ -116,4 +118,28 @@ void MarangoniTracking::savingData(){                                           
     QTextStream out(&file);
     out << dataToSave;
     file.close();
+}
+
+void MarangoniTracking::readMappingParameters(){                                            //Used to load the mapping parameters
+
+    QString filename = "mapping.txt";
+    QFile file (filename);
+    QString line;
+    if(file.open(QIODevice::ReadOnly)){
+        QTextStream in(&file);
+        line = in.readLine();
+        a = line.section('\t', 0,0).toFloat();
+        b = line.section('\t',1,1).toFloat();
+        c = line.section('\t', 2,2).toFloat();
+        line = in.readLine();
+        d = line.section('\t', 0,0).toFloat();
+        e = line.section('\t',1,1).toFloat();
+        f = line.section('\t', 2,2).toFloat();
+        file.close();
+        qDebug() << "Mapping parameters correctly loaded";
+    }
+    else{
+        qDebug() << "Problem with the reading of the mapping parameters";
+        //exit(0);
+    }
 }
