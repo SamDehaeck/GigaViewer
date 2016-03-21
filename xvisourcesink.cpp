@@ -39,8 +39,15 @@ bool XviSourceSink::StartAcquisition(QString dev)
     dataformat="FLOAT";
     footersize=bytesperchunk-firstNums[9];
 
+#ifdef Q_OS_WIN32
+    _fseeki64(xvi,0,SEEK_END);
+    nFrames=(_ftelli64(xvi)-headersize)/bytesperchunk;
+#else
     fseek(xvi,0,SEEK_END);
     nFrames=(ftell(xvi)-headersize)/bytesperchunk;
+#endif
+
+
     fseek(xvi,headersize,SEEK_SET);
     currPos=0;
 //    qDebug()<<"found a lot of frames: "<<nFrames;
@@ -64,7 +71,11 @@ bool XviSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         return true;
     }
     if (indexIncrement!=1) {
+#ifdef Q_OS_WIN32
+                _fseeki64(xvi,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
+#else
                 fseek(xvi,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
+#endif
     }
 
     cv::Mat temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
@@ -80,8 +91,11 @@ bool XviSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     int64 time;
     amread=fread(&time,8,1,xvi);
 
-
-    fseek(xvi,footersize-20,SEEK_CUR);
+#ifdef Q_OS_WIN32
+                _fseeki64(xvi,footersize-20,SEEK_CUR);
+#else
+                fseek(xvi,footersize-20,SEEK_CUR);
+#endif
 
     currPos+=indexIncrement;
     target.seqNumber=currPos;
@@ -138,7 +152,11 @@ bool XviSourceSink::SkipFrames(bool forward) {
     }
 
 
+#ifdef Q_OS_WIN32
+    _fseeki64(xvi,(skipping-1)*bytesperchunk,SEEK_CUR);
+#else
     fseek(xvi,(skipping-1)*bytesperchunk,SEEK_CUR);
+#endif
     currPos+=skipping;
     return true;
 }

@@ -11,9 +11,9 @@ TEMPLATE = app
 
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
 #CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
-CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
-CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+#CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
+#CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
+#CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
 #CONFIG += IDS PVAPI VIMBA HDF5
 # uncomment the CONFIG lines for the camera modules you want compiled, available options: IDS PVAPI VIMBA

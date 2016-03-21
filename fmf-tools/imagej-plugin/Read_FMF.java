@@ -81,11 +81,21 @@ public class Read_FMF implements PlugIn {
                 } else if (form.equals("MONO14")) {
 //					IJ.showMessage(form+" = "+"MONO14");
                     format="[16-bit Unsigned]";
+                } else if (form.equals("BAYERRG12")) {
+//					IJ.showMessage(form+" = "+"MONO14");
+                    format="[16-bit Unsigned]";
+                } else if (form.equals("BAYERRG8")) {
+//					IJ.showMessage(form+" = "+"MONO14");
+                    format="8-bit";
+				} else if (form.equals("BAYERGB8")) {
+//					IJ.showMessage(form+" = "+"MONO14");
+                    format="8-bit";
 				} else if (form.equals("RGB8")) {
 //					IJ.showMessage(form+" = "+"RGB8");
 					format="[24-bit BGR]";
 				} else {
 					IJ.showMessage(form+" did not match anything.");
+					format="8-bit";
                 }
 
                 //other options

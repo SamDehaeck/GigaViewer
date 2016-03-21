@@ -65,7 +65,9 @@ classdef FMF
             obj.bytes_per_chunk = double( fread( obj.filePointer, 1, 'long' ) );
             %frame_count_location = ftell(fp);
             %max_n_frames = double( fread( fp, 1, 'uint64' ) );
-            obj.n_frames = double( fread( obj.filePointer, 1, 'long' ) );
+            temp=fread( obj.filePointer, 2, 'uint32' );
+            obj.n_frames = double( temp(2) );  % ugly 'hack' to read this correctly, will not work for very large files
+            %warning('Noted amount of frames: %d ',obj.n_frames);
 
             if obj.n_frames <= 0,
               fseek(obj.filePointer,0,'eof');
@@ -81,16 +83,17 @@ classdef FMF
             if strcmp(obj.data_format,'MONO8'),
               obj.datatype = 'uint8'; % replace with '*uint8' if you want the output to be uint8 instead of double
             else,
-              if (strcmp(obj.data_format,'MONO12')||strcmp(obj.data_format,'MONO14')),
+              if (strcmp(obj.data_format,'MONO12')||strcmp(obj.data_format,'MONO14')||strcmp(obj.data_format,'BAYERRG12')),
                 obj.datatype = 'uint16';
               else,
                 if strcmp(obj.data_format,'BAYERRG8'),
                     obj.datatype = 'uint8';
                 else,
-                  if strcmp(obj.data_format,'RGB8'),
-                    obj.datatype = ['uint8','uint8','uint8'];
+                  if strcmp(obj.data_format,'BAYERGB8'),
+                    obj.datatype = 'uint8';
                   else,
                     error( 'Unrecognised data type' );
+                    obj.datatype='uint8';
                   end
                 end
               end
