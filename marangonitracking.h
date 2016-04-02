@@ -8,28 +8,34 @@
 #ifdef Q_OS_WIN32
     #include "regulation.h"
 #endif
+
 class MarangoniTracking
 {
 private:
-    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-    float center;
-    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
     int threshold;
     int nrParts;
     int targetX;
     int targetY;
     bool activated;
     bool shouldTrack;
-    QString dataToSave;
+
     void savingData ();
-    void readMappingParameters();
-    float a,b,c,d,e,f;
+    QString dataToSave;
+
+    int type;
+    int flag;
+    float radius;
 #ifdef Q_OS_WIN32
     Regulation myRegulator;
 #endif
+
+    float Ppoint[2];
+    std::vector<std::vector<cv::Point>> contoursP;
+    std::vector<cv::Vec4i> hierachyP;
+    void getPosPartLITTLE(cv::Mat src, std::vector<std::vector<cv::Point>> contoursf, cv::OutputArray hierarchy);
+
 public:
     MarangoniTracking(int thresh,int nrParticles);
-    cv::Point FindParticle(cv::Mat image);
     void ChangeSettings(QMap<QString,QVariant> settings);
     bool processImage(ImagePacket& currIm);
 };

@@ -62,12 +62,16 @@ void MarangoniTrackingDialog::on_thresholdSlider_sliderPressed()
 void MarangoniTrackingDialog::on_thresholdSlider_sliderReleased()
 {
     tSliderPressed=false;
+    int nr=ui->thresholdSlider->value();
+    ui->threshEdit->setText(QString::number(nr));
     extractData();
 }
 
 void MarangoniTrackingDialog::on_thresholdSlider_valueChanged(int)
 {
     if (!tSliderPressed) {
+        int nr=ui->thresholdSlider->value();
+        ui->threshEdit->setText(QString::number(nr));
         extractData();
     }
 }
@@ -106,4 +110,11 @@ void MarangoniTrackingDialog::on_vertPosition_valueChanged(int value)
     if (!ySliderPressed) {
         extractData();
     }
+}
+
+void MarangoniTrackingDialog::on_threshEdit_textChanged(const QString &arg1)
+{
+    int tt=ui->threshEdit->text().toInt();
+    ui->thresholdSlider->setValue(tt);
+    extractData();
 }

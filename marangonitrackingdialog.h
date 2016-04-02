@@ -34,6 +34,8 @@ private slots:
     void on_vertPosition_sliderReleased();
     void on_vertPosition_valueChanged(int value);
 
+    void on_threshEdit_textChanged(const QString &arg1);
+
 private:
     bool extractData();
     bool tSliderPressed,xSliderPressed,ySliderPressed;
