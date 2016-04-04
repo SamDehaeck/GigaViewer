@@ -11,8 +11,8 @@ Regulation::Regulation(): mirCtrl(){                                        //Cr
 
     ptsNumb = 100;                                                          //Cutting the circle into ptsNumb portions
     flag = 1;                                                               //Used for the step response
-    vectorLength = 100;                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
-    d_pl = 17.02;                                                           //Distance between the center of the circle and the laser
+    vectorLength = 32;                                                      //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    d_pl = 17.02;                                                              //Distance between the center of the circle and the laser
 
     //const float kp =0;
     //const flaot ki =0;                                                    //Creation of the regulator parameters
@@ -30,7 +30,7 @@ void Regulation::Figure (int type_recieved, float r, int x_desired, int y_desire
     type = type_recieved, radius = r; desired_x = x_desired; desired_y = y_desired;
     d_pc = radius - d_pl;                                                             //Distance between the center of the circle and the particle
 
-    if(type==1 || type==2){
+    if( (type==1) || (type==2) ){
         qDebug() << "Creation of the figure";
         float stepAngle = (float)M_PI*2 / ptsNumb;
         for( int i = 0; i < ptsNumb; i++ ){
@@ -46,12 +46,13 @@ void Regulation::Figure (int type_recieved, float r, int x_desired, int y_desire
 void Regulation::Regulator (float particle_x, float particle_y){
 
         //PID REGULATION    //use of particule_x, particule_y, desired_x and desired_y
-        //PID REGULATION    //gives the new center of the figure ==> float x and float y
+        //PID REGULATION    //gives the required d_pc_x and d_pc_y (if decoupling is ok)
         //PID REGULATION
 
         if (flag==1){   //Modification of the position of the laser at each image
 
             //For velocity tests and step repsonses, the center/point is fixed by the following rules
+            //in real regulation, x=particle_x + d_pc_x and y=particle_y + d_pc_y if decoupling is ok
             x = particle_x;
             y = particle_y - d_pc;
 
@@ -60,20 +61,22 @@ void Regulation::Regulator (float particle_x, float particle_y){
 //                flag = 0;
 //            }
 
-            if (type==0){  //Point actuation
+            if (type == 0){  //Point actuation
+                y = particle_y - d_pl;
                 mirCtrl.ChangeMirrorPosition(x, y);
             }
 
-            else if (type==1){ //Circle actuation
-                for(int j=0; j<ptsNumb; j++){
+            else if (type == 1){ //Circle actuation
+                qDebug() << "circle is performed";
+                for(int j=0; j<vectorLength; j++){
                     x_vector[j] = figure_x[j] + x;
                     y_vector[j] = figure_y[j] + y;
                 }
                 mirCtrl.ChangeMirrorStream (x_vector, y_vector);
             }
 
-            else {              //Arc circle actuation
-                                //Additional degree of freedom: orientation. Required more computations
+            else if (type == 2){                //Arc circle actuation
+                                                //Additional degree of freedom: orientation. Required more computations
 
 //                //Calculation of objective angle
 //                float objectiveAngle = atan((desired_y - particle_y) / (desired_x - particle_x));
@@ -87,7 +90,7 @@ void Regulation::Regulator (float particle_x, float particle_y){
 //                }
 
                 //for the velocity tests:
-                middleAngle = (float)M_PI / 2;
+                middleAngle = (float)M_PI*(1/2.);
 
                 //Calculation of the index of the middleAngle within x_vector and y_vector
                 int middleAngleIndex = middleAngle / ((float)M_PI*2 / ptsNumb) +0.5;
@@ -99,11 +102,11 @@ void Regulation::Regulator (float particle_x, float particle_y){
 
                 for(i; i <= (vectorLength/4); i++){
                     circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=vectorLength){
-                        circleIndex = circleIndex - vectorLength;
+                    if (circleIndex>=ptsNumb){
+                        circleIndex = circleIndex - ptsNumb;
                     }
                     else if (circleIndex < 0){
-                        circleIndex = circleIndex + vectorLength;
+                        circleIndex = circleIndex + ptsNumb;
                     }
                     x_vector[i] = figure_x[circleIndex] + x;
                     y_vector[i] = figure_y[circleIndex] + y;
@@ -114,11 +117,11 @@ void Regulation::Regulator (float particle_x, float particle_y){
 
                 for(i; i <= (vectorLength*0.75); i++){
                     circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=vectorLength){
-                        circleIndex = circleIndex - vectorLength;
+                    if (circleIndex>=ptsNumb){
+                        circleIndex = circleIndex - ptsNumb;
                     }
                     else if (circleIndex < 0){
-                        circleIndex = circleIndex + vectorLength;
+                        circleIndex = circleIndex + ptsNumb;
                     }
                     x_vector[i] = figure_x[circleIndex] + x;
                     y_vector[i] = figure_y[circleIndex] + y;
@@ -129,11 +132,11 @@ void Regulation::Regulator (float particle_x, float particle_y){
 
                 for(i; i < vectorLength; i++){
                     circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=vectorLength){
-                        circleIndex = circleIndex - vectorLength;
+                    if (circleIndex>=ptsNumb){
+                        circleIndex = circleIndex - ptsNumb;
                     }
                     else if (circleIndex < 0){
-                        circleIndex = circleIndex + vectorLength;
+                        circleIndex = circleIndex + ptsNumb;
                     }
                     x_vector[i] = figure_x[circleIndex] + x;
                     y_vector[i] = figure_y[circleIndex] + y;
@@ -141,6 +144,7 @@ void Regulation::Regulator (float particle_x, float particle_y){
                 }
 
                 mirCtrl.ChangeMirrorStream (x_vector, y_vector);
+
             }
         }
 

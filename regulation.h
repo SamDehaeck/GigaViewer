@@ -23,10 +23,13 @@ private:
     //const flaot ki;
     //const flaot kd;
 
+    //ALWAYS 100
     float figure_x[100];                                            //Variables used for the figure drawing
     float figure_y[100];
-    float x_vector[100];
-    float y_vector[100];
+    //ALWAYS 100
+
+    float x_vector[32];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    float y_vector[32];
 
     float d_pl;                                                     //Distance between the particle and the laser
     float d_pc;                                                     //Distance between the center of the circle and the particle

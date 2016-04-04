@@ -78,15 +78,16 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                 cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
                 cv::Point figureCenter(myRegulator.x, myRegulator.y);
                 if (type==0){
-                    cv::circle(outImage, newLoc2, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
+                    cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
                 }
                 else if (type==1){
-                    cv::circle(outImage, newLoc2, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
+                    cv::circle(outImage, figureCenter, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
                 }
                 else {
                     cv::Size size( radius, radius );                                                    //regulation with a part of the circle
-                    //cv::ellipse(outImage, figureCenter, size, 0, myRegulator.middleAngle*360/M_PI*2 - 90, myRegulator.middleAngle*360/M_PI*2 + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
-                    cv::ellipse(outImage, figureCenter, size, 0,0, 180, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
+                    int middleAngle = myRegulator.middleAngle*180/M_PI;
+                    cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 30, middleAngle + 30, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
+                    //cv::ellipse(outImage, figureCenter, size, 0,180, 360, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
                 }
 
                 currIm.image=outImage;
@@ -111,7 +112,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    QString filename = "thirthVelocity.txt";
+    QString filename = "60deg_dpl17_r200.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);

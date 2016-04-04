@@ -8,7 +8,7 @@
 MirrorControl::MirrorControl()
 {
     qDebug()<<"Creation of MirrorControl object";
-    vectorLength = 100;                                                 //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    vectorLength = 32;                                                 //100 for 180°, 68 for 122.4° and 32 for 57.6°
     for( int i = 0; i < vectorLength; i++ ){							//creation of the m vector used for dataStream
 		m_stream[i]= 0;
 	}
@@ -85,10 +85,10 @@ void MirrorControl::Closing(){
 
 
 //change mirror stream
-void MirrorControl::ChangeMirrorStream (float x_vector[100], float y_vector[100]){
+void MirrorControl::ChangeMirrorStream (float x_vector[32], float y_vector[32]){
 	
     //Mapping: conversion from Pixel to mirrorPosition (between -1 and +1)
-    float xMirr[100], yMirr[100];
+    float xMirr[32], yMirr[32];                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
     for (int i=0; i<vectorLength ; i++){
         xMirr[i] = coefX[0] + coefX[1]*x_vector[i] + coefX[2]*y_vector[i] + coefX[3]*x_vector[i]*x_vector[i] + coefX[4]*x_vector[i]*y_vector[i] + coefX[5]*y_vector[i]*y_vector[i];
         yMirr[i] = coefY[0] + coefY[1]*x_vector[i] + coefY[2]*y_vector[i] + coefY[3]*x_vector[i]*x_vector[i] + coefY[4]*x_vector[i]*y_vector[i] + coefY[5]*y_vector[i]*y_vector[i];
