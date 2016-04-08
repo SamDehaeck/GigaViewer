@@ -11,7 +11,7 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
 #endif
 {
     flag = 1;
-    radius = 200.;
+    radius = 50.;
     type = 2;
 }
 
@@ -64,8 +64,8 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 #ifdef Q_OS_WIN32
             if (flag==1){
                 //Used at the beginning of the code to put the objective of the step repsonse
-                myRegulator.desired_x = Ppoint[0] + 2*radius;           //x position of the particle + 4 times the radius
-                myRegulator.desired_y = Ppoint[1];                      //y position of the particle
+                myRegulator.desired_x = Ppoint[0];                                  //x position of the particle
+                myRegulator.desired_y = Ppoint[1] + 5*radius;                       //y position of the particle + 5 times the radius
                 flag = 0;
             }
             else{
@@ -86,7 +86,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                 else {
                     cv::Size size( radius, radius );                                                    //regulation with a part of the circle
                     int middleAngle = myRegulator.middleAngle*180/M_PI;
-                    cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 30, middleAngle + 30, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
+                    cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 90, middleAngle + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
                     //cv::ellipse(outImage, figureCenter, size, 0,180, 360, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
                 }
 
@@ -112,7 +112,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    QString filename = "60deg_dpl17_r200.txt";
+    QString filename = "080416-stepResponse-180-50-120-first.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);

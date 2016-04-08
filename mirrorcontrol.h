@@ -19,7 +19,7 @@ private:
 
     int vectorLength;
     MTIDevice * mti;
-    unsigned char m_stream[32];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    unsigned char m_stream[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
 	unsigned char m_point;
     void readMappingParameters();
     float coefX[6], coefY[6];
@@ -28,7 +28,7 @@ public:
     MirrorControl();
     bool Initialisation ();
 	void Closing ();
-    void ChangeMirrorStream (float x_vector[32], float y_vector[32]);       //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    void ChangeMirrorStream (float x_vector[100], float y_vector[100]);       //100 for 180°, 68 for 122.4° and 32 for 57.6°
     void ChangeMirrorPosition (float x, float y);
 };
 

@@ -28,8 +28,8 @@ private:
     float figure_y[100];
     //ALWAYS 100
 
-    float x_vector[32];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
-    float y_vector[32];
+    float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    float y_vector[100];
 
     float d_pl;                                                     //Distance between the particle and the laser
     float d_pc;                                                     //Distance between the center of the circle and the particle

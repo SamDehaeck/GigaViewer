@@ -11,7 +11,7 @@ Regulation::Regulation(): mirCtrl(){                                        //Cr
 
     ptsNumb = 100;                                                          //Cutting the circle into ptsNumb portions
     flag = 1;                                                               //Used for the step response
-    vectorLength = 32;                                                      //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    vectorLength = 100;                                                      //100 for 180°, 68 for 122.4° and 32 for 57.6°
     d_pl = 17.02;                                                              //Distance between the center of the circle and the laser
 
     //const float kp =0;
@@ -53,13 +53,13 @@ void Regulation::Regulator (float particle_x, float particle_y){
 
             //For velocity tests and step repsonses, the center/point is fixed by the following rules
             //in real regulation, x=particle_x + d_pc_x and y=particle_y + d_pc_y if decoupling is ok
-            x = particle_x;
-            y = particle_y - d_pc;
+            x = particle_x;                         //for decoupling test: x = particle_x + d_pl;
+            y = particle_y + d_pc;
 
             //For the step response, the laser should stop when it reaches the objective
-//            if (y <= desired_y){
-//                flag = 0;
-//            }
+            if (y >= desired_y){
+                flag = 0;
+            }
 
             if (type == 0){  //Point actuation
                 y = particle_y - d_pl;
@@ -67,7 +67,6 @@ void Regulation::Regulator (float particle_x, float particle_y){
             }
 
             else if (type == 1){ //Circle actuation
-                qDebug() << "circle is performed";
                 for(int j=0; j<vectorLength; j++){
                     x_vector[j] = figure_x[j] + x;
                     y_vector[j] = figure_y[j] + y;
@@ -90,7 +89,7 @@ void Regulation::Regulator (float particle_x, float particle_y){
 //                }
 
                 //for the velocity tests:
-                middleAngle = (float)M_PI*(1/2.);
+                middleAngle = (float)M_PI*(3/2.);
 
                 //Calculation of the index of the middleAngle within x_vector and y_vector
                 int middleAngleIndex = middleAngle / ((float)M_PI*2 / ptsNumb) +0.5;
