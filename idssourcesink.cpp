@@ -46,25 +46,73 @@ bool IdsSourceSink::Init()
            return false;
     }
 
-//    double minFPS, maxFPS, FPSinterval;
-//    is_GetFrameTimeRange (hCam, &minFPS, &maxFPS, &FPSinterval);
-         //cout<< fixed << setprecision(4) << minFPS << " MINFPS " << maxFPS << " MAXFPS "<< FPSinterval << " FPSinterval " << endl;
-         //myfile<< fixed << setprecision(4) << minFPS << " MINFPS " << maxFPS << " MAXFPS "<< FPSinterval << " FPSinterval " << endl;
 
-    is_SetGainBoost (hCam, IS_SET_GAINBOOST_OFF);
-    is_SetWhiteBalance (hCam, IS_SET_WB_DISABLE);
-//    is_SetBrightness (hCam,0);
-//    is_SetContrast (hCam,0);
-//    is_SetGamma (hCam, 100);// Value multiplied by 100 (for the camera it goes from 0.01 to 10
-    is_SetHWGainFactor (hCam, IS_SET_MASTER_GAIN_FACTOR, 100);
-    uint pixelC=304;
+    int clockN;
+    is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_NUMBER,(void*)&clockN,sizeof(clockN));
+    qDebug()<<"Elements in clocklist: "<<clockN;
+
+    int clockList[clockN];
+    is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_LIST,(void*)&clockList,sizeof(clockList));
+    for (int i=0;i<clockN;i++) {
+        qDebug()<<"Clock option - "<<clockList[i];
+    }
+
+    int pixelC=clockList[0];
     is_PixelClock(hCam, IS_PIXELCLOCK_CMD_SET, (void*)&pixelC, sizeof(pixelC));
 
-    flagIDS= is_SetSubSampling (hCam, IS_SUBSAMPLING_2X_VERTICAL | IS_SUBSAMPLING_2X_HORIZONTAL); //Both are needed
+
+    int clockNow;
+    is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET,(void*)&clockNow,sizeof(clockNow));
+    qDebug()<<"Current clock: "<<clockNow;
+
+
+//    double minFPS, maxFPS, FPSinterval;
+//    is_GetFrameTimeRange (hCam, &minFPS, &maxFPS, &FPSinterval);
+//    qDebug()<<"minFps: "<<minFPS<<" maxFps: "<<maxFPS<<" and interval: "<<FPSinterval;
 
     //Configuration section: very important to match the img_bpp=8 with the chacracteristics of the CV::MAT image to use
     //weird results like cropping or black lines can be obtained if not changed accordingly
-    int img_width=2048, img_height=2048, img_bpp=8, factorSMP=2; //Variable to state the Linehopping
+
+    int img_width=0, img_height=0, img_bpp=8; //Variable to state the Linehopping
+
+    SENSORINFO sInfo;
+    is_GetSensorInfo (hCam, &sInfo);
+    img_width = sInfo.nMaxWidth;
+    img_height = sInfo.nMaxHeight;
+    qDebug()<<"Width is "<<img_width<<" and height is "<<img_height;
+    maxWidth=img_width;
+    cols=img_width;
+    maxHeight=img_height;
+    rows=img_height;
+
+    //    is_SetGainBoost (hCam, IS_SET_GAINBOOST_OFF);
+    //    is_SetWhiteBalance (hCam, IS_SET_WB_DISABLE);
+    //    is_SetBrightness (hCam,0);
+    //    is_SetContrast (hCam,0);
+    //    is_SetGamma (hCam, 100);// Value multiplied by 100 (for the camera it goes from 0.01 to 10
+    //    is_SetHWGainFactor (hCam, IS_SET_MASTER_GAIN_FACTOR, 100);
+
+
+    // Set Gain of camera
+    bool masterGain=sInfo.bMasterGain;
+//    qDebug()<<"Hardwaregain is present:"<<masterGain;
+    if (masterGain) {
+        int ret;
+        ret = is_SetHWGainFactor(hCam, IS_INQUIRE_MASTER_GAIN_FACTOR, 100);
+        qDebug()<<"Maximum gain is: "<<ret; // 100 is no gain => 350 is 3.5x or is this 1x and in how many steps?
+
+        int gainSetpoint=100;
+
+        is_SetHWGainFactor(hCam, IS_SET_MASTER_GAIN_FACTOR, gainSetpoint);
+        ret = is_SetHWGainFactor(hCam, IS_GET_MASTER_GAIN_FACTOR, 100);
+        qDebug()<<"Now it is: "<<ret;
+    }
+
+
+
+//    flagIDS= is_SetSubSampling (hCam, IS_SUBSAMPLING_2X_VERTICAL | IS_SUBSAMPLING_2X_HORIZONTAL); //Both are needed
+    int factorSMP=1; // change this to value of subsampling
+
 //    int img_step, img_data_size;
 
     imgMem = NULL;
@@ -77,7 +125,7 @@ bool IdsSourceSink::Init()
     is_SetDisplayMode (hCam, IS_SET_DM_DIB); // Direct buffer mode writes to RAM which is the only option on Linux
 
     //OpenCV variables: REMEMBER THE SUBSAMPLING
-    buffer=cv::Mat::zeros(img_width/factorSMP,img_height/factorSMP, CV_8UC1);
+    buffer=cv::Mat::zeros(img_height/factorSMP,img_width/factorSMP, CV_8UC1);
 
     return true;
 }
@@ -117,7 +165,7 @@ bool IdsSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         is_GetImageMem (hCam, &pMemVoid);
         buffer.data =  (unsigned char*)pMemVoid;
         is_GetImageInfo( hCam, memId, &ImageInfo, sizeof(ImageInfo)); //Get info ASAP in case of an interruption due to a click
-        target.image=buffer.clone();
+        target.image=buffer(cv::Rect(0,0,cols,rows)).clone(); // only copy cropped version from buffer to output.
 
         if (camTimeOffset==0) {
             camTimeOffset=3600000*ImageInfo.TimestampSystem.wHour+60000*ImageInfo.TimestampSystem.wMinute+1000.0*ImageInfo.TimestampSystem.wSecond+ImageInfo.TimestampSystem.wMilliseconds;
@@ -157,8 +205,26 @@ bool IdsSourceSink::ReleaseCamera() {
 
 int IdsSourceSink::SetInterval(int msec) {
     double fps = 1000.0/((double)msec);
-    double newfps;
+
+    double min=0.0,max=0.0,interv=0.0;
+    is_GetFrameTimeRange (hCam, &min, &max, &interv);
+    double minFps, maxFps;//, minstep;
+    maxFps = 1 / min;
+    minFps = 1 / max;
+//    minstep = (1 / min) - (1 / (min + interv));
+//    qDebug()<<"Min fps: "<<minFps<<" max fps: "<<maxFps<<" and interval "<<minstep;
+    if (fps<minFps) {
+        qDebug()<<"Wanted to go below minimum fps "<<minFps;  // should reduce clock settings to try and reach it
+        fps=minFps;
+    } else if (fps>maxFps) {
+        qDebug()<<"Wanted to go above maximum fps "<<maxFps;  // should increase clock to try and reach it
+        fps=maxFps;
+    }
+
+    double newfps=0.0;
     is_SetFrameRate(hCam,fps,&newfps);
+//    qDebug()<<"Tried to set to: "<<fps<<" and got to "<<newfps;
+
     camTimeStep=1000.0/newfps;
     return camTimeStep;
 }
@@ -175,21 +241,82 @@ bool IdsSourceSink::SetShutter(int shutTime)
     double dblRange[3]; // min, max and increment
     is_Exposure(hCam, IS_EXPOSURE_CMD_GET_EXPOSURE_RANGE, (void*)&dblRange, sizeof(dblRange));
 
-    if (texp<dblRange[0]) texp=dblRange[0];
+    // max exposure time is related to fps and changes each time fps is changed (=> = camtimestep)
+
+//    qDebug()<<"Exposure range is: "<<dblRange[0]<<" to "<<dblRange[1];
+//    qDebug()<<"And camtimestep is : "<<camTimeStep;
+
+    if (texp<dblRange[0]) {
+        qDebug()<<"Went too low in shutter time: "<<texp<<" vs "<<dblRange[0]; // should increase clock speed to be able to go faster!
+        texp=dblRange[0];
+    } else if (texp>dblRange[1]) {
+        qDebug()<<"Went too high in shutter time: "<<texp<<" vs "<<dblRange[1]; // should decrease clock speed to be able to go slower
+        texp=dblRange[1];
+    }
+
 
     is_Exposure(hCam,IS_EXPOSURE_CMD_SET_EXPOSURE,(void*)&texp,sizeof(texp));
-
-    //is_SetExposureTime (hCam, IS_GET_EXPOSURE_TIME, &texp);
 
     return true;
 }
 
 int IdsSourceSink::SetAutoShutter(bool fitRange)
 {
-    if ((fitRange)||(!fitRange)) {
-        qDebug()<<"The auto shutter mode parameter has no effect for IDS";
+    if (fitRange) {
+        qDebug()<<"Only 1 auto shutter mode present for IDS";
     }
     double dEnable=1.0;
     is_SetAutoParameter(hCam, IS_SET_ENABLE_AUTO_SHUTTER, &dEnable, NULL);
     return 0;
 }
+
+bool IdsSourceSink::SetRoiRows(int newrows) {
+    if (newrows>maxHeight) {
+        newrows=maxHeight;
+    }
+
+    UINT nAbsPos[2];
+    nAbsPos[0]=0;
+    nAbsPos[1]=0;
+
+    // set absolute pos
+    is_AOI(hCam, IS_AOI_IMAGE_SET_POS, (void*)&nAbsPos , sizeof(nAbsPos));
+
+    IS_SIZE_2D imageSize;
+    imageSize.s32Width = cols;
+    imageSize.s32Height = newrows;
+    INT nRet = is_AOI (hCam,IS_AOI_IMAGE_SET_SIZE, (void*)&imageSize,sizeof(imageSize));
+    if (nRet == IS_SUCCESS) {
+        rows=newrows;
+    } else {
+        qDebug()<<"Cropping rows did not work";
+    }
+
+    return true;
+}
+
+bool IdsSourceSink::SetRoiCols(int newcols) {
+    if (newcols>maxWidth) {
+        newcols=maxWidth;
+    }
+
+    UINT nAbsPos[2];
+    nAbsPos[0]=0;
+    nAbsPos[1]=0;
+    // set absolute pos
+    is_AOI(hCam, IS_AOI_IMAGE_SET_POS, (void*)&nAbsPos , sizeof(nAbsPos));
+
+    IS_SIZE_2D imageSize;
+    imageSize.s32Width = newcols;
+    imageSize.s32Height = rows;
+    INT nRet = is_AOI (hCam,IS_AOI_IMAGE_SET_SIZE, (void*)&imageSize,sizeof(imageSize));
+    if (nRet == IS_SUCCESS) {
+        cols=newcols;
+    }  else {
+        qDebug()<<"Cropping cols did not work";
+    }
+
+    return true;
+}
+
+

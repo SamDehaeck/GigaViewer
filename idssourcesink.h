@@ -20,6 +20,8 @@ public:
     int SetInterval(int msec);
     bool SetShutter(int shutTime);
     int SetAutoShutter(bool fitRange);
+    bool SetRoiRows(int rows);
+    bool SetRoiCols(int cols);
 
 private:
     HIDS hCam;
@@ -34,6 +36,7 @@ private:
     int Index;
     unsigned long Last;
     int rows,cols;
+    int maxHeight,maxWidth;
     double camTimeStep;
     double camTimeOffset;
     cv::Mat buffer;
