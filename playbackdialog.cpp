@@ -78,7 +78,7 @@ void PlaybackDialog::on_toolButton_clicked()
 {
     QString old = ui->RecFolder->text();
 //    if (old=="") {
-        QString fold= QFileDialog::getExistingDirectory(this,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
+        QString fold= QFileDialog::getExistingDirectory(0,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 //    } else {
 //        QString fold= QFileDialog::getExistingDirectory(this,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 //    }
@@ -146,6 +146,7 @@ void PlaybackDialog::showNewFps(int msec) {
 
 void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 {
+//    qDebug()<<"Fps val given: "<<value;
     double newFrameRate=1;
     if (value>10) {
         newFrameRate=value-9;
