@@ -155,7 +155,8 @@ SOURCES += main.cpp \
     imagesourcesink.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp \
-    xvisourcesink.cpp
+    xvisourcesink.cpp \
+    mrfsourcesink.cpp
 
 TRACKING {
     SOURCES += marangonitracking.cpp \
@@ -182,7 +183,8 @@ HEADERS  += \
     imagesourcesink.h \
     cameracontrolsdialog.h \
     regexsourcesink.h \
-    xvisourcesink.h
+    xvisourcesink.h \
+    mrfsourcesink.h
 
 
 FORMS += \

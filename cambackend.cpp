@@ -2,6 +2,7 @@
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
 #include "xvisourcesink.h"
+#include "mrfsourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
 
@@ -134,6 +135,10 @@ bool CamBackend::StartAcquisition(QString dev)
         doesCallBack=false;
     } else if (dev.contains(".xvi")) {
         currSource=new XviSourceSink();
+        needTimer=true;
+        doesCallBack=false;
+    } else if (dev.contains(".mrf")) {
+        currSource=new MrfSourceSink();
         needTimer=true;
         doesCallBack=false;
     } else if ((dev.contains(".png")) || (dev.contains(".bmp")) || (dev.contains(".jpg")) || (dev.contains(".JPG")) || (dev.contains(".tif")) || (dev.contains(".TIF"))) {
