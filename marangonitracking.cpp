@@ -112,7 +112,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    QString filename = "080416-stepResponse-180-50-120-first.txt";
+    QString filename = "25042016-stepR-exp1-distanceIndex1.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);

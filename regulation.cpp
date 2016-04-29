@@ -11,8 +11,26 @@ Regulation::Regulation(): mirCtrl(){                                        //Cr
 
     ptsNumb = 100;                                                          //Cutting the circle into ptsNumb portions
     flag = 1;                                                               //Used for the step response
-    vectorLength = 100;                                                      //100 for 180°, 68 for 122.4° and 32 for 57.6°
-    d_pl = 17.02;                                                              //Distance between the center of the circle and the laser
+    vectorLength = 100;                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
+
+//Index 1
+    d_pl = 11.63;
+//Index 2
+    //d_pl = 15.51;
+//Index 3
+    //d_pl = 19.39;
+//Index 4
+    //d_pl = 23.27;
+//Index 5
+    //d_pl = 27.15;
+//Index 6
+    //d_pl = 31.03;
+//Index 7
+    //d_pl = 34.9;
+//Index 8
+    //d_pl = 38.78;
+//Index 9
+    //d_pl = 42.66;
 
     //const float kp =0;
     //const flaot ki =0;                                                    //Creation of the regulator parameters
@@ -52,17 +70,20 @@ void Regulation::Regulator (float particle_x, float particle_y){
         if (flag==1){   //Modification of the position of the laser at each image
 
             //For velocity tests and step repsonses, the center/point is fixed by the following rules
-            //in real regulation, x=particle_x + d_pc_x and y=particle_y + d_pc_y if decoupling is ok
-            x = particle_x;                         //for decoupling test: x = particle_x + d_pl;
-            y = particle_y + d_pc;
-
-            //For the step response, the laser should stop when it reaches the objective
-            if (y >= desired_y){
-                flag = 0;
-            }
+    //Index 1-5-9
+            x = particle_x + d_pc;
+            y = particle_y;
+    //Index 2-6
+//            x = particle_x;
+//            y = particle_y + d_pc;
+    //Index 3-7
+//            x = particle_x - d_pc;
+//            y = particle_y;
+    //Index 4-8
+//            x = particle_x;
+//            y = particle_y - d_pc;
 
             if (type == 0){  //Point actuation
-                y = particle_y - d_pl;
                 mirCtrl.ChangeMirrorPosition(x, y);
             }
 
@@ -88,8 +109,17 @@ void Regulation::Regulator (float particle_x, float particle_y){
 //                  middleAngle = middleAngle + 2*M_PI;
 //                }
 
-                //for the velocity tests:
-                middleAngle = (float)M_PI*(3/2.);
+                //for the velocity tests and step response tests:
+                //middleAngle = (float)M_PI*(3/2.);
+
+//Index 1-5-9
+                middleAngle = (float)M_PI;
+//Index 2-6
+                //middleAngle = (float)M_PI*(3/2.);
+//Index 3-7
+                //middleAngle = 0;
+//Index 4-8
+                //middleAngle = (float)M_PI*(1/2.);
 
                 //Calculation of the index of the middleAngle within x_vector and y_vector
                 int middleAngleIndex = middleAngle / ((float)M_PI*2 / ptsNumb) +0.5;
