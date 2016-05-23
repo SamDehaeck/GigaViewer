@@ -13,28 +13,10 @@ Regulation::Regulation(): mirCtrl(){                                        //Cr
     flag = 1;                                                               //Used for the step response
     vectorLength = 100;                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
 
-//Index 1
-    d_pl = 11.63;
-//Index 2
-    //d_pl = 15.51;
-//Index 3
-    //d_pl = 19.39;
-//Index 4
-    //d_pl = 23.27;
-//Index 5
-    //d_pl = 27.15;
-//Index 6
-    //d_pl = 31.03;
-//Index 7
-    //d_pl = 34.9;
-//Index 8
-    //d_pl = 38.78;
-//Index 9
-    //d_pl = 42.66;
-
-    //const float kp =0;
-    //const flaot ki =0;                                                    //Creation of the regulator parameters
-    //const flaot kd =0;
+    k_p =0.4558;
+    T_i =8.962;                                                             //Creation of the regulator parameters
+    k_t =0.37;
+    T_s = 0.1;
 }
 
 bool Regulation::Initialisation(){
@@ -43,12 +25,11 @@ bool Regulation::Initialisation(){
 }
 
 
-void Regulation::Figure (int type_recieved, float r, int x_desired, int y_desired){
+void Regulation::Figure (int type_regulation, int type_target, int time_start, float r, int x_target, int y_target){
 
-    type = type_recieved, radius = r; desired_x = x_desired; desired_y = y_desired;
-    d_pc = radius - d_pl;                                                             //Distance between the center of the circle and the particle
+    regulation_type = type_regulation, target_type = type_target, start_time = time_start; radius = r;
 
-    if( (type==1) || (type==2) ){
+    if( (regulation_type == 1) || (regulation_type == 2) ){
         qDebug() << "Creation of the figure";
         float stepAngle = (float)M_PI*2 / ptsNumb;
         for( int i = 0; i < ptsNumb; i++ ){
@@ -59,127 +40,181 @@ void Regulation::Figure (int type_recieved, float r, int x_desired, int y_desire
     else{
         qDebug()<<"Use of the point actuation. No figure creation";
     }
+
+    if( target_type == 0){                                                      //step reference
+        target_x = x_target;
+        target_y = y_target;
+    }
+    else{                                                                       //tracking reference: target x and y change during time
+        target_x = 0;
+        target_y = 0;
+    }
+
+    u_i = 0;
+    u = 0;                                                                      //reset of internal states of the regulator and actuation variable
+    u_sat = 0;
+    objectifReached = false;
 }
 
-void Regulation::Regulator (float particle_x, float particle_y){
+void Regulation::Regulator (float particle_x, float particle_y, int time){
 
-        //PID REGULATION    //use of particule_x, particule_y, desired_x and desired_y
-        //PID REGULATION    //gives the required d_pc_x and d_pc_y (if decoupling is ok)
-        //PID REGULATION
+    //target positions
+    if (target_type == 1){                                                       //tracking reference. target_x and y are computed at each step
+        int duration = time - start_time;
+        target_x = 0*duration;                                                  //parameterisation
+        target_y = 0*duration;
+    }
 
-        if (flag==1){   //Modification of the position of the laser at each image
+    //error calculation
+    float x_error = 0.064453*target_x - 0.064453*particle_x;                             //results in mm
+    float y_error = 0.064453*target_y - 0.064453*particle_y;
 
-            //For velocity tests and step repsonses, the center/point is fixed by the following rules
-    //Index 1-5-9
-            x = particle_x + d_pc;
-            y = particle_y;
-    //Index 2-6
-//            x = particle_x;
-//            y = particle_y + d_pc;
-    //Index 3-7
-//            x = particle_x - d_pc;
-//            y = particle_y;
-    //Index 4-8
-//            x = particle_x;
-//            y = particle_y - d_pc;
+    //angle orientation and r_particle_target calculation
+    float alpha;
+    if (x_error > 0){
+        alpha = atan((y_error/x_error));
+    }
+    else if (x_error < 0){
+        alpha = (float)M_PI + atan((y_error/x_error));
+    }
+    else{
+        if (y_error > 0){
+            alpha = (float)M_PI/2;
+        }
+        else if (y_error < 0){
+            alpha = - (float)M_PI/2;
+        }
+        else{
+            alpha = 0;
+        }
+    }
+    middleAngle = (float)M_PI + alpha;
+    float error = sqrt((x_error*x_error) + (y_error*y_error));
 
-            if (type == 0){  //Point actuation
-                mirCtrl.ChangeMirrorPosition(x, y);
+    //controller
+    u_i = u_i + (k_p*T_s/T_i) * error - k_t*(u - u_sat);
+    float u_p = k_p/(2*T_i) * (T_s + 2*T_i) * error;
+    u = u_i + u_p;
+    if (u >= 7){
+        u_sat = 7;
+    }
+    else if (u <= -7){
+        u_sat = -7;
+    }
+    else{
+        u_sat = u;
+    }
+
+    qDebug()<<"u: "<<u;
+    qDebug()<<"u_sat: "<<u_sat;
+
+    //u_steady-state to r_las-part
+    double r_las_part;
+    if (u_sat >= 0){
+        r_las_part = (1/1.678)*log(24.93/u_sat);
+    }
+    else{
+        r_las_part = (1/1.678)*log(-u_sat/24.93);
+    }
+    qDebug()<< "r_las_part: " <<r_las_part;
+
+    //objective nearly reached. Use of a circle to stop the particle within the vicinity of the objective
+//    if (abs(u_sat) < 0.3 && target_type ==0 ){
+//        objectifReached = true;
+//    }
+    if (abs(x_error) < (radius*0.064453/2) && abs(y_error) < (radius*0.064453/2) && target_type ==0 ){
+        objectifReached = true;
+    }
+
+    //r_las-part to r_part_center
+    float r_part_center = radius - (r_las_part * 15.515);
+
+    //r_part_center to x/y_part_center
+    float x_part_center = r_part_center * cos(alpha);
+    float y_part_center = r_part_center * sin(alpha);
+
+    //computation of the new center figure
+    x = particle_x + x_part_center;
+    y = particle_y + y_part_center;
+
+
+    if (objectifReached == true){
+        for(int j=0; j<vectorLength; j++){
+            x_vector[j] = figure_x[j] + target_x;
+            y_vector[j] = figure_y[j] + target_y;
+        }
+        mirCtrl.ChangeMirrorStream (x_vector, y_vector);
+    }
+
+    else if (regulation_type == 0){  //Point actuation
+        mirCtrl.ChangeMirrorPosition(-x, -y);
+    }
+
+    else if (regulation_type == 1){ //Circle actuation
+        for(int j=0; j<vectorLength; j++){
+            x_vector[j] = figure_x[j] + x;
+            y_vector[j] = figure_y[j] + y;
+        }
+        mirCtrl.ChangeMirrorStream (x_vector, y_vector);
+    }
+
+    else if (regulation_type == 2){                //Arc circle actuation
+
+        //Calculation of the index of the middleAngle within x_vector and y_vector
+        int middleAngleIndex = middleAngle / ((float)M_PI*2 / ptsNumb) +0.5;
+
+        //Construction of the arc circle
+        int index = 0;
+        int i = 0;
+        int circleIndex;
+
+        for(i; i <= (vectorLength/4); i++){
+            circleIndex = middleAngleIndex+index;
+            if (circleIndex>=ptsNumb){
+                circleIndex = circleIndex - ptsNumb;
             }
-
-            else if (type == 1){ //Circle actuation
-                for(int j=0; j<vectorLength; j++){
-                    x_vector[j] = figure_x[j] + x;
-                    y_vector[j] = figure_y[j] + y;
-                }
-                mirCtrl.ChangeMirrorStream (x_vector, y_vector);
+            else if (circleIndex < 0){
+                circleIndex = circleIndex + ptsNumb;
             }
-
-            else if (type == 2){                //Arc circle actuation
-                                                //Additional degree of freedom: orientation. Required more computations
-
-//                //Calculation of objective angle
-//                float objectiveAngle = atan((desired_y - particle_y) / (desired_x - particle_x));
-//                //Calculation of the middleAngle, which corresponds to the angle at the middle of the arc figure
-//                middleAngle = objectiveAngle + M_PI;
-//                if (middleAngle >= 2*M_PI){
-//                  middleAngle = middleAngle - 2*M_PI;
-//                }
-//                else if (middleAngle < 0){
-//                  middleAngle = middleAngle + 2*M_PI;
-//                }
-
-                //for the velocity tests and step response tests:
-                //middleAngle = (float)M_PI*(3/2.);
-
-//Index 1-5-9
-                middleAngle = (float)M_PI;
-//Index 2-6
-                //middleAngle = (float)M_PI*(3/2.);
-//Index 3-7
-                //middleAngle = 0;
-//Index 4-8
-                //middleAngle = (float)M_PI*(1/2.);
-
-                //Calculation of the index of the middleAngle within x_vector and y_vector
-                int middleAngleIndex = middleAngle / ((float)M_PI*2 / ptsNumb) +0.5;
-
-                //Construction of the arc circle
-                int index = 0;
-                int i = 0;
-                int circleIndex;
-
-                for(i; i <= (vectorLength/4); i++){
-                    circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=ptsNumb){
-                        circleIndex = circleIndex - ptsNumb;
-                    }
-                    else if (circleIndex < 0){
-                        circleIndex = circleIndex + ptsNumb;
-                    }
-                    x_vector[i] = figure_x[circleIndex] + x;
-                    y_vector[i] = figure_y[circleIndex] + y;
-                    index++;
-                }
-
-                index = index - 2;
-
-                for(i; i <= (vectorLength*0.75); i++){
-                    circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=ptsNumb){
-                        circleIndex = circleIndex - ptsNumb;
-                    }
-                    else if (circleIndex < 0){
-                        circleIndex = circleIndex + ptsNumb;
-                    }
-                    x_vector[i] = figure_x[circleIndex] + x;
-                    y_vector[i] = figure_y[circleIndex] + y;
-                    index--;
-                }
-
-                index = index + 2;
-
-                for(i; i < vectorLength; i++){
-                    circleIndex = middleAngleIndex+index;
-                    if (circleIndex>=ptsNumb){
-                        circleIndex = circleIndex - ptsNumb;
-                    }
-                    else if (circleIndex < 0){
-                        circleIndex = circleIndex + ptsNumb;
-                    }
-                    x_vector[i] = figure_x[circleIndex] + x;
-                    y_vector[i] = figure_y[circleIndex] + y;
-                    index++;
-                }
-
-                mirCtrl.ChangeMirrorStream (x_vector, y_vector);
-
-            }
+            x_vector[i] = figure_x[circleIndex] + x;
+            y_vector[i] = figure_y[circleIndex] + y;
+            index++;
         }
 
-        else{   //The laser is fixed within the objective position
-            qDebug() << "Objective reached";
+        index = index - 2;
+
+        for(i; i <= (vectorLength*0.75); i++){
+            circleIndex = middleAngleIndex+index;
+            if (circleIndex>=ptsNumb){
+                circleIndex = circleIndex - ptsNumb;
+            }
+            else if (circleIndex < 0){
+                circleIndex = circleIndex + ptsNumb;
+            }
+            x_vector[i] = figure_x[circleIndex] + x;
+            y_vector[i] = figure_y[circleIndex] + y;
+            index--;
         }
+
+        index = index + 2;
+
+        for(i; i < vectorLength; i++){
+            circleIndex = middleAngleIndex+index;
+            if (circleIndex>=ptsNumb){
+                circleIndex = circleIndex - ptsNumb;
+            }
+            else if (circleIndex < 0){
+                circleIndex = circleIndex + ptsNumb;
+            }
+            x_vector[i] = figure_x[circleIndex] + x;
+            y_vector[i] = figure_y[circleIndex] + y;
+            index++;
+        }
+
+        mirCtrl.ChangeMirrorStream (x_vector, y_vector);
+
+    }
+
 
 //        //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
 //        QString currentData(QString::number(x_vector[j])                  //x_particle

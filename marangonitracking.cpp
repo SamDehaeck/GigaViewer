@@ -10,9 +10,9 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
   ,myRegulator()
 #endif
 {
-    flag = 1;
     radius = 50.;
-    type = 2;
+    regulation_type = 2;                                                        //type 0 = point, type 1 = circle, type 2 = arc circle
+    target_type = 0;                                                          //type 0 = step reference, type 1 = traking reference
 }
 
 void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
@@ -27,7 +27,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
         if (!myRegulator.Initialisation()){                                         //Initialisation of the mirror and...
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
-        myRegulator.Figure(type, radius, targetX, targetY);                //Creation of the figure. For the future, need a button to choose which type of figure is used
+        myRegulator.Figure(regulation_type, target_type, start_time, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
 #endif
     }
 
@@ -49,7 +49,14 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 }
 
 bool MarangoniTracking::processImage(ImagePacket& currIm) {
-    if (activated) {
+    if (!activated) {
+        cv::Mat outImage=currIm.image.clone();
+        cv::Point targetPosition(targetX, targetY);
+        cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
+        currIm.image=outImage;
+        start_time = currIm.timeStamp;
+    }
+    else {
 
         if (currIm.pixFormat=="RGB8") {
             cv::Mat grayIm;
@@ -62,32 +69,31 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             getPosPartLITTLE(currIm.image, contoursP, hierachyP);
 
 #ifdef Q_OS_WIN32
-            if (flag==1){
-                //Used at the beginning of the code to put the objective of the step repsonse
-                myRegulator.desired_x = Ppoint[0];                                  //x position of the particle
-                myRegulator.desired_y = Ppoint[1] + 5*radius;                       //y position of the particle + 5 times the radius
-                flag = 0;
-            }
-            else{
 
-                myRegulator.Regulator(Ppoint[0], Ppoint[1]);                                            //Modification of the laser position
+                myRegulator.Regulator(Ppoint[0], Ppoint[1], currIm.timeStamp);                           //Modification of the laser position
 
                 //Adding figures on screen
                 cv::Mat outImage=currIm.image.clone();
                 cv::Point particlePos(Ppoint[0], Ppoint[1]);
                 cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
+                cv::Point targetPosition(myRegulator.target_x, myRegulator.target_y);
+                cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
                 cv::Point figureCenter(myRegulator.x, myRegulator.y);
-                if (type==0){
+                if (regulation_type == 0){
                     cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
                 }
-                else if (type==1){
+                else if (regulation_type == 1){
                     cv::circle(outImage, figureCenter, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
                 }
                 else {
-                    cv::Size size( radius, radius );                                                    //regulation with a part of the circle
-                    int middleAngle = myRegulator.middleAngle*180/M_PI;
-                    cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 90, middleAngle + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
-                    //cv::ellipse(outImage, figureCenter, size, 0,180, 360, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
+                    if (myRegulator.objectifReached == false){
+                        cv::Size size( radius, radius );                                                        //regulation with a arc circle
+                        int middleAngle = myRegulator.middleAngle*180/M_PI;
+                        cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 90, middleAngle + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
+                    }
+                    else{
+                        cv::circle(outImage, targetPosition, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);       //objective reached. Stabilisation with circle
+                    }
                 }
 
                 currIm.image=outImage;
@@ -100,10 +106,20 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                                     +","
                                     +QString::number(myRegulator.y)     //y position of the center of the circle
                                     +","
+                                    +QString::number(myRegulator.middleAngle)     //angle of the figure
+                                    +","
+                                    +QString::number(myRegulator.u)     //u_dot_aux value
+                                    +","
+                                    +QString::number(myRegulator.target_x)     //x target
+                                    +","
+                                    +QString::number(myRegulator.target_y)     //y target
+                                    +","
+                                    +QString::number(myRegulator.objectifReached)     //objective reached (1: true, 0: false)
+                                    +","
                                     +QString::number(currIm.timeStamp)  //time of the picture
                                     +",");
                 dataToSave.append(currentData);
-            }
+
 #endif
         }
     }
@@ -112,7 +128,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    QString filename = "25042016-stepR-exp1-distanceIndex1.txt";
+    QString filename = "manipulation_test2_1.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);

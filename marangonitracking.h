@@ -22,8 +22,10 @@ private:
     void savingData ();
     QString dataToSave;
 
-    int type;
-    int flag;
+    int regulation_type;
+    int target_type;
+    int start_time;
+
     float radius;
 #ifdef Q_OS_WIN32
     Regulation myRegulator;

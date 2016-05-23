@@ -19,9 +19,14 @@ private:
     int ptsNumb;
     int vectorLength;
 
-    //const float kp;                                               //Regulator parameters
-    //const flaot ki;
-    //const flaot kd;
+    double k_p;
+    double T_i;                                                //Regulator parameters
+    double k_t;
+    double T_s;
+
+    float u_i;
+                                                            //internal states of the regulator
+    float u_sat;
 
     //ALWAYS 100
     float figure_x[100];                                            //Variables used for the figure drawing
@@ -31,9 +36,9 @@ private:
     float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
     float y_vector[100];
 
-    float d_pl;                                                     //Distance between the particle and the laser
-    float d_pc;                                                     //Distance between the center of the circle and the particle
-    int type;                                                       //used to define which type of figure is used
+    int regulation_type;                                            //used to define which type of figure is used
+    int target_type;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
+    int start_time;
     float radius;
     int flag;
 
@@ -42,17 +47,22 @@ private:
 public:
     Regulation ();
     bool Initialisation();                                          //Used to initialize the MEM
-    void Figure (int type_recieved, float r, int x_desired, int y_desired); 	//Must be called when "track" is pressed
-    void Regulator(float particle_x, float particle_y);             //Must be called when the position of the particule moves
+    void Figure (int type_regulation, int type_target, int time_start, float r, int x_terget, int y_target); 	//Must be called when "track" is pressed
+    void Regulator(float particle_x, float particle_y, int time);             //Must be called when the position of the particule moves
     void closeRegulation ();                                        //Must be called when the the experiment is over to close the mirror
 
     float x;                                                        //For point control, correspond to the new position of the laser...
     float y;                                                        //...for the figure control, correspond to the center of the figure
 
-    int desired_x;                                                  //general variables which represent the desired positions
-    int desired_y;
+    float u;
+
+    float target_x;                                                  //general variables which represent the desired positions
+    float target_y;
 
     float middleAngle;
+
+    bool objectifReached;
+
 };
 
 #endif // REGULATION_H
