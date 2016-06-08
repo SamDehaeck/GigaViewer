@@ -24,7 +24,6 @@ private:
 
     int regulation_type;
     int target_type;
-    int start_time;
 
     float radius;
 #ifdef Q_OS_WIN32

@@ -12,6 +12,9 @@ class Regulation
 
 private:
 
+    // !!!!!!!ATTENTION - CODE A SUPPRIMER !!!!!!!!
+    int flag;
+
     //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
     QString dataToSave;
     //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
@@ -23,6 +26,11 @@ private:
     double T_i;                                                //Regulator parameters
     double k_t;
     double T_s;
+
+    float start_x;
+    float start_y;
+
+    int counter;
 
     float u_i;
                                                             //internal states of the regulator
@@ -38,17 +46,17 @@ private:
 
     int regulation_type;                                            //used to define which type of figure is used
     int target_type;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
-    int start_time;
+    int increment;
     float radius;
-    int flag;
+
 
     MirrorControl mirCtrl;                                          //Mirror object used to access to the MirrorControl functions
 
 public:
     Regulation ();
     bool Initialisation();                                          //Used to initialize the MEM
-    void Figure (int type_regulation, int type_target, int time_start, float r, int x_terget, int y_target); 	//Must be called when "track" is pressed
-    void Regulator(float particle_x, float particle_y, int time);             //Must be called when the position of the particule moves
+    void Figure (int type_regulation, int type_target, float r, int x_terget, int y_target); 	//Must be called when "track" is pressed
+    void Regulator(float particle_x, float particle_y);             //Must be called when the position of the particule moves
     void closeRegulation ();                                        //Must be called when the the experiment is over to close the mirror
 
     float x;                                                        //For point control, correspond to the new position of the laser...

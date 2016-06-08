@@ -27,7 +27,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
         if (!myRegulator.Initialisation()){                                         //Initialisation of the mirror and...
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
-        myRegulator.Figure(regulation_type, target_type, start_time, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
+        myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
 #endif
     }
 
@@ -54,7 +54,6 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
         cv::Point targetPosition(targetX, targetY);
         cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
         currIm.image=outImage;
-        start_time = currIm.timeStamp;
     }
     else {
 
@@ -70,7 +69,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 #ifdef Q_OS_WIN32
 
-                myRegulator.Regulator(Ppoint[0], Ppoint[1], currIm.timeStamp);                           //Modification of the laser position
+                myRegulator.Regulator(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
 
                 //Adding figures on screen
                 cv::Mat outImage=currIm.image.clone();
@@ -128,7 +127,10 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    QString filename = "manipulation_test2_1.txt";
+    //QString filename = "StepTest_5_2.txt";
+    //QString filename = "RampTest_4_1.txt";
+    QString filename = "06062016_VideoTest_1.txt";
+    //QString filename = "06062016_trajectoryTest_r50_a180_p120_index1";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);
