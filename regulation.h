@@ -3,21 +3,12 @@
 
 #include "mirrorcontrol.h"
 
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-#include <QtCore>
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
 class Regulation
 {
 
 private:
 
-    // !!!!!!!ATTENTION - CODE A SUPPRIMER !!!!!!!!
     int flag;
-
-    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-    QString dataToSave;
-    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
 
     int ptsNumb;
     int vectorLength;

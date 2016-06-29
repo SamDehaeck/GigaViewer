@@ -1,11 +1,6 @@
 #include "regulation.h"
 #include <QDebug>
 
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-#include <QList>
-#include <QDir>
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
 Regulation::Regulation(): mirCtrl(){                                        //Creation of the regulation object
     qDebug()<<"Creation of Regulation object";
 
@@ -17,8 +12,6 @@ Regulation::Regulation(): mirCtrl(){                                        //Cr
     T_i =8.962;                                                             //Creation of the regulator parameters
     k_t =0.37;
     T_s = 0.1;
-
-    counter = 0;
 }
 
 bool Regulation::Initialisation(){
@@ -31,6 +24,7 @@ void Regulation::Figure (int type_regulation, int type_target, float r, int x_ta
 
     regulation_type = type_regulation; target_type = type_target; radius = r;
     increment = 0;
+    counter = 0;
     if( (regulation_type == 1) || (regulation_type == 2) ){
         qDebug() << "Creation of the figure";
         float stepAngle = (float)M_PI*2 / ptsNumb;
@@ -141,41 +135,10 @@ void Regulation::Regulator (float particle_x, float particle_y){
     y = particle_y + y_part_center;
 
 
-
-
-    // !!!!!!!ATTENTION - CODE A SUPPRIMER !!!!!!!!
-
-//    double d_pl = 17.06;
-//    float d_pc = radius - d_pl;
-
-//    //index 1
-//    x = particle_x + d_pc;
-//    y = particle_y;
-//    middleAngle = (float)M_PI;
-
-//    //index 2
-// //    x = particle_x;
-// //    y = particle_y + d_pc;
-// //    middleAngle = (float)M_PI*(3/2.);
-
-//    //index 3
-// //    x = particle_x - d_pc;
-// //    y = particle_y;
-// //    middleAngle = 0;
-
-//    //index 4
-// //    x = particle_x;
-// //    y = particle_y - d_pc;
-// //    middleAngle = (float)M_PI*(1/2.);
-
-
-    // !!!!!!!ATTENTION - CODE A SUPPRIMER !!!!!!!!
-
-
-
+    //Transfer new data stream to the mirror
 
     if (regulation_type == 0){          //Point actuation
-        mirCtrl.ChangeMirrorPosition(-x, -y);
+        mirCtrl.ChangeMirrorPosition(x, y);
     }
 
     else if (regulation_type == 1){     //Circle actuation
@@ -262,29 +225,9 @@ void Regulation::Regulator (float particle_x, float particle_y){
         }
 
     }
-
-
-//        //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-//        QString currentData(QString::number(x_vector[j])                  //x_particle
-//                            +","
-//                            +QString::number(y_vector[j])                 //y_particle
-//                            +",");
-//        dataToSave.append(currentData);
-//        //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
 }
 
 void Regulation::closeRegulation (){
     qDebug()<<"Closing the mirror";
-
-//    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-//    QString filename = "circle_reg.txt";
-//    QFile file (filename);
-//    file.open(QIODevice::WriteOnly);
-//    QTextStream out(&file);
-//    out << dataToSave;
-//    file.close();
-//    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
     mirCtrl.Closing();                                                  //Close the mirror
 }

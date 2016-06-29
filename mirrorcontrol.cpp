@@ -53,15 +53,6 @@ bool MirrorControl::Initialisation(){
 //Closing of the mirror
 void MirrorControl::Closing(){
 
-//    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-//    QString filename = "circle_mirr.txt";
-//    QFile file (filename);
-//    file.open(QIODevice::WriteOnly);
-//    QTextStream out(&file);
-//    out << dataToSave;
-//    file.close();
-//    //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
     MTIError LastError;
 
     mti->ResetDevicePosition(); 										//Send analog outputs (and device) back to origin in 25ms
@@ -92,15 +83,6 @@ void MirrorControl::ChangeMirrorStream (float x_vector[100], float y_vector[100]
     for (int i=0; i<vectorLength ; i++){
         xMirr[i] = coefX[0] + coefX[1]*x_vector[i] + coefX[2]*y_vector[i] + coefX[3]*x_vector[i]*x_vector[i] + coefX[4]*x_vector[i]*y_vector[i] + coefX[5]*y_vector[i]*y_vector[i];
         yMirr[i] = coefY[0] + coefY[1]*x_vector[i] + coefY[2]*y_vector[i] + coefY[3]*x_vector[i]*x_vector[i] + coefY[4]*x_vector[i]*y_vector[i] + coefY[5]*y_vector[i]*y_vector[i];
-
-//        //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-//        QString currentData(QString::number(xMirr[i])         //x_particle
-//                +","
-//                +QString::number(yMirr[i])                    //y_particle
-//                +",");
-//        dataToSave.append(currentData);
-//        //CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-
     }
     mti->SendDataStream( xMirr, yMirr, m_stream, vectorLength, 0, false );		// This call will download the buffer of data to the controller and run it when existing frame ends
 }

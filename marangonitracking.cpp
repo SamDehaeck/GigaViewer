@@ -54,6 +54,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
         cv::Point targetPosition(targetX, targetY);
         cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
         currIm.image=outImage;
+
     }
     else {
 
@@ -101,9 +102,9 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                                     +","
                                     +QString::number(Ppoint[1])         //y_particle
                                     +","
-                                    +QString::number(myRegulator.x)     //x position of the center of the circle
+                                    +QString::number(myRegulator.x)     //x position of the center of the pattern
                                     +","
-                                    +QString::number(myRegulator.y)     //y position of the center of the circle
+                                    +QString::number(myRegulator.y)     //y position of the center of the pattern
                                     +","
                                     +QString::number(myRegulator.middleAngle)     //angle of the figure
                                     +","
@@ -127,10 +128,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
 
-    //QString filename = "StepTest_5_2.txt";
-    //QString filename = "RampTest_4_1.txt";
-    QString filename = "06062016_VideoTest_1.txt";
-    //QString filename = "06062016_trajectoryTest_r50_a180_p120_index1";
+    QString filename = "test.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);

@@ -1,13 +1,11 @@
 #ifndef MIRRORCONTROL_H
 #define MIRRORCONTROL_H
 
+#include <QtCore>
+
 #include "MTIDefinitions.h"
 #include "MTIDevice.h"
 #include "MTIDataGenerator.h"
-
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
-#include <QtCore>
-//CODE TO DELETE - USED TO VERIFY THE FUNCTIONING//
 
 class MirrorControl
 {

@@ -85,12 +85,14 @@ void CamBackend::GrabFrame()
         }
 
         // RECORD FRAME TO DISC
-        if (recording && currSink) currSink->RecordFrame(currImage);
+        //if (recording && currSink) currSink->RecordFrame(currImage);
 
 #ifdef TRACKING
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
         tracker.processImage(currImage);
+
 #endif
+        if (recording && currSink) currSink->RecordFrame(currImage);        //placed here to have the different incrustations on screen
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         AdaptForDisplay(currImage);
