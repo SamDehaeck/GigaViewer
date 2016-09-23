@@ -262,8 +262,24 @@ bool FmfSourceSink::StartRecording(QString recFold, QString codec, int, int cols
     timestamps.clear();
     startTime=-1;
 
-    QDateTime mom = QDateTime::currentDateTime();
-    basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+    QDir basedir(recFold);
+    if (basedir.exists()) {
+        QDateTime mom = QDateTime::currentDateTime();
+        basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+    } else {
+        QRegExp rx("(.+)/(.+)$"); //somepath/somename.someextension
+        int pos=0;
+        pos=rx.indexIn(recFold);
+        if (pos>-1) {
+            basename=rx.cap(1)+"/"+rx.cap(2);
+        } else {
+            qDebug()<<"Recording Folder does not exist";
+            QDateTime mom = QDateTime::currentDateTime();
+            basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+        }
+//        qDebug()<<"recFold"<<dir<<" basename "<<basename;
+    }
+
     QString filenam=basename+".fmf";
 
 
@@ -349,12 +365,12 @@ bool FmfSourceSink::StopRecording()
     uint64_t posNow=ftell(fmfrec);
 #endif
     uint64_t nWritten=(posNow-recheadersize)/bytesperchunk;
-    qDebug()<<"Number of frames: "<<nWritten;
+//    qDebug()<<"Number of frames: "<<nWritten;
     fseek(fmfrec,recNframespos,SEEK_SET);
     if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     fclose(fmfrec);
 
-    QString filename=basename+"_timestamps.txt";
+/*    QString filename=basename+"_timestamps.txt";
 //    QString filename = "/home/sam/times.txt";
     QFile fileout(filename);
     if (fileout.open(QFile::ReadWrite | QFile::Text| QFile::Truncate)){
@@ -364,7 +380,7 @@ bool FmfSourceSink::StopRecording()
      }
      fileout.close();
     }
-
+*/
 
 
 

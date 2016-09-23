@@ -234,8 +234,27 @@ bool Hdf5SourceSink::ReleaseCamera()
 
 bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
-    QDateTime mom = QDateTime::currentDateTime();
-    QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".h5";
+    QString basename;
+    QDir basedir(recFold);
+    if (basedir.exists()) {
+        QDateTime mom = QDateTime::currentDateTime();
+        basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+    } else {
+        QRegExp rx("(.+)/(.+)$"); //somepath/somename.someextension
+        int pos=0;
+        pos=rx.indexIn(recFold);
+        if (pos>-1) {
+            basename=rx.cap(1)+"/"+rx.cap(2);
+        } else {
+            qDebug()<<"Recording Folder does not exist";
+            QDateTime mom = QDateTime::currentDateTime();
+            basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+        }
+//        qDebug()<<"recFold"<<dir<<" basename "<<basename;
+    }
+
+
+    QString filenam=basename+".h5";
     std::string datasetname="data";
     timestamps.clear();
 

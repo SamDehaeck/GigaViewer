@@ -127,14 +127,33 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
 
 bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
 {
-    dir=recFold;
+    QDir basedir(recFold);
+    if (basedir.exists()) {
+        dir=recFold;
+        basename="image-";
+    } else {
+        QRegExp rx("(.+)/(.+)$"); //somepath/somename.someextension
+        int pos=0;
+        pos=rx.indexIn(recFold);
+        if (pos>-1) {
+            dir=rx.cap(1);
+            basename=rx.cap(2);
+        } else {
+            qDebug()<<"Recording Folder does not exist";
+            dir=recFold;
+            basename="image-";
+        }
+//        qDebug()<<"recFold"<<dir<<" basename "<<basename;
+    }
+
+
     extension=".png";
     if (codec=="BMP") {
         extension=".bmp";
     } else if (codec=="JPG") {
         extension=".jpg";
     }
-    basename="image-";
+
     index=0;
     timestamps.clear();
     startTime=-1;
@@ -143,7 +162,7 @@ bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, 
 
 bool RegexSourceSink::StopRecording()
 {
-    QString filename=QString(dir+"/"+"timestamps.txt");
+    QString filename=QString(dir+"/"+basename+"timestamps.txt");
 //    QString filename = "/home/sam/times.txt";
     QFile fileout(filename);
     if (fileout.open(QFile::ReadWrite | QFile::Text| QFile::Truncate)){
