@@ -46,6 +46,21 @@ bool IdsSourceSink::Init()
            return false;
     }
 
+    // first set the extended pixelclock range if available to reach higher maximal fps
+    /* Enable the extended pixel clock range */
+    bool extClock=false;
+    UINT nEnable;
+    nEnable = EXTENDED_PIXELCLOCK_RANGE_ON;
+    INT nRet = is_DeviceFeature(hCam, IS_DEVICE_FEATURE_CMD_SET_EXTENDED_PIXELCLOCK_RANGE_ENABLE, (void*)&nEnable, sizeof(nEnable));
+    if (nRet == IS_SUCCESS) {
+    /* Extended pixel clock range is enabled */
+        qDebug()<<"Extended pixel clock range is enabled";
+        extClock=true;
+    } else {
+        qDebug()<<"Could not switch on the extended pixel clock range";
+        extClock=false;
+    }
+
 
     int clockN;
     is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_NUMBER,(void*)&clockN,sizeof(clockN));
@@ -57,7 +72,11 @@ bool IdsSourceSink::Init()
         qDebug()<<"Clock option - "<<clockList[i];
     }
 
-    int pixelC=clockList[0];
+    int pixelC=clockList[clockN-2];
+    if (extClock==true) {
+        pixelC=clockList[clockN-1];
+    }
+
     is_PixelClock(hCam, IS_PIXELCLOCK_CMD_SET, (void*)&pixelC, sizeof(pixelC));
 
 

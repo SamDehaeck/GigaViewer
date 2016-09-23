@@ -60,6 +60,17 @@ bool VimbaSourceSink::Init()
         err = system.GetCameras( cameras );            // Fetch all cameras known to Vimba
         if( VmbErrorSuccess == err ) {
 
+            bool camIsOpen=false;
+            if (cameras.size()==0) {
+                CameraPtr ipCam;
+                if ( VmbErrorSuccess == system.OpenCameraByID("169.254.1.55",VmbAccessModeFull,ipCam)) {
+                     qDebug()<<"IP camera opened";
+                     cameras.push_back(ipCam);
+                     camIsOpen=true;
+                }
+
+            }
+
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
                     QStringList cams;
@@ -93,15 +104,15 @@ bool VimbaSourceSink::Init()
                 if( VmbErrorSuccess == err )    {
                     qDebug()<<"Opening camera "<<QString::fromStdString(namestr);
 
-                    err=pCamera->Open(VmbAccessModeFull);
+                    if (!camIsOpen) err=pCamera->Open(VmbAccessModeFull);
                     if (err==VmbErrorSuccess) {
                         //camera successfully opened. Now do some camera initialisation steps
 
 
-                        // Set the GeV packet size to the highest possible value
+                        // Set the GeV packet size to the highest possible value => will make JAI camera stop to work correctly!
                         // (In this example we do not test whether this cam actually is a GigE cam)
                         FeaturePtr pCommandFeature;
-                        if ( VmbErrorSuccess == pCamera->GetFeatureByName( "GVSPAdjustPacketSize", pCommandFeature ))
+/*                        if ( VmbErrorSuccess == pCamera->GetFeatureByName( "GVSPAdjustPacketSize", pCommandFeature ))
                         {
                             if ( VmbErrorSuccess == pCommandFeature->RunCommand() )
                             {
@@ -115,14 +126,20 @@ bool VimbaSourceSink::Init()
                                 } while ( false == bIsCommandDone );
                             }
                         }
-
+*/
                         // get/set some features
                         FeaturePtr pFeature;
 
-                        // Set Trigger source to fixedRate
+                        // Set Trigger source to fixedRate if it exists (only for AVT cameras)
                         err=pCamera->GetFeatureByName("TriggerSource",pFeature);
                         if (err==VmbErrorSuccess) {
-                            pFeature->SetValue("FixedRate");
+                            StringVector vals;
+                            pFeature->GetValues(vals);
+                            for (uint i =0;i<vals.size();i++) {
+                                if (QString::fromStdString(vals[i])=="FixedRate") {
+                                    pFeature->SetValue("FixedRate");
+                                }
+                            }
                         }
 
                         // get Camera timestamp frequency
@@ -130,7 +147,7 @@ bool VimbaSourceSink::Init()
                         if (err==VmbErrorSuccess) {
                             err=pFeature->GetValue(camFreq);
                             if (err==VmbErrorSuccess) {
-//                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
+                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
                             } else {
                                 qDebug()<<"Could not extract freq: "<<err;
                             }
@@ -161,23 +178,23 @@ bool VimbaSourceSink::Init()
                             pFeature->GetValue(maxWidth);
                         }
 
-                        err=pCamera->GetFeatureByName("Width",pFeature);
+/*                        err=pCamera->GetFeatureByName("Width",pFeature);
                         if (err==VmbErrorSuccess) {
                             pFeature->SetValue(maxWidth);
                             pFeature->GetValue(width); // this should be continuous
                         }
-
+*/
                         err=pCamera->GetFeatureByName("HeightMax",pFeature);
                         if (err==VmbErrorSuccess) {
                             pFeature->GetValue(maxHeight);
                         }
 
-                        err=pCamera->GetFeatureByName("Height",pFeature);
+/*                        err=pCamera->GetFeatureByName("Height",pFeature);
                         if (err==VmbErrorSuccess) {
                             pFeature->SetValue(maxHeight);
                             pFeature->GetValue(height); // this should be continuous
                         }
-
+*/
                         // make sure shutter time is manual
                         err=pCamera->GetFeatureByName("ExposureAuto",pFeature);
                         if (err==VmbErrorSuccess) {
@@ -217,7 +234,7 @@ bool VimbaSourceSink::Init()
                         if (ok && !item.isEmpty()) {
                             format=item;
                             setFormat(format);
-                            qDebug()<<"Selected "<<format;
+//                            qDebug()<<"Selected "<<format;
                         }
 
 
@@ -300,6 +317,7 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     err=pFrame->GetPixelFormat(pixFormat);
     err=pFrame->GetHeight(height);
     err=pFrame->GetWidth(width);
+//    qDebug()<<"Received frame with size: "<<width<<"x"<<height;
     if ((pixFormat==VmbPixelFormatMono8)||(pixFormat==VmbPixelFormatBayerRG8)||(pixFormat==VmbPixelFormatBayerGB8)) {
         target.image=cv::Mat(height,width,CV_8U);
         err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
@@ -360,20 +378,24 @@ int VimbaSourceSink::SetInterval(int msec)
     FeaturePtr pFeature;
     double acqRate=1000.0/(1.0*msec);
     VmbErrorType err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
+    if (err!=VmbErrorSuccess) {
+        err=pCamera->GetFeatureByName("AcquisitionFrameRate",pFeature);
+    }
     if (err==VmbErrorSuccess) {
+        qDebug()<<"Could find the framerate handle";
         err=pFeature->SetValue(acqRate); // this should be continuous
         if (err==VmbErrorSuccess) {
             frameRate=acqRate;
-//            qDebug()<<"New frame rate is: "<<frameRate;
+            qDebug()<<"New frame rate is: "<<frameRate;
             return msec;
         } else {
-//            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
+            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
             err=pCamera->GetFeatureByName("AcquisitionFrameRateLimit",pFeature);
             double maxRate;
             if (err==VmbErrorSuccess) {
                 err=pFeature->GetValue(maxRate);
                 if (acqRate>maxRate) {
-//                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
+                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
                     err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
                     acqRate=maxRate;
                     err=pFeature->SetValue(acqRate);
@@ -383,13 +405,13 @@ int VimbaSourceSink::SetInterval(int msec)
                         err=pFeature->SetValue(acqRate);
                     }
                     frameRate=acqRate;
-//                    qDebug()<<"actual framerate now: "<<frameRate;
+                    qDebug()<<"actual framerate now: "<<frameRate;
                     return (int)(1000.0/acqRate);
                 }
             }
         }
     }
-
+    qDebug()<<"Could not find the framerate handle";
     return false;
 }
 
@@ -520,6 +542,7 @@ std::vector<std::string> VimbaSourceSink::listOptions(FeaturePtr pFeature) {
 }
 
 bool VimbaSourceSink::SetRoiRows(int rows) {
+    qDebug()<<"Setting the rows";
     if (rows>maxHeight) {
         rows=maxHeight;
     }
@@ -527,13 +550,46 @@ bool VimbaSourceSink::SetRoiRows(int rows) {
     VmbErrorType err;
     err=pCamera->GetFeatureByName("Height",pFeature);
     if (err==VmbErrorSuccess) {
-        pFeature->SetValue(rows);
-        height=rows;
+        err=pFeature->SetValue(rows);
+        if (err==VmbErrorSuccess) {
+            height=rows;
+            qDebug()<<"Should be here";
+        } else {
+            if (err==VmbErrorInvalidAccess) { // probably not possible to set ROI while images are streaming
+                err=pCamera->StopContinuousImageAcquisition();
+                if (err==VmbErrorSuccess) {
+                    err=pCamera->GetFeatureByName("Height",pFeature);
+                    if (err==VmbErrorSuccess) {
+                        err=pFeature->SetValue(rows);
+                        if (err==VmbErrorSuccess) {
+//                            err=pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
+                            height=rows;
+                            if (err==VmbErrorSuccess) {
+                                qDebug()<<"Restart successfull";
+                            } else {
+                                qDebug()<<"Restart did not work"<<err;
+                            }
+
+                        }
+                    }
+                }
+            } else {
+                qDebug()<<"Or perhaps here";
+            }
+
+        }
+
+    } else {
+        qDebug()<<"Setting Rows did not work";
     }
     return true;
 }
 
 bool VimbaSourceSink::SetRoiCols(int cols) {
+    if (cols==width) {
+        return true; //nothing to do
+        qDebug()<<"Nothing to do for columns";
+    }
     if (cols>maxWidth) {
         cols=maxWidth;
     }
@@ -541,8 +597,33 @@ bool VimbaSourceSink::SetRoiCols(int cols) {
     VmbErrorType err;
     err=pCamera->GetFeatureByName("Width",pFeature);
     if (err==VmbErrorSuccess) {
-        pFeature->SetValue(cols);
-        width=cols;
+        err=pFeature->SetValue(cols);
+        if (err==VmbErrorSuccess) {
+            width=cols;
+        } else {
+            if (err==VmbErrorInvalidAccess) { // probably not possible to set ROI while images are streaming
+                err=pCamera->StopContinuousImageAcquisition();
+                if (err==VmbErrorSuccess) {
+                    err=pCamera->GetFeatureByName("Width",pFeature);
+                    if (err==VmbErrorSuccess) {
+                        err=pFeature->SetValue(cols);
+                        if (err==VmbErrorSuccess) {
+//                            err=pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
+                            width=cols;
+                            if (err==VmbErrorSuccess) {
+                                qDebug()<<"Restart successfull";
+                            } else {
+                                qDebug()<<"Restart did not work"<<err;
+                            }
+
+                        }
+                    }
+                }
+            }
+
+        }
+    } else {
+        qDebug()<<"Setting Cols did not work";
     }
     return true;
 }

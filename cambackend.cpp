@@ -5,6 +5,7 @@
 #include "mrfsourcesink.h"
 #include "regexsourcesink.h"
 #include <QDebug>
+#include <cmath>
 
 #ifdef PVAPI
 #include "avtsourcesink.h"
@@ -232,10 +233,10 @@ void CamBackend::SetInterval(int newInt) {
         }
 
         if (needTimer) {
-            timer.setInterval(abs(newNewInt));
+            timer.setInterval(std::abs(newNewInt));
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
-            int newFps=currSource->SetInterval(abs(newNewInt));
+            int newFps=currSource->SetInterval(std::abs(newNewInt));
             if (newFps!=newNewInt) {
                 emit fpsChanged(newFps);
             }
