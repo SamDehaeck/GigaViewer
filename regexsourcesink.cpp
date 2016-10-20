@@ -105,6 +105,8 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
         cv::Mat dummy(source.image.rows,source.image.cols,CV_16UC3);
         cv::cvtColor(source.image,dummy,CV_BayerRG2RGB);
         source.image=dummy;
+    } else {
+        source.image=source.image.clone(); // needed otherwise recording crashes when fps too high.
     }
 
 
