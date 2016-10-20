@@ -66,7 +66,12 @@ bool IdsSourceSink::Init()
     is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_NUMBER,(void*)&clockN,sizeof(clockN));
     qDebug()<<"Elements in clocklist: "<<clockN;
 
+#ifdef Q_OS_WIN32
+    int clockList[100];
+#else
     int clockList[clockN];
+#endif
+
     is_PixelClock(hCam,IS_PIXELCLOCK_CMD_GET_LIST,(void*)&clockList,sizeof(clockList));
     for (int i=0;i<clockN;i++) {
         qDebug()<<"Clock option - "<<clockList[i];
