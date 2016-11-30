@@ -420,6 +420,10 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         currImage.image.convertTo(temp,CV_8U,stretch,shift);
         currImage.image=temp.clone();
         //qDebug()<<"Got a Float frame";
+    } else if (currImage.pixFormat=="BOOL") {
+        cv::Mat temp;
+        currImage.image.convertTo(temp,CV_8U,255,0);
+        currImage.image=temp.clone();
     } else {
         qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }

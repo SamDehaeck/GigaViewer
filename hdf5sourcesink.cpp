@@ -135,8 +135,13 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
         } else if (dataclass==H5T_COMPOUND) { //typically a complex number => no meaningfull way to show this so exit
             qDebug()<<"Data set has compound type - will exit";
             return false;
+        } else if (dataclass==4) { // This appears to be the bool used by pytables.
+            qDebug()<<"Detected a bool dataset";
+            dataformat="BOOL";
+            readType=PredType::NATIVE_B8;
+            frame=cv::Mat(dims[1],dims[2],CV_8U);
         } else {
-            qDebug()<<"Data set has unknown type - will exit";
+            qDebug()<<"Data set has unknown type - will exit"<<dataclass;
             return false;
         }
 
