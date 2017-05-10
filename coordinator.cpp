@@ -26,6 +26,9 @@ Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
 #ifdef TRACKING
         connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
 #endif
+#ifdef ELLIPSE
+        connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
+#endif
     }
 }
 

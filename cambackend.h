@@ -8,6 +8,9 @@
 #ifdef TRACKING
 #include "marangonitracking.h"
 #endif
+#ifdef ELLIPSE
+#include "ellipsedetection.h"
+#endif
 
 class CamBackend : public QThread
 {
@@ -46,6 +49,9 @@ public slots:
 #ifdef TRACKING
     void changedPluginSettings(QMap<QString,QVariant> settings);
 #endif
+#ifdef ELLIPSE
+    void changedPluginSettings(QMap<QString,QVariant> settings);
+#endif
 private:
     void run();
     void record();
@@ -63,6 +69,7 @@ private:
     bool doesCallBack;
     bool running;
     QString format;
+    bool doPluginProcessing;
     int skipImages;
     int recSkip;
 
@@ -70,7 +77,10 @@ private:
 #ifdef TRACKING
     MarangoniTracking tracker;
 #endif
-    bool doPluginProcessing;
+#ifdef ELLIPSE
+    EllipseDetection tracker;
+#endif
+
 
 };
 

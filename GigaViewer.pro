@@ -11,9 +11,10 @@ TEMPLATE = app
 
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
 #CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
-#CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
+CONFIG += ELLIPSE
+CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-#CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+CONFIG += VIMBA     # use GigE cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
 #CONFIG += IDS PVAPI VIMBA HDF5
 # uncomment the CONFIG lines for the camera modules you want compiled, available options: IDS PVAPI VIMBA
@@ -40,6 +41,10 @@ VIMBA {
 
 TRACKING {
     DEFINES *= TRACKING
+}
+
+ELLIPSE {
+    DEFINES *= ELLIPSE
 }
 
 #message(The Defines are $$DEFINES)
@@ -85,6 +90,7 @@ unix:!macx {
         QMAKE_LIBDIR += /usr/lib/x86_64-linux-gnu/hdf5/serial
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
+
     LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
 #    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
 #    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
@@ -158,7 +164,7 @@ SOURCES += main.cpp \
     regexsourcesink.cpp \
     cameracontrolsdialog.cpp \
     xvisourcesink.cpp \
-    mrfsourcesink.cpp
+    mrfsourcesink.cpp \
 
 TRACKING {
     SOURCES += marangonitracking.cpp \
@@ -168,6 +174,16 @@ TRACKING {
         marangonitrackingdialog.h
 
     FORMS += marangonitrackingdialog.ui
+}
+
+ELLIPSE {
+    SOURCES += ellipsedetection.cpp \
+        ellipsedetectiondialog.cpp
+
+    HEADERS += ellipsedetection.h \
+        ellipsedetectiondialog.h
+
+    FORMS += ellipsedetectiondialog.ui
 }
 
 HEADERS  += \
@@ -186,13 +202,14 @@ HEADERS  += \
     cameracontrolsdialog.h \
     regexsourcesink.h \
     xvisourcesink.h \
-    mrfsourcesink.h
+    mrfsourcesink.h \
 
 
 FORMS += \
     fileinputdialog.ui \
     playbackdialog.ui \
-    cameracontrolsdialog.ui
+    cameracontrolsdialog.ui \
+
 
 OTHER_FILES += \
     README.txt \

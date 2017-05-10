@@ -17,6 +17,9 @@
 #include "marangonitrackingdialog.h"
 #endif
 
+#ifdef ELLIPSE
+#include "ellipsedetectiondialog.h"
+#endif
 
 class MainGui : public QGraphicsView
 {
@@ -46,6 +49,9 @@ signals:
 #ifdef TRACKING
     void pluginSettingsChanged(QMap<QString,QVariant> settings);
 #endif
+#ifdef ELLIPSE
+    void pluginSettingsChanged(QMap<QString,QVariant> settings);
+#endif
 public slots:
     void newImageReceived(ImagePacket theMatrix);
     void openCvFeedPressed();
@@ -70,6 +76,9 @@ protected:
 #ifdef TRACKING
     void showTrackingDialog(bool visible);
 #endif
+#ifdef ELLIPSE
+    void showTrackingDialog(bool visible);
+#endif
 
 private:
     VideoGlScene* theScene;
@@ -84,6 +93,9 @@ private:
 
 #ifdef TRACKING
     MarangoniTrackingDialog* trackDialog;
+#endif
+#ifdef ELLIPSE
+    EllipseDetectionDialog* trackDialog;
 #endif
 };
 
