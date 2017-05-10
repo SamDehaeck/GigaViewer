@@ -78,7 +78,7 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 #ifdef Q_OS_WIN32
             target.image=cv::imread(dum.fileName().toStdString().c_str());
 #else
-            target.image=cv::imread(dum.fileName().toUtf8().data());
+            target.image=cv::imread(dum.fileName().toUtf8().data()); //,cv::IMREAD_ANYDEPTH);
 #endif
             target.seqNumber=index;
             return true;
