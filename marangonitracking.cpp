@@ -11,10 +11,10 @@
 
 using namespace cv;
 
-MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false)
-#ifdef Q_OS_WIN32
-  ,myRegulator()
-#endif
+MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false),myRegulator()
+  #ifdef Q_OS_WIN32
+  ,mirCtrl()
+  #endif
 {
     radius = 50.;
     regulation_type = 2;                                                        //type 0 = point, type 1 = circle, type 2 = arc circle
@@ -30,11 +30,11 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     if ((!activated)&&(settings["activated"].toBool())) {
         qDebug()<<"Activation of the tracking";
 #ifdef Q_OS_WIN32
-        if (!myRegulator.Initialisation()){                                         //Initialisation of the mirror and...
+        if (!initializeMirror()){                                         //Initialisation of the mirror and...
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
-        myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
 #endif
+       // myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
     }
 
     //Desactivation of the tracking
@@ -48,7 +48,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 #endif
 
 #ifdef Q_OS_WIN32                                                               //...and stops the data saving
-        myRegulator.closeRegulation();
+        closeMirror();
 #endif
         qDebug()<<"Writing data to disc...";
         savingData();                                                           //Writting dataToSave which contains every parameters on disc
@@ -86,13 +86,13 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             cv::findContours( processed, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
             cv::Mat outImage=currIm.image.clone(); // use a clone to avoid storing on raw image which is stored.
-//            cv::drawContours(outImage,contours,-1,255,2);
+            //            cv::drawContours(outImage,contours,-1,255,2);
 
             cv::Point newLoc(targetX*currIm.image.cols/100.0,targetY*currIm.image.rows/100.0);
             cv::ellipse(outImage,newLoc,cv::Size(5,5),0,0,360,255,-1);
 
-//            std::cout << contours.size() << std::endl;
-//            std::cout << contours[0] << std::endl;
+            //            std::cout << contours.size() << std::endl;
+            //            std::cout << contours[0] << std::endl;
 
             if (contours[0].size() > 5) { //otherwise fitEllipse does not work
                 cv::RotatedRect contours_part = cv::fitEllipse(Mat(contours[0]));
@@ -107,55 +107,55 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 #ifdef Q_OS_WIN32
 
-                myRegulator.Regulator(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
+            myRegulator.Regulator(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
 
-                //Adding figures on screen
-                cv::Mat outImage=currIm.image.clone();
-                cv::Point particlePos(Ppoint[0], Ppoint[1]);
-                cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
-                cv::Point targetPosition(myRegulator.target_x, myRegulator.target_y);
-                cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
-                cv::Point figureCenter(myRegulator.x, myRegulator.y);
-                if (regulation_type == 0){
-                    cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
+            //Adding figures on screen
+            cv::Mat outImage=currIm.image.clone();
+            cv::Point particlePos(Ppoint[0], Ppoint[1]);
+            cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
+            cv::Point targetPosition(myRegulator.target_x, myRegulator.target_y);
+            cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
+            cv::Point figureCenter(myRegulator.x, myRegulator.y);
+            if (regulation_type == 0){
+                cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
+            }
+            else if (regulation_type == 1){
+                cv::circle(outImage, figureCenter, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
+            }
+            else {
+                if (myRegulator.objectifReached == false){
+                    cv::Size size( radius, radius );                                                        //regulation with a arc circle
+                    int middleAngle = myRegulator.middleAngle*180/M_PI;
+                    cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 90, middleAngle + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
                 }
-                else if (regulation_type == 1){
-                    cv::circle(outImage, figureCenter, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
+                else{
+                    cv::circle(outImage, targetPosition, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);       //objective reached. Stabilisation with circle
                 }
-                else {
-                    if (myRegulator.objectifReached == false){
-                        cv::Size size( radius, radius );                                                        //regulation with a arc circle
-                        int middleAngle = myRegulator.middleAngle*180/M_PI;
-                        cv::ellipse(outImage, figureCenter, size, 0, middleAngle - 90, middleAngle + 90, cv::Scalar( 0, 0, 255 ), 1, 8, 0);
-                    }
-                    else{
-                        cv::circle(outImage, targetPosition, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);       //objective reached. Stabilisation with circle
-                    }
-                }
+            }
 
-                currIm.image=outImage;
-                //Adding all parameters in the 'dataToSave' vector
-                QString currentData(QString::number(Ppoint[0])          //x_particle
-                                    +","
-                                    +QString::number(Ppoint[1])         //y_particle
-                                    +","
-                                    +QString::number(myRegulator.x)     //x position of the center of the pattern
-                                    +","
-                                    +QString::number(myRegulator.y)     //y position of the center of the pattern
-                                    +","
-                                    +QString::number(myRegulator.middleAngle)     //angle of the figure
-                                    +","
-                                    +QString::number(myRegulator.u)     //u_dot_aux value
-                                    +","
-                                    +QString::number(myRegulator.target_x)     //x target
-                                    +","
-                                    +QString::number(myRegulator.target_y)     //y target
-                                    +","
-                                    +QString::number(myRegulator.objectifReached)     //objective reached (1: true, 0: false)
-                                    +","
-                                    +QString::number(currIm.timeStamp)  //time of the picture
-                                    +",");
-                dataToSave.append(currentData);
+            currIm.image=outImage;
+            //Adding all parameters in the 'dataToSave' vector
+            QString currentData(QString::number(Ppoint[0])          //x_particle
+                    +","
+                    +QString::number(Ppoint[1])         //y_particle
+                    +","
+                    +QString::number(myRegulator.x)     //x position of the center of the pattern
+                    +","
+                    +QString::number(myRegulator.y)     //y position of the center of the pattern
+                    +","
+                    +QString::number(myRegulator.middleAngle)     //angle of the figure
+                    +","
+                    +QString::number(myRegulator.u)     //u_dot_aux value
+                    +","
+                    +QString::number(myRegulator.target_x)     //x target
+                    +","
+                    +QString::number(myRegulator.target_y)     //y target
+                    +","
+                    +QString::number(myRegulator.objectifReached)     //objective reached (1: true, 0: false)
+                    +","
+                    +QString::number(currIm.timeStamp)  //time of the picture
+                    +",");
+            dataToSave.append(currentData);
 
 #endif
         }
@@ -171,3 +171,15 @@ void MarangoniTracking::savingData(){                                           
     out << dataToSave;
     file.close();
 }
+
+#ifdef Q_OS_WIN32
+bool MarangoniTracking::initializeMirror(){
+    bool properConnection = mirCtrl.Initialisation();                        //initialisation of the mirror
+    return properConnection;
+}
+
+void MarangoniTracking::closeMirror() {
+    qDebug()<<"Closing the mirror";
+    mirCtrl.Closing();                                                  //Close the mirror
+}
+#endif

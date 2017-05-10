@@ -1,8 +1,6 @@
 #ifndef REGULATION_H
 #define REGULATION_H
 
-#include "mirrorcontrol.h"
-
 class Regulation
 {
 
@@ -40,15 +38,10 @@ private:
     int increment;
     float radius;
 
-
-    MirrorControl mirCtrl;                                          //Mirror object used to access to the MirrorControl functions
-
 public:
-    Regulation ();
-    bool Initialisation();                                          //Used to initialize the MEM
+    Regulation();
     void Figure (int type_regulation, int type_target, float r, int x_terget, int y_target); 	//Must be called when "track" is pressed
     void Regulator(float particle_x, float particle_y);             //Must be called when the position of the particule moves
-    void closeRegulation ();                                        //Must be called when the the experiment is over to close the mirror
 
     float x;                                                        //For point control, correspond to the new position of the laser...
     float y;                                                        //...for the figure control, correspond to the center of the figure

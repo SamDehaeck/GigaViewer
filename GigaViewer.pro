@@ -160,10 +160,12 @@ SOURCES += main.cpp \
 
 TRACKING {
     SOURCES += marangonitracking.cpp \
-        marangonitrackingdialog.cpp
+        marangonitrackingdialog.cpp \
+        regulation.cpp
 
     HEADERS += marangonitracking.h \
-        marangonitrackingdialog.h
+        marangonitrackingdialog.h \
+        regulation.h
 
     FORMS += marangonitrackingdialog.ui
 }
