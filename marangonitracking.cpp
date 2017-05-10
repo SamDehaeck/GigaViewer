@@ -17,8 +17,8 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
   #endif
 {
     radius = 50.;
-    regulation_type = 2;                                                        //type 0 = point, type 1 = circle, type 2 = arc circle
-    target_type = 0;                                                          //type 0 = step reference, type 1 = traking reference
+    regulation_type = 0;                           //type 0 = point, type 1 = circle, type 2 = arc circle, type 3 = point with feedforward
+    target_type = 0;                               //type 0 = step reference, type 1 = traking reference
 }
 
 void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
@@ -34,12 +34,12 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
 #endif
-       // myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
+        myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
     }
 
     //Desactivation of the tracking
     if (activated&&(!settings["activated"].toBool())) {
-        qDebug()<<"Desactivation of the traking";
+        qDebug()<<"Desactivation of the tracking";
         activated=settings["activated"].toBool();                               //Update and sleep to avoid conflict with the MEM:...
 #ifdef Q_OS_WIN32
         Sleep(300);
@@ -51,7 +51,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
         closeMirror();
 #endif
         qDebug()<<"Writing data to disc...";
-        savingData();                                                           //Writting dataToSave which contains every parameters on disc
+        savingData();                                                           //Writting which contains every parameters on disc
         qDebug()<<"Data saved";
     }
 
@@ -105,17 +105,25 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
             currIm.image=outImage;
 
-#ifdef Q_OS_WIN32
 
             myRegulator.Regulator(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
 
+#ifdef Q_OS_WIN32
+            if (regulation_type == 0) || (regulation_type == 3){                   //Transfer new data stream to the mirror
+                mirCtrl.ChangeMirrorPosition(myRegulator.laser_x,myRegulator.laser_y);
+            }
+            else {
+                mirCtrl.ChangeMirrorStream(myRegulator.x_vector,myRegulator.y_vector);
+            }
+#endif
+
             //Adding figures on screen
-            cv::Mat outImage=currIm.image.clone();
+            //cv::Mat outImage=currIm.image.clone();
             cv::Point particlePos(Ppoint[0], Ppoint[1]);
             cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
             cv::Point targetPosition(myRegulator.target_x, myRegulator.target_y);
             cv::circle(outImage, targetPosition, radius*0.1, cv::Scalar( 96, 96, 96 ), -1, 8, 0);        //target position
-            cv::Point figureCenter(myRegulator.x, myRegulator.y);
+            cv::Point figureCenter(myRegulator.laser_x, myRegulator.laser_y);
             if (regulation_type == 0){
                 cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //regulation with the point
             }
@@ -136,28 +144,27 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             currIm.image=outImage;
             //Adding all parameters in the 'dataToSave' vector
             QString currentData(QString::number(Ppoint[0])          //x_particle
-                    +","
+                    +" "
                     +QString::number(Ppoint[1])         //y_particle
-                    +","
-                    +QString::number(myRegulator.x)     //x position of the center of the pattern
-                    +","
-                    +QString::number(myRegulator.y)     //y position of the center of the pattern
-                    +","
+                    +" "
+                    +QString::number(myRegulator.laser_x)     //x position of the center of the pattern
+                    +" "
+                    +QString::number(myRegulator.laser_y)     //y position of the center of the pattern
+                    +" "
                     +QString::number(myRegulator.middleAngle)     //angle of the figure
-                    +","
+                    +" "
                     +QString::number(myRegulator.u)     //u_dot_aux value
-                    +","
+                    +" "
                     +QString::number(myRegulator.target_x)     //x target
-                    +","
+                    +" "
                     +QString::number(myRegulator.target_y)     //y target
-                    +","
+                    +" "
                     +QString::number(myRegulator.objectifReached)     //objective reached (1: true, 0: false)
-                    +","
-                    +QString::number(currIm.timeStamp)  //time of the picture
-                    +",");
-            dataToSave.append(currentData);
+                    +" "
+                    +QString::number(currIm.timeStamp,'f',0)  //time of the picture
+                    +"\n");
 
-#endif
+            dataToSave.append(currentData);
         }
     }
     return true;

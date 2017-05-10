@@ -30,9 +30,6 @@ private:
     float figure_y[100];
     //ALWAYS 100
 
-    float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
-    float y_vector[100];
-
     int regulation_type;                                            //used to define which type of figure is used
     int target_type;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
     int increment;
@@ -40,21 +37,23 @@ private:
 
 public:
     Regulation();
-    void Figure (int type_regulation, int type_target, float r, int x_terget, int y_target); 	//Must be called when "track" is pressed
+    void Figure (int type_regulation, int type_target, float r, int x_target, int y_target); 	//Must be called when "track" is pressed
     void Regulator(float particle_x, float particle_y);             //Must be called when the position of the particule moves
 
-    float x;                                                        //For point control, correspond to the new position of the laser...
-    float y;                                                        //...for the figure control, correspond to the center of the figure
+    float laser_x;                                                        //For point control, correspond to the new position of the laser...
+    float laser_y;                                                        //...for the figure control, correspond to the center of the figure
 
     float u;
 
     float target_x;                                                  //general variables which represent the desired positions
     float target_y;
 
+    float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    float y_vector[100];
+
     float middleAngle;
 
     bool objectifReached;
-
 };
 
 #endif // REGULATION_H
