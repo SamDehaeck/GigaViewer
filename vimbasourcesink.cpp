@@ -339,8 +339,14 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         if (pixFormat==VmbPixelFormatMono14) target.pixFormat="MONO14";
         if (pixFormat==VmbPixelFormatBayerRG12) target.pixFormat="BAYERRG12";
     } else if (pixFormat==VmbPixelFormatRgb8) {
-        target.image=cv::Mat(height,width,CV_8UC3);
-        err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
+        //cv::Mat dummy;
+        cv::Mat dummy=cv::Mat(height,width,CV_8UC3);
+        err=pFrame->GetImage(dummy.data); // assign the frame image buffer pointer to the target image
+
+        target.image=cv::Mat(dummy.rows,dummy.cols,CV_8UC3);
+        cv::cvtColor(dummy,target.image,CV_RGB2BGR);
+        //target.image=dummy;
+
         if (err!=VmbErrorSuccess) {
             qDebug()<<"Something went wrong assigning the data";
         }
