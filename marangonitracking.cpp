@@ -3,6 +3,12 @@
 #include <QList>
 #include <QDir>
 
+#ifdef Q_OS_WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 using namespace cv;
 
 MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thresh),nrParts(nrParticles),activated(false),shouldTrack(false)
@@ -35,7 +41,12 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     if (activated&&(!settings["activated"].toBool())) {
         qDebug()<<"Desactivation of the traking";
         activated=settings["activated"].toBool();                               //Update and sleep to avoid conflict with the MEM:...
-       // Sleep(300);                                                             //... No new postion of the laser is required when closing connection...
+#ifdef Q_OS_WIN32
+        Sleep(300);
+#else
+        usleep(300*1000);  /* sleep for 300 milliSeconds */                     //... No new postion of the laser is required when closing connection...
+#endif
+
 #ifdef Q_OS_WIN32                                                               //...and stops the data saving
         myRegulator.closeRegulation();
 #endif
@@ -49,6 +60,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 }
 
 bool MarangoniTracking::processImage(ImagePacket& currIm) {
+
     if (!activated) {
         cv::Mat outImage=currIm.image.clone();
         cv::Point targetPosition(targetX, targetY);
@@ -65,8 +77,33 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             currIm.pixFormat="MONO8";
         }
         if (currIm.pixFormat=="MONO8") {
+            cv::Mat processed;
+            int newT=threshold*255/100.0;  //change here if it needs to work for 16-bit
+            cv::threshold ( currIm.image, processed, newT, 255, THRESH_BINARY_INV );
 
-            getPosPartLITTLE(currIm.image, contoursP, hierachyP);
+            std::vector<std::vector<cv::Point> > contours;
+            cv::Mat hierarchy;
+            cv::findContours( processed, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+            cv::Mat outImage=currIm.image.clone(); // use a clone to avoid storing on raw image which is stored.
+//            cv::drawContours(outImage,contours,-1,255,2);
+
+            cv::Point newLoc(targetX*currIm.image.cols/100.0,targetY*currIm.image.rows/100.0);
+            cv::ellipse(outImage,newLoc,cv::Size(5,5),0,0,360,255,-1);
+
+//            std::cout << contours.size() << std::endl;
+//            std::cout << contours[0] << std::endl;
+
+            if (contours[0].size() > 5) { //otherwise fitEllipse does not work
+                cv::RotatedRect contours_part = cv::fitEllipse(Mat(contours[0]));
+                cv::ellipse(outImage,contours_part,255,2);
+                cv::Point center_contours_part(contours_part.center.x,contours_part.center.y);
+                cv::circle(outImage,center_contours_part,2,255,-1);
+                Ppoint[0] = contours_part.center.x;
+                Ppoint[1] = contours_part.center.y;
+            }
+
+            currIm.image=outImage;
 
 #ifdef Q_OS_WIN32
 
@@ -127,60 +164,10 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 }
 
 void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
-
-    QString filename = "test.txt";
+    QString filename = "../Data/test.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);
     QTextStream out(&file);
     out << dataToSave;
     file.close();
-}
-
-
-
-void MarangoniTracking::getPosPartLITTLE(cv::Mat src, std::vector<std::vector<cv::Point>> contoursf, cv::OutputArray hierarchy)
-{
-    cv::Mat img2_gray;
-    cv::Mat img2_bw(img2_gray.cv::Mat::size(), CV_8U);
-    int findcont = 0;
-    std::vector<std::vector<cv::Point>> contours;   //vector<vector<Point> > contoursaux;
-
-    img2_gray=src.cv::Mat::clone(); //OR cvtColor( src, img2_gray, CV_BGR2GRAY );
-    cv::threshold ( img2_gray, img2_bw, threshold, 255, THRESH_BINARY_INV ); //Equivalent to the function graythresh + imgbw from MATLAB
-    cv::GaussianBlur( img2_bw, img2_bw, Size( 5, 5 ), 0, 0 );
-    cv::threshold ( img2_bw, img2_bw, 0, 255, THRESH_BINARY | THRESH_OTSU ); //Applying the filter render everything to grey scale so I "binarize it again"
-
-    cv::findContours( img2_bw, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-
-
-
-    //IMPROVEMENT: In the case I missclicked on the particle, the algorithm just show the previous value:
-    //I expect this not to happen when performing real experiments. It is only when pushing the particle manually
-    //The no contour was happend it is probable that I overlapped on the particle so I should only keep the last value
-    if (contours.size() >=1)
-    {
-        //Only if the current area is bigger replace, otherwise keep the value
-        for( int i = 1; i < contours.size() ; i++ )
-        { if (  contourArea(contours[i]) > contourArea(contours[findcont]) )
-            {  //area1 = contourArea(contours[i]); area2 = contourArea(contours[findcont]);
-                findcont = i; }
-        }
-
-        //contoursf.push_back(contours[findcont]);
-        contoursf.insert(contoursf.begin(), contours.begin() + findcont, contours.begin() + findcont+1);
-
-        //contours[findcont], 0);
-        // Get the moments
-        std::vector<cv::Moments> mu(contoursf.size() );
-        for( int i = 0; i < contoursf.size(); i++ )
-        { mu[i] = moments( contoursf[i], false ); }
-
-        ///  Get the mass centers:
-        std::vector<cv::Point2f> mc( contoursf.size() );
-        for( int i = 0; i < contoursf.size(); i++ )
-        { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
-
-        Ppoint[0] = mc[0].x;
-        Ppoint[1] = mc[0].y;
-    }
 }
