@@ -1,5 +1,6 @@
 #include "regulation.h"
 #include <QDebug>
+#include <iostream>
 
 Regulation::Regulation() {                                        //Creation of the regulation object
     qDebug()<<"Creation of Regulation object";
@@ -44,6 +45,17 @@ void Regulation::Configure (int type_regulation, int type_target, float r, int x
     u = 0;                                                                      //reset of internal states of the regulator and actuation variable
     u_sat = 0;
     objectifReached = false;
+
+    if (regulation_type == 3) {                                                //parameters for Regulator2017
+        k_p = 0.4558;
+        k_i = 0.11158;
+        T_s = 0.333;     // @ 30FPS
+
+        u0 = 0;          // state u(k)
+        u1 = 0;          // state u(k-1)
+        e0 = 0;
+        e1 = 0;
+    }
 }
 
 void Regulation::Regulator2017 (float particle_x, float particle_y){
@@ -60,72 +72,73 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
         target_y = start_y + 200*sin(0.05*increment)*cos(0.05*increment);
     }
 
-    //error calculation
-    float x_error = 0.064453*target_x - 0.064453*particle_x;                             //results in mm
-    float y_error = 0.064453*target_y - 0.064453*particle_y;
-    float error = sqrt((x_error*x_error) + (y_error*y_error));                          //radial error
+    //****************************** PID *******************************//
 
-    //angle orientation and r_particle_target calculation
-    float alpha;
-    if (x_error > 0){
-        alpha = atan((y_error/x_error));
+    //update of the (k-1) states
+    e1 = e0;
+    u1 = u0;
+
+    //error calculation
+    float x_error = 0.064453*target_x - 0.064453*particle_x;              //results in mm
+    float y_error = 0.064453*target_y - 0.064453*particle_y;
+
+    //conversion cartesian to polar coordinates
+    e0 = sqrt((x_error*x_error) + (y_error*y_error));            //radial error
+    float alpha = getAlpha(x_error,y_error);
+
+    //controller PID
+    u0 = u1 + (k_p + k_i*(T_s/2)) * e0 + (-k_p + k_i*(T_s/2)) * e1;  //in [mm/s]
+
+    //saturation
+    if (u0 >= 5){
+        u_sat = 5;
     }
-    else if (x_error < 0){
-        alpha = (float)M_PI + atan((y_error/x_error));
+    else if (u0 <= -5){
+        u_sat = -5;
     }
     else{
-        if (y_error > 0){
+        u_sat = u0;
+    }
+    std::cout << u_sat << std::endl;
+
+    //u_steady-state to r_las-part
+    double r_las_part;
+    if (u_sat >= 0){
+        r_las_part = (-1/1.433)*log(u_sat/26.086)*-1;
+    }
+    else{
+        r_las_part = (-1/1.433)*log(-u_sat/26.086);
+    }
+
+    //convert back in cartesian coordinates and in pixels for the mirror
+    laser_x = r_las_part * cos(alpha) * 15.515 + particle_x;
+    laser_y = r_las_part * sin(alpha) * 15.515 + particle_y;
+
+}
+
+float Regulation::getAlpha (float thing_part_x, float thing_part_y) {
+    //take the distance between something and the particle in x and y, and return the angle alpha
+    //with respect to the x-axis
+    float alpha;
+    if (thing_part_x > 0){
+        alpha = atan((thing_part_y/thing_part_x));
+    }
+    else if (thing_part_x < 0){
+        alpha = (float)M_PI + atan((thing_part_y/thing_part_x));
+    }
+    else{
+        if (thing_part_y > 0){
             alpha = (float)M_PI/2;
         }
-        else if (y_error < 0){
+        else if (thing_part_y < 0){
             alpha = - (float)M_PI/2;
         }
         else{
             alpha = 0;
         }
     }
-    middleAngle = (float)M_PI + alpha;
-
-
-    //controller
-    if (target_type == 1){
-        //u_i = u_i + (k_p*T_s/T_i) * error - k_t*(u - u_sat);
-    }
-    float u_p = k_p/(2*T_i) * (T_s + 2*T_i) * error;
-    u = u_i + u_p;
-    if (u >= 7){
-        u_sat = 7;
-    }
-    else if (u <= -7){
-        u_sat = -7;
-    }
-    else{
-        u_sat = u;
-    }
-
-    //u_steady-state to r_las-part
-    double r_las_part;
-    if (u_sat >= 0){
-        r_las_part = (1/1.678)*log(24.93/u_sat)*1;
-    }
-    else{
-        r_las_part = (1/1.678)*log(-u_sat/24.93)*1;
-    }
-
-    //objective nearly reached. Use of a circle to stop the particle within the vicinity of the objective
-    if (abs(x_error) < (radius*0.064453) && abs(y_error) < (radius*0.064453) && target_type ==0 ){
-        objectifReached = true;
-        counter++;
-    }
-
-
-        laser_x = r_las_part * cos(alpha) * 15.515 + particle_x;
-        laser_y = r_las_part * sin(alpha) * 15.515 + particle_y;
-
-
-
+    return alpha;
 }
-
 
 // Dimitri's version
 void Regulation::Regulator2016 (float particle_x, float particle_y){

@@ -22,6 +22,7 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
 }
 
 void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
+
     targetX=settings["targetX"].toInt();
     targetY=settings["targetY"].toInt();
     threshold=settings["threshold"].toInt();
@@ -29,11 +30,13 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     //Activation of the tracking
     if ((!activated)&&(settings["activated"].toBool())) {
         qDebug()<<"Activation of the tracking";
+
 #ifdef Q_OS_WIN32
         if (!initializeMirror()){                                         //Initialisation of the mirror and...
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
 #endif
+
         myRegulator.Configure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
     }
 
@@ -113,11 +116,12 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             }
 
 #ifdef Q_OS_WIN32
-            if (regulation_type == 0) || (regulation_type == 3){                   //Transfer new data stream to the mirror
-                mirCtrl.ChangeMirrorPosition(myRegulator.laser_x,myRegulator.laser_y);
-            }
-            else {
+            //Transfer new data stream to the mirror
+            if (regulation_type == 1) || (regulation_type == 2) {
                 mirCtrl.ChangeMirrorStream(myRegulator.x_vector,myRegulator.y_vector);
+            }
+                else {
+                mirCtrl.ChangeMirrorPosition(myRegulator.laser_x,myRegulator.laser_y);
             }
 #endif
 

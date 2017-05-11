@@ -12,6 +12,7 @@ private:
     int vectorLength;
 
     double k_p;
+    double k_i;
     double T_i;                                                //Regulator parameters
     double k_t;
     double T_s;
@@ -21,9 +22,12 @@ private:
 
     int counter;
 
-    float u_i;
-                                                            //internal states of the regulator
+    float u_i;                                                //internal states of the regulator
     float u_sat;
+    double u0;
+    double u1;
+    double e0;
+    double e1;
 
     //ALWAYS 100
     float figure_x[100];                                            //Variables used for the figure drawing
@@ -34,6 +38,8 @@ private:
     int target_type;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
     int increment;
     float radius;
+
+    float getAlpha (float thing_part_x, float thing_part_y);
 
 public:
     Regulation();
