@@ -18,6 +18,7 @@ private:
     double T_i;                                                //Regulator parameters
     double k_t;
     double T_s;
+    double k_ff;
 
     float start_x;
     float start_y;
@@ -58,6 +59,9 @@ public:
 
     float target_x;                                                  //general variables which represent the desired positions
     float target_y;
+
+    float obstacle_x;                                                //variables for the feedforward
+    float obstacle_y;
 
     float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
     float y_vector[100];

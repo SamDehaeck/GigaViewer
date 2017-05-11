@@ -149,7 +149,9 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                 }
             }
             else if (regulation_type == 3){
-                cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 200, 200, 200 ), 3, 8, 0);        //regulation with the point
+                cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 200, 200, 200 ), 3, 8, 0);    //regulation with the point and feedforward to reject perturbation
+                cv::Point obstaclePosition(myRegulator.obstacle_x, myRegulator.obstacle_y);
+                cv::circle(outImage, obstaclePosition, radius*0.1, cv::Scalar( 255, 255, 255 ), 5, 8, 0);
             }
 
             currIm.image=outImage;

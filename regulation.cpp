@@ -46,15 +46,19 @@ void Regulation::Configure (int type_regulation, int type_target, float r, int x
     u_sat = 0;
     objectifReached = false;
 
-    if (regulation_type == 3) {                                                //parameters for Regulator2017
+    if (regulation_type == 3) {                                //parameters for Regulator2017
         k_p = 0.4558;
         k_i = 0.11158;
         T_s = 0.333;     // @ 30FPS
+        k_ff = 0.9;
 
         u0 = 0;          // state u(k)
         u1 = 0;          // state u(k-1)
-        e0 = 0;
-        e1 = 0;
+        e0 = 0;          // state e(k)
+        e1 = 0;          // state e(k-1)
+
+        obstacle_x = 350;
+        obstacle_y = 350;
     }
 }
 
@@ -78,28 +82,92 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     e1 = e0;
     u1 = u0;
 
-    //error calculation
+    //error calculation (pixels to mm)
     float x_error = 0.064453*target_x - 0.064453*particle_x;              //results in mm
     float y_error = 0.064453*target_y - 0.064453*particle_y;
 
     //conversion cartesian to polar coordinates
     e0 = sqrt((x_error*x_error) + (y_error*y_error));            //radial error
-    float alpha = getAlpha(x_error,y_error);
+    float alphaPID = getAlpha(x_error,y_error);
 
     //controller PID
     u0 = u1 + (k_p + k_i*(T_s/2)) * e0 + (-k_p + k_i*(T_s/2)) * e1;  //in [mm/s]
 
     //saturation
-    if (u0 >= 5){
+    double u_sat_PID;
+//    if (u0 >= 5){
+//        u_sat_PID = 5;
+//    }
+//    else if (u0 <= -5){
+//        u_sat_PID = -5;
+//    }
+//    else{
+        u_sat_PID = u0;
+//    }
+    std::cout << "PID : " << u_sat_PID << std::endl;
+
+    // conversion polar to cartesian coordinates
+    // the vector of that speed has to be add to the speed computed by the FF
+    double u_PID_x = u_sat_PID * cos(alphaPID);
+    double u_PID_y = u_sat_PID * sin(alphaPID);
+
+    //************************** FEED FORWARD **************************//
+
+    //distance between obstacle and particle (pixels to mm)
+    float distFF_x = 0.064453*obstacle_x - 0.064453*particle_x;      //results in mm
+    float distFF_y = 0.064453*obstacle_y - 0.064453*particle_y;
+
+    //conversion cartesian to polar coordinates
+    float distFF = sqrt((distFF_x*distFF_x) + (distFF_y*distFF_y));      //radial distance in mm
+    float alphaFF = getAlpha(distFF_x,distFF_y);
+
+    //opposite Kralchevsky axial force (from experimental model) - input : [m], output : [N]
+    double force_K =  9.5932 * pow(10,-6) * exp(-826.4989*distFF*0.001)
+                      + 7.1232 * pow(10,-7) * exp(-171.1862*distFF*0.001);
+
+    //Stokes to convert force_K to velocity
+    double uFF = force_K / (6 * (double)M_PI * 1.0016 * pow(10,-3) * 0.0005);  // [m/s]
+    uFF = uFF * 1000; // [mm/s]
+
+    //saturation
+    double u_sat_FF;
+//    if (uFF >= 5){
+//        u_sat_FF = 5;
+//    }
+//    else if (uFF <= -5){
+//        u_sat_FF = -5;
+//    }
+//    else{
+        u_sat_FF = uFF;
+//    }
+    std::cout << "FF : " << u_sat_FF << std::endl;
+
+    // conversion polar to cartesian coordinates
+    // the vector of that speed has to be add to the speed computed by the PID
+    double u_FF_x = u_sat_FF * cos(alphaFF);
+    double u_FF_y = u_sat_FF * sin(alphaFF);
+
+    //********************** COMBINATION PID-FF ************************//
+
+    //vectors addition
+    double u_x = u_PID_x + u_FF_x;
+    double u_y = u_PID_y + u_FF_y;
+
+    //conversion cartesian to polar coordinates
+    u = sqrt((u_x*u_x) + (u_y*u_y));      //radial distance in mm
+    double alpha = getAlpha(u_x,u_y);
+
+    //saturation
+    if (u >= 5){
         u_sat = 5;
     }
-    else if (u0 <= -5){
+    else if (u <= -5){
         u_sat = -5;
     }
     else{
-        u_sat = u0;
+        u_sat = u;
     }
-    std::cout << u_sat << std::endl;
+    std::cout << "total : " << u_sat << std::endl;
 
     //u_steady-state to r_las-part
     double r_las_part;
@@ -109,8 +177,10 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     else{
         r_las_part = (-1/1.433)*log(-u_sat/26.086);
     }
+    alpha = alpha + (float)M_PI;
 
     //convert back in cartesian coordinates and in pixels for the mirror
+    //and use the particle as reference
     laser_x = r_las_part * cos(alpha) * 15.515 + particle_x;
     laser_y = r_las_part * sin(alpha) * 15.515 + particle_y;
 
