@@ -17,7 +17,7 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
   #endif
 {
     radius = 50.;
-    regulation_type = 0;                           //type 0 = point, type 1 = circle, type 2 = arc circle, type 3 = point with feedforward
+    regulation_type = 3;                           //type 0 = point, type 1 = circle, type 2 = arc circle, type 3 = point with feedforward
     target_type = 0;                               //type 0 = step reference, type 1 = traking reference
 }
 
@@ -34,7 +34,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
             qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
         }
 #endif
-        myRegulator.Figure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
+        myRegulator.Configure(regulation_type, target_type, radius, targetX, targetY);     //Creation of the figure and initialisation of some parameters
     }
 
     //Desactivation of the tracking
@@ -105,8 +105,12 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
             currIm.image=outImage;
 
-
-            myRegulator.Regulator(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
+            if ((regulation_type == 0) || (regulation_type == 1) || (regulation_type == 2)){
+                myRegulator.Regulator2016(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
+            }
+            else {
+                myRegulator.Regulator2017(Ppoint[0], Ppoint[1]);                           //Modification of the laser position
+            }
 
 #ifdef Q_OS_WIN32
             if (regulation_type == 0) || (regulation_type == 3){                   //Transfer new data stream to the mirror
@@ -130,7 +134,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             else if (regulation_type == 1){
                 cv::circle(outImage, figureCenter, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);            //regulation with the circle
             }
-            else {
+            else if (regulation_type == 2){
                 if (myRegulator.objectifReached == false){
                     cv::Size size( radius, radius );                                                        //regulation with a arc circle
                     int middleAngle = myRegulator.middleAngle*180/M_PI;
@@ -139,6 +143,9 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                 else{
                     cv::circle(outImage, targetPosition, radius, cv::Scalar( 0, 0, 255 ), 1, 8, 0);       //objective reached. Stabilisation with circle
                 }
+            }
+            else if (regulation_type == 3){
+                cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 200, 200, 200 ), 3, 8, 0);        //regulation with the point
             }
 
             currIm.image=outImage;

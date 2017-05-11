@@ -37,8 +37,11 @@ private:
 
 public:
     Regulation();
-    void Figure (int type_regulation, int type_target, float r, int x_target, int y_target); 	//Must be called when "track" is pressed
-    void Regulator(float particle_x, float particle_y);             //Must be called when the position of the particule moves
+    void Configure (int type_regulation, int type_target, float r, int x_target, int y_target); 	//Must be called when "track" is pressed
+    void Regulator2016(float particle_x, float particle_y);             //Must be called when the position of the particule moves...
+                                                                        //Dimitri's version
+    void Regulator2017(float particle_x, float particle_y);             //Must be called when the position of the particule moves
+                                                                        //Adrien's version
 
     float laser_x;                                                        //For point control, correspond to the new position of the laser...
     float laser_y;                                                        //...for the figure control, correspond to the center of the figure

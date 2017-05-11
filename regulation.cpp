@@ -14,11 +14,12 @@ Regulation::Regulation() {                                        //Creation of 
     T_s = 0.1;
 }
 
-void Regulation::Figure (int type_regulation, int type_target, float r, int x_target, int y_target){
+void Regulation::Configure (int type_regulation, int type_target, float r, int x_target, int y_target){
 
     regulation_type = type_regulation; target_type = type_target; radius = r;
     increment = 0;
     counter = 0;
+
     if( (regulation_type == 1) || (regulation_type == 2) ){
         qDebug() << "Creation of the figure";
         float stepAngle = (float)M_PI*2 / ptsNumb;
@@ -28,7 +29,7 @@ void Regulation::Figure (int type_regulation, int type_target, float r, int x_ta
         }
     }
     else{
-        qDebug()<<"Use of the point actuation. No figure creation";
+        qDebug()<<"Use of point actuation. No figure creation";
     }
 
     if( target_type == 0){                                                      //step reference
@@ -45,7 +46,7 @@ void Regulation::Figure (int type_regulation, int type_target, float r, int x_ta
     objectifReached = false;
 }
 
-void Regulation::Regulator (float particle_x, float particle_y){
+void Regulation::Regulator2017 (float particle_x, float particle_y){
 
     //target positions
     if (target_type == 1){                                                       //tracking reference. target_x and y are computed at each step
@@ -117,16 +118,107 @@ void Regulation::Regulator (float particle_x, float particle_y){
         counter++;
     }
 
-    //r_las-part to r_part_center
-    float r_part_center = radius - (r_las_part * 15.515);               //in pix
 
-    //r_part_center to x/y_part_center
-    float x_part_center = r_part_center * cos(alpha);
-    float y_part_center = r_part_center * sin(alpha);
+        laser_x = r_las_part * cos(alpha) * 15.515 + particle_x;
+        laser_y = r_las_part * sin(alpha) * 15.515 + particle_y;
 
-    //computation of the new center figure
-    laser_x = particle_x + x_part_center;
-    laser_y = particle_y + y_part_center;
+
+
+}
+
+
+// Dimitri's version
+void Regulation::Regulator2016 (float particle_x, float particle_y){
+
+    //target positions
+    if (target_type == 1){                                                       //tracking reference. target_x and y are computed at each step
+        if (flag == 1){                                                         //start of the tracking at the current particle position
+            start_x = particle_x;
+            start_y = particle_y;
+            flag = 0;
+        }
+        increment++;
+        target_x = start_x + 200*sin(0.05*increment);                                                  //parameterisation
+        target_y = start_y + 200*sin(0.05*increment)*cos(0.05*increment);
+    }
+
+    //error calculation
+    float x_error = 0.064453*target_x - 0.064453*particle_x;                             //results in mm
+    float y_error = 0.064453*target_y - 0.064453*particle_y;
+    float error = sqrt((x_error*x_error) + (y_error*y_error));                          //radial error
+
+    //angle orientation and r_particle_target calculation
+    float alpha;
+    if (x_error > 0){
+        alpha = atan((y_error/x_error));
+    }
+    else if (x_error < 0){
+        alpha = (float)M_PI + atan((y_error/x_error));
+    }
+    else{
+        if (y_error > 0){
+            alpha = (float)M_PI/2;
+        }
+        else if (y_error < 0){
+            alpha = - (float)M_PI/2;
+        }
+        else{
+            alpha = 0;
+        }
+    }
+    middleAngle = (float)M_PI + alpha;
+
+
+    //controller
+    if (target_type == 1){
+        //u_i = u_i + (k_p*T_s/T_i) * error - k_t*(u - u_sat);
+    }
+    float u_p = k_p/(2*T_i) * (T_s + 2*T_i) * error;
+    u = u_i + u_p;
+    if (u >= 7){
+        u_sat = 7;
+    }
+    else if (u <= -7){
+        u_sat = -7;
+    }
+    else{
+        u_sat = u;
+    }
+
+    //u_steady-state to r_las-part
+    double r_las_part;
+    if (u_sat >= 0){
+        r_las_part = (1/1.678)*log(24.93/u_sat)*1;
+    }
+    else{
+        r_las_part = (1/1.678)*log(-u_sat/24.93)*1;
+    }
+
+    //objective nearly reached. Use of a circle to stop the particle within the vicinity of the objective
+    if (abs(x_error) < (radius*0.064453) && abs(y_error) < (radius*0.064453) && target_type ==0 ){
+        objectifReached = true;
+        counter++;
+    }
+
+    if (regulation_type == 0) {
+        laser_x = r_las_part * cos(alpha) * 15.515 + particle_x;
+        laser_y = r_las_part * sin(alpha) * 15.515 + particle_y;
+    }
+
+    else {
+
+        //r_las-part to r_part_center
+        float r_part_center = radius - (r_las_part * 15.515);               //in pix
+
+        //r_part_center to x/y_part_center
+        float x_part_center = r_part_center * cos(alpha);
+        float y_part_center = r_part_center * sin(alpha);
+
+        //computation of the new center figure
+        laser_x = particle_x + x_part_center;
+        laser_y = particle_y + y_part_center;
+
+    }
 
 
     //Transfer new data stream to the mirror
