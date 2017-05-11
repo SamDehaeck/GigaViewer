@@ -90,12 +90,46 @@ void MirrorControl::ChangeMirrorStream (float x_vector[100], float y_vector[100]
 
 //change mirror position
 void MirrorControl::ChangeMirrorPosition (float x, float y){
-	
-    //Mapping: conversion from Pixel to mirrorPosition (between -1 and +1)
-    float xMirr = coefX[0] + coefX[1]*x + coefX[2]*y + coefX[3]*x*x + coefX[4]*x*y + coefX[5]*y*y;
-    float yMirr =  coefY[0] + coefY[1]*x + coefY[2]*y + coefY[3]*x*x + coefY[4]*x*y + coefY[5]*y*y;
 
-    mti->GoToDevicePosition( xMirr, yMirr, m_point, 10 );						//This call will move the laser to new x, y position in 10ms
+    double data[1] = {0.0};
+    double data2[1] = {0.0};
+    float aux= 0.0;
+    float aux2 = 0.0;
+
+    //Coefficients defining the plane equation
+    //double coefV1[6] = {4.15518970689798,	0.01587121536049,	-0.01218135670724,	0.00000086718561,	0.00000165423421,	0.00000002454538};
+    double coefV1[10] = { -0.645139125538851,	0.001337530766587,	-0.000031904568699,	-0.000000105020935,	0.000000069940947,	-0.000000001806407,	0.000000000060716,	0.000000000014994,	0.000000000022520,	-0.000000000000352};
+
+
+    //double coefV2[6] = {18.7896527377886,	-0.0174273406467,	-0.0119839925597,	0.0000014772564,	-0.0000011979468,	0.0000001710982},
+    double coefV2[10]= { 0.48687571479313,	-0.00006809171329,	-0.00092187391658,	0.00000009144940,	0.00000002981364,	-0.00000006134410,	-0.00000000000777,	-0.00000000001880,	0.00000000000231,	0.00000000004283	};
+
+    //On my new program I rely on a formula to do this, therefore I do not need so much detail
+    data[0] =  coefV1[0] + coefV1[1]*x + coefV1[2]*y + coefV1[3]*x*x + coefV1[4]*x*y + coefV1[5]*y*y  + coefV1[6]*x*x*x+  coefV1[7]*y*x*x + coefV1[8]*x*y*y + coefV1[9]*y*y*y     ;
+    data2[0] =  coefV2[0] + coefV2[1]*x + coefV2[2]*y + coefV2[3]*x*x + coefV2[4]*x*y + coefV2[5]*y*y  + coefV2[6]*x*x*x+  coefV2[7]*y*x*x + coefV2[8]*x*y*y + coefV2[9]*y*y*y     ;
+
+
+    //diffticks = (clock() - tini)/(double(CLOCKS_PER_SEC));
+    //cout<< fixed << setprecision(4) << diffticks <<endl;
+
+    //printf(" Computed Voltages = %.2f , %.2f   \n", data[0], data2[0]) ;
+    aux = float(data[0]);		aux2= float(data2[0]);
+
+    //mti->GoToDevicePosition( aux, aux2, mData, mSec );
+    mti->SetDeviceParam( MTIParam::OutputOffsets,    aux, aux2 );
+
+    //dataNI[0] = float64(data[0]);
+    //dataNI2[0] = float64( data2[0]);
+    //DAQmxWriteAnalogF64(taskHandle, 1, 1,4.0,DAQmx_Val_GroupByChannel,dataNI,NULL,NULL);
+    //DAQmxWriteAnalogF64(taskHandle2, 1, 1,4.0,DAQmx_Val_GroupByChannel,dataNI2,NULL,NULL);
+
+
+    //OLD
+    //Mapping: conversion from Pixel to mirrorPosition (between -1 and +1)
+    //    float xMirr = coefX[0] + coefX[1]*x + coefX[2]*y + coefX[3]*x*x + coefX[4]*x*y + coefX[5]*y*y;
+    //    float yMirr =  coefY[0] + coefY[1]*x + coefY[2]*y + coefY[3]*x*x + coefY[4]*x*y + coefY[5]*y*y;
+
+    //    mti->GoToDevicePosition( xMirr, yMirr, m_point, 10 );						//This call will move the laser to new x, y position in 10ms
 }
 
 

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #ifndef REGULATION_H
 #define REGULATION_H
 

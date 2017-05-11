@@ -1,6 +1,6 @@
 #include "regulation.h"
 #include <QDebug>
-#include <iostream>
+
 
 Regulation::Regulation() {                                        //Creation of the regulation object
     qDebug()<<"Creation of Regulation object";
@@ -104,7 +104,7 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     //u_steady-state to r_las-part
     double r_las_part;
     if (u_sat >= 0){
-        r_las_part = (-1/1.433)*log(u_sat/26.086)*-1;
+        r_las_part = (-1/1.433)*log(u_sat/26.086);
     }
     else{
         r_las_part = (-1/1.433)*log(-u_sat/26.086);
