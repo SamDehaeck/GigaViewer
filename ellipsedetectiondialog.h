@@ -34,9 +34,23 @@ private slots:
     void on_vertPosition_sliderReleased();
     void on_vertPosition_valueChanged(int value);
 
+    void on_IntervalleDiameter_stateChanged(int arg1);
+
+    void on_AspectRatioBox_stateChanged(int arg1);
+
+    void on_BlackWhiteBox_stateChanged(int arg1);
+
+    void on_AspectRatioSlider_sliderPressed();
+
+    void on_AspectRatioSlider_sliderReleased();
+
+    void on_AspectRatioSlider_valueChanged(int value);
+
+    //void on_ContoursIntervalleBox_stateChanged(int arg1);
+
 private:
     bool extractData();
-    bool tSliderPressed,xSliderPressed,ySliderPressed;
+    bool tSliderPressed,xSliderPressed,ySliderPressed,aSliderPressed;
 
 
 

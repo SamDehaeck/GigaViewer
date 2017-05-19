@@ -4,7 +4,7 @@
 
 
 EllipseDetectionDialog::EllipseDetectionDialog(QWidget *parent) :
-    QDialog(parent),tSliderPressed(false),xSliderPressed(false),ySliderPressed(false),
+    QDialog(parent),tSliderPressed(false),xSliderPressed(false),ySliderPressed(false),aSliderPressed(false),
     ui(new Ui::EllipseDetectionDialog)
 {
     ui->setupUi(this);
@@ -18,7 +18,13 @@ bool EllipseDetectionDialog::extractData() {
     settings["threshold"]=ui->thresholdSlider->value();
     settings["targetX"]=ui->horPosition->value();
     settings["targetY"]=ui->vertPosition->value();
+    settings["targetAspectRatio"]=ui->AspectRatioSlider->value();
     settings["shouldTrack"]=ui->trackButton->isChecked();
+    settings["CriteriumDiameterMaxMin"]=ui->IntervalleDiameter->isChecked();
+    settings["CriteriumAspectRatio"]=ui->AspectRatioBox->isChecked();
+    settings["CriteriumBlackWhite"]=ui->BlackWhiteBox->isChecked();
+    //settings["ContoursIntervalle"]=ui->ContoursIntervalleBox->isChecked();
+
 
     emit stateChanged(settings);
 
@@ -109,3 +115,44 @@ void EllipseDetectionDialog::on_vertPosition_valueChanged(int)
         extractData();
     }
 }
+
+
+
+void EllipseDetectionDialog::on_IntervalleDiameter_stateChanged(int)
+{
+    extractData();
+}
+
+void EllipseDetectionDialog::on_AspectRatioBox_stateChanged(int)
+{
+    extractData();
+}
+
+
+void EllipseDetectionDialog::on_BlackWhiteBox_stateChanged(int)
+{
+    extractData();
+}
+
+void EllipseDetectionDialog::on_AspectRatioSlider_sliderPressed()
+{
+    aSliderPressed=true;
+}
+
+void EllipseDetectionDialog::on_AspectRatioSlider_sliderReleased()
+{
+    aSliderPressed=false;
+    extractData();
+}
+
+void EllipseDetectionDialog::on_AspectRatioSlider_valueChanged(int)
+{
+    if(!aSliderPressed){
+        extractData();
+    }
+}
+
+//void EllipseDetectionDialog::on_ContoursIntervalleBox_stateChanged(int arg1)
+//{
+    //extractData();
+//}

@@ -11,6 +11,16 @@ private:
     int threshold;
     int targetX;
     int targetY;
+    int targetAspectRatio;
+    //double CenterLine;
+    //double VerticalLine;
+    bool UseAspectRatio;
+    //bool UseContourLimits;
+    bool UseBlackWhite;
+    bool UseCenterLine;
+    bool UseVertical;
+    bool UseDiamateterIntervalle;
+
     bool activated;
     bool shouldTrack;
     QStringList dataToSave;
