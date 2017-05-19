@@ -27,14 +27,14 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
     if (activated) {
 
 
-        if (currIm.pixFormat=="RGB8") {
+        if (currIm.pixFormat=="RGB8" || (currIm.image.channels()==3)) {
             cv::Mat grayIm;
             cv::cvtColor(currIm.image,grayIm,CV_RGB2GRAY);
             currIm.image=grayIm.clone();
             currIm.pixFormat="MONO8";
         }
         if (currIm.pixFormat=="MONO8") {
-            int newT=threshold*255/100.0;  //change here if it needs to work for 16-bit
+            int newT=threshold*500/100.0;  //change here if it needs to work for 16-bit
 
             int apSize=3;
             // Find edge pixels
@@ -80,59 +80,100 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
 //                int solCounter=0;
 //                int resColumns=0;
                 int minContour= 20; //Nombre minimum de points de contours
-                int maxSize=max(I.rows,I.cols);// ?
+                int maxSize=max(I.rows,I.cols);//
                 float minDiam = targetX/100.0*maxSize; // Longueur du petit axe de l'ellipse
                 float maxDiam = targetY/100.0*maxSize; // Longueur du grand axe de l'ellipse
-                std::vector<RotatedRect> foundEllipses; // Ellipse trouvé. Ellipse se trouve sous la forme d'un vecteur de type RoatedRect
+                float maxContourfloat=4*3.1415*maxDiam;
+                int maxContour=static_cast<float>(maxContourfloat);
+
+                std::vector<RotatedRect> foundEllipses;// Ellipse trouvé. Ellipse se trouve sous la forme d'un vecteur de type RoatedRect
 // RotatedRect a trois paramètre : un axe hauteur, un axe longueur et un angle.
+                //bool CriteriumValidationRatio;
                 for (int i=0;i<nrLabs;i++) // Pour tout les objets trouvés
                 {
-                    if (counter[i]<=minContour)// Si le nombre de point de contours de l'objet est inférieur au nombre minimum de points de contours
+                    if (counter[i]<=minContour || counter[i]>=maxContour)// Si le nombre de point de contours de l'objet est inférieur au nombre minimum de points de contours ou supérieur au nombre maximum de points de contours
                     {
                         continue; // Nous passons au prochain objet
-                    } else {
+                    }
+                    else
+                    {
                         RotatedRect fEll=cv::fitEllipse(labCont[i]); // Dessinne les contours de l'objet ( les points sont reliés par une ligne continue) en forme d'ellpise
-                        float aspRat=fEll.size.width/fEll.size.height;// Excentricité de l'ellipse
                         double minAxis=min(fEll.size.width,fEll.size.height)/2;// La longueur du petit axe de l'ellipse est le minimum entre la largeur et la hauteur
                         double maxAxis=max(fEll.size.width,fEll.size.height)/2;// La longueur du grand axe de l'ellipse est le maximum entre la largeur et la hauteur
+                        double maxAngle;
+                        if (fEll.size.width>fEll.size.height) maxAngle=fEll.angle;
+                        else maxAngle=fEll.angle+90;
+
+                        float aspRat=minAxis/maxAxis;// Excentricité de l'ellipse
                         Point Center=fEll.center;
 
-//                        qDebug()<<"Min and max are: "<<minAxis<<" - "<<maxAxis;
-                        if (aspRat>0.8 && aspRat < 1.2) // Si l'excentricité est comprise entre 0.8 et 1.2 ( donc une ellipse proche d'un cercle)
+                        if (aspRat>0.8 && aspRat < 1) // Si l'excentricité est comprise entre 0.8 et 1.2 ( donc une ellipse proche d'un cercle)
                         {
-                            double Focal1x,Focal1y,Focal2x,Focal2y;// Création des 2 foyers de l'ellipse
-                            double Cdouble=sqrt(pow(maxAxis,2)-pow(minAxis,2));//Distance du centre de l'ellipse à l'un des foyers
+                            double CenterCapillaire=210;//Absicisse du centre du capillaire
+                            double EntreeDuCapillaire=860;//Ordonnée de l'entrée du capillaire
 
-                            Focal1x=Center.x+cos(fEll.angle)*Cdouble;// Calcul de l'abscisse du 1er foyer
-                            Focal1y=sin(fEll.angle)*Cdouble-Center.y;// Calcul de l'ordonnées du 1er foyer
-                            Focal2x=cos(fEll.angle)*Cdouble-Center.x;// Calcul de l'abscisse du 2ème foyer
-                            Focal2y=Center.y+sin(fEll.angle)*Cdouble;// Calcul de l'ordonnées du 2ème foyer
-                            double maxDist=20;
-                            double minValidationRatio=0.2;
-
-                            if (minAxis>minDiam && maxAxis<maxDiam)// Si la longueur du petit axe est plus grand que ? et la longueur du grand axe est plus grand que ?
+                            if (minAxis<minDiam && maxAxis<maxDiam)// Si la longueur du petit axe est plus grand que ? et la longueur du grand axe est plus grand que ?
                             {
-                                int NumberOfPointsGood=0;
-                                for(int k=1;k<counter[i];k++)
-                                {
-                                    double xm=static_cast<double>(labCont[i][k].x);
-                                    double ym=static_cast<double>(labCont[i][k].y);
-                                    if ((sqrt(pow(xm-Focal1x,2)+pow(ym-Focal1y,2))+sqrt(pow(xm-Focal2x,2)+pow(ym-Focal2y,2))-2*maxDiam)<maxDist)
-                                    {
-                                        NumberOfPointsGood+=1;
-                                    }
-                                }
-                                double ValidationRatio=NumberOfPointsGood/(2*3.1415*sqrt(minAxis*maxAxis));
+                                continue;
+                            }
 
-                                if (ValidationRatio>minValidationRatio)
+                            if(abs(Center.x-CenterCapillaire)>20 || Center.y>EntreeDuCapillaire)//Si l'ellipse ne se situe pas dans le capilaire
+                            {
+                                continue;
+                            }
+                            double maxAxisExt=maxAxis+5;//Grand axe de l'ellipse extérieur
+                            double minAxisExt=maxAxisExt*aspRat;//Petit Axe de l'ellipse extérieur
+                            double maxAxisInt=maxAxis-5;//Grand axe de l'elipse intérieur
+                            double minAxisInt=maxAxisInt*aspRat;//Petit axe de l'ellipse intérieur
+                            RotatedRect ellipseExt=RotatedRect(fEll.center,Size2f(2*maxAxisExt,2*minAxisExt),maxAngle);//Création de l'ellipse extérieur
+                            RotatedRect ellipseInt=RotatedRect(fEll.center,Size2f(2*maxAxisInt,2*minAxisInt),maxAngle);//Création de l'ellipse intérieur
+                            int NbreEchantillon=100;// Nombre d'échantillon dont l'on étudie la luminosité sur les ellipses
+                            double MeanBrightnessDiff=0;
+                            for (int i=0;i<NbreEchantillon;i++)
+                            {
+                                MeanBrightnessDiff=MeanBrightnessDiff+ExtractValues(I,GetSamplePositions(ellipseExt,i,NbreEchantillon))-ExtractValues(I,GetSamplePositions(ellipseInt,i,NbreEchantillon));
+                            }
 
-                                {
-                                    qDebug()<<"ValRaio: "<<ValidationRatio;
-                                    cv::ellipse(I,fEll,150,5); // ?
+                            if ((MeanBrightnessDiff/NbreEchantillon)<0)
+                            {
+                                continue;
+                            }
+                            //double Focal1x,Focal1y,Focal2x,Focal2y;// Création des 2 foyers de l'ellipse
+                            //double Cdouble=sqrt(pow(maxAxis,2)-pow(minAxis,2));//Distance du centre de l'ellipse à l'un des foyers
+                            //Focal1x=Center.x+cos(fEll.angle)*Cdouble;// Calcul de l'abscisse du 1er foyer
+                            //Focal1y=sin(fEll.angle)*Cdouble-Center.y;// Calcul de l'ordonnées du 1er foyer
+                            //Focal2x=cos(fEll.angle)*Cdouble-Center.x;// Calcul de l'abscisse du 2ème foyer
+                            //Focal2y=Center.y+sin(fEll.angle)*Cdouble;// Calcul de l'ordonnées du 2ème foyer
+                            //double maxDist=40;
+                            //double minValidationRatio=0.2;
+
+                            //int NumberOfPointsGood=0;
+                            //for(int k=1;k<counter[i];k++)
+                            //{
+                                //double xm=static_cast<double>(labCont[i][k].x);
+                                //double ym=static_cast<double>(labCont[i][k].y);
+
+                                //if (abs(sqrt(pow(xm-Focal1x,2)+pow(ym-Focal1y,2))+sqrt(pow(xm-Focal2x,2)+pow(ym-Focal2y,2))-2*maxDiam)<maxDist)
+                                //{
+                                    //NumberOfPointsGood+=1;
+                                //}
+
+                             //}
+                             //double ValidationRatio=NumberOfPointsGood/(2*3.1415*sqrt(minAxis*maxAxis));
+
+                             //if ((ValidationRatio>minValidationRatio)==false)
+                             //{
+                                 //continue;
+                             //}
+
+
+
+                                    cv::ellipse(I,fEll,150,2); // ?
                                     foundEllipses.push_back(fEll); // ?
 
-                                }
-                            }
+
+
+
                         }
                     }
 
@@ -183,4 +224,31 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
     }
     return true;
 }
+
+Point GetSamplePositions(RotatedRect Ellipse, int n, int NbreEchantillon)
+{
+
+    double deltateta=2*3.1415/NbreEchantillon;
+    int xEllipse=static_cast<int>(Ellipse.center.x + (max(Ellipse.size.width,Ellipse.size.height)/2)*cos(n*deltateta-(Ellipse.angle*3.1415/180)));
+    int yEllipse=static_cast<int>(Ellipse.center.y + (min(Ellipse.size.width,Ellipse.size.height)/2)*sin(n*deltateta-(Ellipse.angle*3.1415/180)));
+    return Point(xEllipse,yEllipse);
+
+
+}
+double ExtractValues(cv::Mat I,cv::Point Pixel)
+{
+
+    if (I.channels()==3)
+    {
+        Vec3b valuePixel = I.at<Vec3b>(Pixel);
+        return (double)valuePixel[0];
+    }
+    else
+    {
+        return I.at<uchar>(Pixel);
+    }
+}
+
+
+
 

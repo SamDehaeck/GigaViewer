@@ -57,7 +57,7 @@
     <item row="3" column="2">
      <widget class="QSlider" name="horPosition">
       <property name="value">
-       <number>50</number>
+       <number>1</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>

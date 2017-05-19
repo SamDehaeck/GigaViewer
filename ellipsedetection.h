@@ -18,6 +18,10 @@ public:
     EllipseDetection(int thresh);
     void ChangeSettings(QMap<QString,QVariant> settings);
     bool processImage(ImagePacket& currIm);
+
 };
+
+cv::Point GetSamplePositions(cv::RotatedRect Ellipse,int i,int NbreEchantillon);
+double ExtractValues(cv::Mat I,cv::Point Pixel);
 
 #endif // ELLIPSEDETECTION_H
