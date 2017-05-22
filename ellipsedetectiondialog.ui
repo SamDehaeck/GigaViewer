@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>599</width>
-    <height>661</height>
+    <width>902</width>
+    <height>835</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,450 +21,15 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>561</width>
-     <height>511</height>
+     <width>711</width>
+     <height>681</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item row="3" column="0">
-     <widget class="QToolBox" name="toolBox">
-      <widget class="QWidget" name="toolBoxPage1" native="true">
-       <attribute name="label">
-        <string/>
-       </attribute>
-       <widget class="QLabel" name="label">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>10</y>
-          <width>191</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Threshold</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSlider" name="thresholdSlider">
-        <property name="geometry">
-         <rect>
-          <x>235</x>
-          <y>-2</y>
-          <width>281</width>
-          <height>71</height>
-         </rect>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="IntervalleDiameter">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>80</y>
-          <width>222</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Activate Diameter Intervalle</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="MinDiameter">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>120</y>
-          <width>201</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Min Diameter</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSlider" name="horPosition">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>120</y>
-          <width>291</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="value">
-         <number>1</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QLabel" name="MaxDiameter">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>150</y>
-          <width>201</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Max Diameter</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSlider" name="vertPosition">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>150</y>
-          <width>291</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="pageStep">
-         <number>10</number>
-        </property>
-        <property name="value">
-         <number>80</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="AspectRatioBox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>220</y>
-          <width>190</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Activate Aspect Ratio</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_5">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>250</y>
-          <width>201</width>
-          <height>65</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Aspect Ratio</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSlider" name="AspectRatioSlider">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>270</y>
-          <width>291</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="maximum">
-         <number>99</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>80</number>
-        </property>
-        <property name="sliderPosition">
-         <number>80</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="tickPosition">
-         <enum>QSlider::NoTicks</enum>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="BlackWhiteBox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>330</y>
-          <width>190</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Activate BlackWhite</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="DistanceBlackWhite">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>370</y>
-          <width>301</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>5</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_8">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>360</y>
-          <width>201</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Acceptable Distance</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="toolBoxPage2" native="true">
-       <attribute name="label">
-        <string/>
-       </attribute>
-       <widget class="QSlider" name="ValidationRatio">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>50</y>
-          <width>301</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="value">
-         <number>50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_4">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>40</y>
-          <width>161</width>
-          <height>61</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Validation Ratio</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_6">
-        <property name="geometry">
-         <rect>
-          <x>8</x>
-          <y>220</y>
-          <width>181</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Center Line</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QSlider" name="CenterLineSlider">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>220</y>
-          <width>161</width>
-          <height>29</height>
-         </rect>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>50</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-       <widget class="QSlider" name="VerticalLineSlider">
-        <property name="geometry">
-         <rect>
-          <x>450</x>
-          <y>250</y>
-          <width>29</width>
-          <height>161</height>
-         </rect>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>80</number>
-        </property>
-        <property name="sliderPosition">
-         <number>80</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="DistanceCenterLine">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>280</y>
-          <width>111</width>
-          <height>27</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>20</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="CoverageBox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>10</y>
-          <width>190</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Activate Coverage</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_7">
-        <property name="geometry">
-         <rect>
-          <x>370</x>
-          <y>220</y>
-          <width>181</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Vertical Line</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="GeometryLineBox">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>180</y>
-          <width>190</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Activate Geometry Line</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_3">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>90</y>
-          <width>151</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Acceptable Distance</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="accDistance">
-        <property name="geometry">
-         <rect>
-          <x>230</x>
-          <y>100</y>
-          <width>131</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>6</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_9">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>270</y>
-          <width>171</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Acceptable Distance</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </widget>
-     </widget>
-    </item>
-    <item row="1" column="0" rowspan="2" colspan="2">
+    <item row="2" column="0" rowspan="2" colspan="2">
      <widget class="QCheckBox" name="activateBox">
       <property name="enabled">
        <bool>true</bool>
@@ -474,13 +39,336 @@
       </property>
      </widget>
     </item>
+    <item row="4" column="0">
+     <widget class="QToolBox" name="toolBox">
+      <widget class="QWidget" name="toolBoxPage1" native="true">
+       <attribute name="label">
+        <string>Ellipse Detection</string>
+       </attribute>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>30</y>
+          <width>671</width>
+          <height>531</height>
+         </rect>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="10" column="6" colspan="3">
+          <widget class="QLineEdit" name="DistanceCenterLine">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>20</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="5" colspan="4">
+          <widget class="QSlider" name="CenterLineSlider">
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="5" colspan="4">
+          <widget class="QSlider" name="horPosition">
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="5">
+          <widget class="QLabel" name="MinDiameter">
+           <property name="text">
+            <string>Min Diameter</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="9">
+          <widget class="QCheckBox" name="IntervalleDiameter">
+           <property name="text">
+            <string>Activate Diameter Intervalle</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0" colspan="5">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Aspect Ratio</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0" colspan="5">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Vertical Line</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0" colspan="9">
+          <widget class="QCheckBox" name="GeometryLineBox">
+           <property name="text">
+            <string>Activate Geometry Line</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" rowspan="3" colspan="9">
+          <widget class="QCheckBox" name="AspectRatioBox">
+           <property name="text">
+            <string>Activate Aspect Ratio</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0" colspan="6">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Acceptable Distance</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="5">
+          <widget class="QLabel" name="MaxDiameter">
+           <property name="text">
+            <string>Max Diameter</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="5" colspan="4">
+          <widget class="QSlider" name="VerticalLineSlider">
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>80</number>
+           </property>
+           <property name="sliderPosition">
+            <number>80</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" colspan="6">
+          <widget class="QSlider" name="thresholdSlider">
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="5" colspan="4">
+          <widget class="QSlider" name="vertPosition">
+           <property name="pageStep">
+            <number>10</number>
+           </property>
+           <property name="value">
+            <number>80</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="5" colspan="4">
+          <widget class="QSlider" name="AspectRatioSlider">
+           <property name="maximum">
+            <number>99</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>80</number>
+           </property>
+           <property name="sliderPosition">
+            <number>80</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="3">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Threshold</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0" colspan="5">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Center Line</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0" rowspan="2" colspan="9">
+          <widget class="QCheckBox" name="BlackWhiteBox">
+           <property name="text">
+            <string>Activate BlackWhite</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="0" colspan="6">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Acceptable Distance</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="6" colspan="3">
+          <widget class="QLineEdit" name="DistanceBlackWhite">
+           <property name="text">
+            <string>5</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="0" colspan="9">
+          <widget class="QCheckBox" name="CoverageBox">
+           <property name="text">
+            <string>Activate Coverage</string>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="0" colspan="5">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Validation Ratio</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="5" colspan="4">
+          <widget class="QSlider" name="ValidationRatio">
+           <property name="value">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="6" colspan="3">
+          <widget class="QLineEdit" name="accDistance">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>6</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="0" colspan="6">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Acceptable Distance</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <zorder>label</zorder>
+       <zorder>thresholdSlider</zorder>
+       <zorder>IntervalleDiameter</zorder>
+       <zorder>MinDiameter</zorder>
+       <zorder>horPosition</zorder>
+       <zorder>MaxDiameter</zorder>
+       <zorder>vertPosition</zorder>
+       <zorder>AspectRatioBox</zorder>
+       <zorder>label_5</zorder>
+       <zorder>AspectRatioSlider</zorder>
+       <zorder>BlackWhiteBox</zorder>
+       <zorder>DistanceBlackWhite</zorder>
+       <zorder>label_8</zorder>
+       <zorder>label_2</zorder>
+       <zorder>accDistance</zorder>
+       <zorder>ValidationRatio</zorder>
+       <zorder>label_3</zorder>
+       <zorder>CoverageBox</zorder>
+       <zorder>label_4</zorder>
+       <zorder>GeometryLineBox</zorder>
+       <zorder>label_6</zorder>
+       <zorder>label_7</zorder>
+       <zorder>DistanceCenterLine</zorder>
+       <zorder>label_9</zorder>
+       <zorder>VerticalLineSlider</zorder>
+       <zorder>thresholdSlider</zorder>
+      </widget>
+      <widget class="QWidget" name="toolBoxPage2" native="true">
+       <attribute name="label">
+        <string>Pressure Settings</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QPushButton" name="trackButton">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>640</y>
+     <y>750</y>
      <width>341</width>
      <height>27</height>
     </rect>
