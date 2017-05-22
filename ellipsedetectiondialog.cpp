@@ -19,10 +19,19 @@ bool EllipseDetectionDialog::extractData() {
     settings["targetX"]=ui->horPosition->value();
     settings["targetY"]=ui->vertPosition->value();
     settings["targetAspectRatio"]=ui->AspectRatioSlider->value();
+    settings["targetValidationRatio"]=ui->ValidationRatio->value();
+    settings["targetCenterLine"]=ui->CenterLineSlider->value();
+    settings["targetVerticalLine"]=ui->VerticalLineSlider->value();
     settings["shouldTrack"]=ui->trackButton->isChecked();
     settings["CriteriumDiameterMaxMin"]=ui->IntervalleDiameter->isChecked();
     settings["CriteriumAspectRatio"]=ui->AspectRatioBox->isChecked();
     settings["CriteriumBlackWhite"]=ui->BlackWhiteBox->isChecked();
+    settings["CriteriumCoverage"]=ui->CoverageBox->isChecked();
+    settings["targetAcceptableDist"]=ui->accDistance->text();
+    settings["targetB&WDistance"]=ui->DistanceBlackWhite->text();
+    settings["targetDistanceCenterLine"]=ui->DistanceCenterLine->text();
+    settings["CriteriumGeometry"]=ui->GeometryLineBox->isChecked();
+
     //settings["ContoursIntervalle"]=ui->ContoursIntervalleBox->isChecked();
 
 
@@ -156,3 +165,88 @@ void EllipseDetectionDialog::on_AspectRatioSlider_valueChanged(int)
 //{
     //extractData();
 //}
+
+void EllipseDetectionDialog::on_CoverageBox_stateChanged(int)
+{
+    extractData();
+}
+
+
+void EllipseDetectionDialog::on_ValidationRatio_sliderPressed()
+{
+    ValidationRatioSliderPressed=true;
+}
+
+void EllipseDetectionDialog::on_ValidationRatio_sliderReleased()
+{
+    ValidationRatioSliderPressed=false;
+    extractData();
+}
+
+void EllipseDetectionDialog::on_ValidationRatio_valueChanged(int)
+{
+    if(!ValidationRatioSliderPressed){
+        extractData();
+    }
+}
+
+void EllipseDetectionDialog::on_accDistance_textChanged(const QString &arg1)
+{
+    extractData();
+}
+
+
+
+void EllipseDetectionDialog::on_GeometryLineBox_stateChanged(int)
+{
+    extractData();
+}
+
+
+
+void EllipseDetectionDialog::on_CenterLineSlider_sliderPressed()
+{
+    CenterLineSliderPressed=true;
+}
+
+void EllipseDetectionDialog::on_CenterLineSlider_sliderReleased()
+{
+    CenterLineSliderPressed=false;
+    extractData();
+}
+
+void EllipseDetectionDialog::on_CenterLineSlider_valueChanged(int)
+{
+    if(!CenterLineSliderPressed){
+        extractData();
+    }
+}
+
+void EllipseDetectionDialog::on_VerticalLineSlider_sliderPressed()
+{
+    VerticalLineSliderPressed=true;
+}
+
+void EllipseDetectionDialog::on_VerticalLineSlider_sliderReleased()
+{
+    VerticalLineSliderPressed=false;
+    extractData();
+}
+
+void EllipseDetectionDialog::on_VerticalLineSlider_valueChanged(int)
+{
+    if(!VerticalLineSliderPressed){
+        extractData();
+    }
+}
+
+void EllipseDetectionDialog::on_lineEdit_textChanged(const QString &arg1)
+{
+    extractData();
+}
+
+
+void EllipseDetectionDialog::on_DistanceCenterLine_textChanged(const QString &arg1)
+{
+    extractData();
+}

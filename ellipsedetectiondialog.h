@@ -48,9 +48,40 @@ private slots:
 
     //void on_ContoursIntervalleBox_stateChanged(int arg1);
 
+    void on_CoverageBox_stateChanged(int arg1);
+
+    void on_ValidationRatio_sliderPressed();
+
+    void on_ValidationRatio_sliderReleased();
+
+    void on_ValidationRatio_valueChanged(int value);
+
+    void on_accDistance_textChanged(const QString &arg1);
+
+
+    void on_GeometryLineBox_stateChanged(int);
+
+
+
+    void on_CenterLineSlider_sliderPressed();
+
+    void on_CenterLineSlider_sliderReleased();
+
+    void on_CenterLineSlider_valueChanged(int value);
+
+    void on_VerticalLineSlider_sliderPressed();
+
+    void on_VerticalLineSlider_sliderReleased();
+
+    void on_VerticalLineSlider_valueChanged(int value);
+
+    void on_lineEdit_textChanged(const QString &arg1);
+
+    void on_DistanceCenterLine_textChanged(const QString &arg1);
+
 private:
     bool extractData();
-    bool tSliderPressed,xSliderPressed,ySliderPressed,aSliderPressed;
+    bool tSliderPressed,xSliderPressed,ySliderPressed,aSliderPressed,ValidationRatioSliderPressed,CenterLineSliderPressed,VerticalLineSliderPressed;
 
 
 
