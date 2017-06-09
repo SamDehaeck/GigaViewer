@@ -2,6 +2,8 @@
 #include <QDebug>
 
 
+
+
 Regulation::Regulation() {                                        //Creation of the regulation object
     qDebug()<<"Creation of Regulation object";
 
@@ -9,10 +11,11 @@ Regulation::Regulation() {                                        //Creation of 
 
     vectorLength = 100;                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
 
-    k_p =0.4558;
-    T_i =8.962;                                                             //Creation of the regulator parameters
-    k_t =0.37;
-    T_s = 0.1;
+    k_p =2.6653;
+    T_i =20.2429;                                                             //Creation of the regulator parameters
+    k_t =0.00164;
+    T_s = 0.0333;
+
 }
 
 void Regulation::Configure (int type_regulation, int type_target, float r, int x_target, int y_target){
@@ -47,18 +50,19 @@ void Regulation::Configure (int type_regulation, int type_target, float r, int x
     objectifReached = false;
 
     if (regulation_type == 3) {                                //parameters for Regulator2017
-        k_p = 0.4558;
-        k_i = 0.11158;
-        T_s = 0.333;     // @ 30FPS
-        k_ff = 0.9;
+        k_p =2.6653;
+        T_i =20.2429;                                          //Creation of the regulator parameters
+        k_t =0.00164;
+        T_s = 0.0666;                                          //IDS limited to 15FPS for some reasons
+        k_ff = 0.7;
 
         u0 = 0;          // state u(k)
         u1 = 0;          // state u(k-1)
         e0 = 0;          // state e(k)
         e1 = 0;          // state e(k-1)
 
-        obstacle_x = 350;
-        obstacle_y = 350;
+        obstacle_x = 545;
+        obstacle_y = 298;
     }
 }
 
@@ -66,21 +70,27 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
 
     //target positions
     if (target_type == 1){                                                       //tracking reference. target_x and y are computed at each step
-        if (flag == 1){                                                         //start of the tracking at the current particle position
+        if (flag == 1){                                                          //start the tracking at the current particle position
             start_x = particle_x;
             start_y = particle_y;
             flag = 0;
         }
         increment++;
-        target_x = start_x + 200*sin(0.05*increment);                                                  //parameterisation
-        target_y = start_y + 200*sin(0.05*increment)*cos(0.05*increment);
+
+        target_x = start_x + 200*cos(2*3.1416*0.02*increment*T_s);               //circle at f=0.02 Hz
+        target_y = start_y + 200*sin(2*3.1416*0.02*increment*T_s);
+
+//        target_x = start_x + 4*15.7538*T_s*increment;                                      //horizontal line 4mm/s)
+//        target_y = start_y ;
     }
+
 
     //****************************** PID *******************************//
 
+
     //update of the (k-1) states
-    e1 = e0;
-    u1 = u0;
+//    e1 = e0;                                                                        //for method without anti-windup
+//    u1 = u0;
 
     //error calculation (pixels to mm)
     float x_error = 0.064453*target_x - 0.064453*particle_x;              //results in mm
@@ -91,27 +101,38 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     float alphaPID = getAlpha(x_error,y_error);
 
     //controller PID
-    u0 = u1 + (k_p + k_i*(T_s/2)) * e0 + (-k_p + k_i*(T_s/2)) * e1;  //in [mm/s]
+//    u0 = u1 + (k_p + k_i*(T_s/2)) * e0 + (-k_p + k_i*(T_s/2)) * e1;  //in [mm/s]     //for method without anti-windup
+
+    //proportional action
+    float u_p = k_p/(2*T_i) * (T_s + 2*T_i) * e0;         //u_p(k) = coeff * e(k)
+    u0 = u_i + u_p;                                       //u(k) = up(k) + ui(k)
 
     //saturation
     double u_sat_PID;
-//    if (u0 >= 5){
-//        u_sat_PID = 5;
-//    }
-//    else if (u0 <= -5){
-//        u_sat_PID = -5;
-//    }
-//    else{
+    if (u0 >= 5.4){
+        u_sat_PID = 5.4;
+    }
+    else if (u0 <= -5.4){
+        u_sat_PID = -5.4;
+    }
+    else{
         u_sat_PID = u0;
-//    }
-    std::cout << "PID : " << u_sat_PID << std::endl;
+    }
+    std::cout << "PID : " << u0 << std::endl;
+    std::cout << "PID sat : " << u_sat_PID << std::endl;
+
+    //integral action with anti-windup
+    u_i = u_i + (k_p*T_s/T_i) * e0 - k_t*(u0 - u_sat);   //u_i(k+1) = ui(k) + smth * e(k) - kt*(u(k) - u_sat(k))
+
 
     // conversion polar to cartesian coordinates
     // the vector of that speed has to be add to the speed computed by the FF
     double u_PID_x = u_sat_PID * cos(alphaPID);
     double u_PID_y = u_sat_PID * sin(alphaPID);
 
+
     //************************** FEED FORWARD **************************//
+
 
     //distance between obstacle and particle (pixels to mm)
     float distFF_x = 0.064453*obstacle_x - 0.064453*particle_x;      //results in mm
@@ -121,25 +142,34 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     float distFF = sqrt((distFF_x*distFF_x) + (distFF_y*distFF_y));      //radial distance in mm
     float alphaFF = getAlpha(distFF_x,distFF_y);
 
-    //opposite Kralchevsky axial force (from experimental model) - input : [m], output : [N]
-    double force_K =  9.5932 * pow(10,-6) * exp(-826.4989*distFF*0.001)
-                      + 7.1232 * pow(10,-7) * exp(-171.1862*distFF*0.001);
+    //opposite Kralchevsky axial force (from experimental model (fit exponential)) - input : [m], output : [N]
+//    double force_K =  5.8329 * pow(10,-7) * exp(-168.8263*distFF*0.001)
+//                      + 1.0887 * pow(10,-5) * exp(-808.8847*distFF*0.001);
+
+    //opposite Kralchevsky axial force (from experimental model (fit Bessel)) - input : [m], output : [N]
+    double a = 9.8888 * pow(10,-6);
+    double b = 800.5627;
+    double bessel = boost::math::cyl_bessel_k(1,b*distFF*0.001);
+    double force_K = a*bessel;
 
     //Stokes to convert force_K to velocity
     double uFF = force_K / (6 * (double)M_PI * 1.0016 * pow(10,-3) * 0.0005);  // [m/s]
     uFF = uFF * 1000; // [mm/s]
+    uFF = k_ff * uFF;   // proportional coefficient
 
     //saturation
     double u_sat_FF;
-//    if (uFF >= 5){
-//        u_sat_FF = 5;
-//    }
-//    else if (uFF <= -5){
-//        u_sat_FF = -5;
-//    }
-//    else{
+    if (uFF >= 5.4){
+        u_sat_FF = 5.4;
+    }
+    else if (uFF <= -5.4){
+        u_sat_FF = -5.4;
+    }
+    else{
         u_sat_FF = uFF;
-//    }
+    }
+
+
     std::cout << "FF : " << u_sat_FF << std::endl;
 
     // conversion polar to cartesian coordinates
@@ -155,14 +185,14 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
 
     //conversion cartesian to polar coordinates
     u = sqrt((u_x*u_x) + (u_y*u_y));      //radial distance in mm
-    double alpha = getAlpha(u_x,u_y);
+    double alpha = getAlpha(u_x,u_y);     //orientation
 
     //saturation
-    if (u >= 5){
-        u_sat = 5;
+    if (u >= 5.4){
+        u_sat = 5.4;
     }
-    else if (u <= -5){
-        u_sat = -5;
+    else if (u <= -5.4){
+        u_sat = -5.4;
     }
     else{
         u_sat = u;

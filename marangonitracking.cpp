@@ -18,7 +18,7 @@ MarangoniTracking::MarangoniTracking(int thresh,int nrParticles) : threshold(thr
 {
     radius = 50.;
     regulation_type = 3;                           //type 0 = point, type 1 = circle, type 2 = arc circle, type 3 = point with feedforward
-    target_type = 0;                               //type 0 = step reference, type 1 = traking reference
+    target_type = 0;                               //type 0 = step reference, type 1 = tracking reference, see regulator for the track followed
 }
 
 void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
@@ -33,7 +33,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 
 #ifdef Q_OS_WIN32
         if (!initializeMirror()){                                         //Initialisation of the mirror and...
-            qDebug() << "Problem with the MEM connection";                          //...verification that the connection with the MEMs is ok
+            qDebug() << "Problem with the MEM connection";                //...verification that the connection with the MEMs is ok
         }
 #endif
 
@@ -89,13 +89,13 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             cv::findContours( processed, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
             cv::Mat outImage=currIm.image.clone(); // use a clone to avoid storing on raw image which is stored.
-            //            cv::drawContours(outImage,contours,-1,255,2);
+            //cv::drawContours(outImage,contours,-1,255,2);
 
             cv::Point newLoc(targetX*currIm.image.cols/100.0,targetY*currIm.image.rows/100.0);
-            cv::ellipse(outImage,newLoc,cv::Size(5,5),0,0,360,255,-1);
+            cv::ellipse(outImage,newLoc,cv::Size(5,5),0,0,360,150,-1);
 
-            //            std::cout << contours.size() << std::endl;
-            //            std::cout << contours[0] << std::endl;
+            //std::cout << contours.size() << std::endl;
+            //std::cout << contours[0] << std::endl;
 
             if (contours[0].size() > 5) { //otherwise fitEllipse does not work
                 cv::RotatedRect contours_part = cv::fitEllipse(Mat(contours[0]));
@@ -117,16 +117,16 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
 #ifdef Q_OS_WIN32
             //Transfer new data stream to the mirror
-            if (regulation_type == 1) || (regulation_type == 2) {
+            if ((regulation_type == 1) || (regulation_type == 2)) {
                 mirCtrl.ChangeMirrorStream(myRegulator.x_vector,myRegulator.y_vector);
             }
-                else {
+            else {
                 mirCtrl.ChangeMirrorPosition(myRegulator.laser_x,myRegulator.laser_y);
             }
 #endif
 
-            //Adding figures on screen
-            //cv::Mat outImage=currIm.image.clone();
+//            //Adding figures on screen
+//            //cv::Mat outImage=currIm.image.clone();
             cv::Point particlePos(Ppoint[0], Ppoint[1]);
             cv::circle(outImage, particlePos, radius*0.1, cv::Scalar( 0, 0, 255 ), 1, 8, 0);        //particle
             cv::Point targetPosition(myRegulator.target_x, myRegulator.target_y);
@@ -172,6 +172,10 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
                     +" "
                     +QString::number(myRegulator.target_y)     //y target
                     +" "
+                    +QString::number(myRegulator.obstacle_x)     //x obstacle
+                    +" "
+                    +QString::number(myRegulator.obstacle_y)     //y obstacle
+                    +" "
                     +QString::number(myRegulator.objectifReached)     //objective reached (1: true, 0: false)
                     +" "
                     +QString::number(currIm.timeStamp,'f',0)  //time of the picture
@@ -183,7 +187,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
     return true;
 }
 
-void MarangoniTracking::savingData(){                                                       //Used to write dataToSave on disc
+void MarangoniTracking::savingData(){                         //Used to write dataToSave on disc
     QString filename = "../Data/test.txt";
     QFile file (filename);
     file.open(QIODevice::WriteOnly);

@@ -92,7 +92,11 @@ void CamBackend::GrabFrame()
         tracker.processImage(currImage);
 
 #endif
-        if (recording && currSink) currSink->RecordFrame(currImage);        //placed here to have the different incrustations on screen
+//        if (currImage.seqNumber%5==0) {
+
+            if (recording && currSink) currSink->RecordFrame(currImage);        //placed here to have the different incrustations on screen
+
+//        }
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         AdaptForDisplay(currImage);

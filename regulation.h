@@ -1,4 +1,6 @@
 #include <iostream>
+#include <QtCore>
+#include <boost/math/special_functions/bessel.hpp>
 
 #ifndef REGULATION_H
 #define REGULATION_H
@@ -26,7 +28,7 @@ private:
     int counter;
 
     float u_i;                                                //internal states of the regulator
-    float u_sat;
+    double u_sat;
     double u0;
     double u1;
     double e0;

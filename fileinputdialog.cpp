@@ -17,6 +17,7 @@ FileInputDialog::FileInputDialog(QWidget *parent) :
     ui->idsButton->setEnabled(false);
 #endif
 
+
 #ifndef VIMBA
     ui->vimbaButton->setEnabled(false);
 #endif
