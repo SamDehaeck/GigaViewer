@@ -27,12 +27,19 @@
 #include "marangonitracking.h"
 #endif
 
-CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
-#ifdef TRACKING
-  ,tracker(50,1),doPluginProcessing(false)
+#ifdef ELLIPSE
+#include "ellipsedetection.h"
 #endif
-   ,skipImages(0),recSkip(0)
+
+CamBackend::CamBackend(QObject *parent) :
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0)
+#ifdef TRACKING
+  ,tracker(50,1)
+#endif
+  #ifdef ELLIPSE
+    ,tracker(50)
+  #endif
+
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
@@ -109,6 +116,12 @@ void CamBackend::GrabFrame()
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
         tracker.processImage(currImage);
 #endif
+
+#ifdef ELLIPSE
+        // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
+        tracker.processImage(currImage);
+#endif
+
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         AdaptForDisplay(currImage);
@@ -420,6 +433,10 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         currImage.image.convertTo(temp,CV_8U,stretch,shift);
         currImage.image=temp.clone();
         //qDebug()<<"Got a Float frame";
+    } else if (currImage.pixFormat=="BOOL") {
+        cv::Mat temp;
+        currImage.image.convertTo(temp,CV_8U,255,0);
+        currImage.image=temp.clone();
     } else {
         qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
@@ -452,6 +469,16 @@ bool CamBackend::setSettingsPlugin(ImagePacket& ,QStringList ) {
 #ifdef TRACKING
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     if (settings["pluginName"]=="MarangoniTracking") {
+//        qDebug()<<"should inform marangoni";
+        tracker.ChangeSettings(settings);
+    }
+
+}
+#endif
+
+#ifdef ELLIPSE
+void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
+    if (settings["pluginName"]=="EllipseDetection") {
 //        qDebug()<<"should inform marangoni";
         tracker.ChangeSettings(settings);
     }
