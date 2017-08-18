@@ -1,10 +1,11 @@
 #include "videoglscene.h"
 
 #include <QtGui>
-#include <QtOpenGL>
+#include <QGraphicsProxyWidget>
+#include <qopenglfunctions_3_0.h>
 
 VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
-    QGraphicsScene(parent)
+    QGraphicsScene(parent),didInitOpengl(0)
 {
     QDialog* dial;
     int ini=0;
@@ -53,6 +54,10 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     {
         qWarning("OpenGLScene: drawBackground needs a QGLWidget to be set as viewport on the graphics view");
         return;
+    }
+    if (didInitOpengl==0) {
+        initializeOpenGLFunctions();
+        didInitOpengl=1;
     }
 
     painter->beginNativePainting();

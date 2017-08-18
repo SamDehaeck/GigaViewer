@@ -2,10 +2,11 @@
 #define VIDEOGLSCENE_H
 
 #include <QGraphicsScene>
+#include <qopenglfunctions_3_0.h>
 #include "opencv2/opencv.hpp"
 #include "fileinputdialog.h"
 
-class VideoGlScene : public QGraphicsScene
+class VideoGlScene : public QGraphicsScene , protected QOpenGLFunctions_3_0
 {
     Q_OBJECT
 public:
@@ -19,6 +20,7 @@ signals:
 public slots:
 
 private:
+    int didInitOpengl;
 
 
 };

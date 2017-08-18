@@ -1,7 +1,7 @@
 Compiling on Windows
 --------------------
-* Install VisualStudio2012 (later versions probably work as well, but 32-bit vc12 mode allows to use precompiled versions of qt and opencv)
-* Install Qt (version 5.4.2 including Opengl extension)
+* Install Visual Studio 2017, be sure to install the desktop development with C++ option, or at least the vc++2017 and windows sdk
+* Install Qt (version 5.9 )
 * Install Git (Github desktop is an easy solution)
 * Opencv: Download and install in C:\opencv . It should have a build\x86\vc12\lib subdirectory
 * Add the corresponding 'bin'-directory to the windows path (the lib directory is only for linking)

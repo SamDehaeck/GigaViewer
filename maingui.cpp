@@ -6,7 +6,7 @@ MainGui::MainGui(QWidget *parent) :
 {
     setWindowTitle(tr("Gige Viewer"));
 //    view.setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); //anti-aliased
-    setViewport(new QGLWidget);
+    setViewport(new QOpenGLWidget);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     fileDialog = new FileInputDialog;
