@@ -1,16 +1,30 @@
 Compiling on Windows
 --------------------
-* Install Visual Studio 2017, be sure to install the desktop development with C++ option, or at least the vc++2017 and windows sdk
-* Install Qt (version 5.9 )
+* Install Visual Studio 2017 Community, be sure to install the desktop development with C++ option, or at least the vc++2017 and windows sdk
+* Install Qt (version 5.9 ) + its Source
 * Install Git (Github desktop is an easy solution)
-* Opencv: Download and install in C:\opencv . It should have a build\x86\vc12\lib subdirectory
+* Opencv: Download and install in C:\opencv . It should have a build\x64\vc14 subdirectory
 * Add the corresponding 'bin'-directory to the windows path (the lib directory is only for linking)
 * HDF5: this is optional but allows to record into and read from HDF5 containers
   - Download and install. Copy installed files to C:\HDF5\1.8.15
   - Add the 'bin' directory to the windows path
-* Now open QtCreator (located in /users/tips/Qt) and click New Project - Import Project - Git Clone and for repository type:
-  https://github.com/SamDehaeck/GigaViewer . Now select where you want to save and click continue.
-* If you installed Github desktop instead, clone the repository through its interface instead and open the .pro file from qtcreator afterwards.
+  * Now open QtCreator (located in /users/tips/Qt) and click New Project - Import Project - Git Clone and for repository type:
+    https://github.com/SamDehaeck/GigaViewer . Now select where you want to save and click continue.
+  * If you installed Github desktop instead, clone the repository through its interface instead and open the .pro file from qtcreator afterwards.
+
+* For the moment, the precompiled Qt allows you to compile GigaViewer, but it only shows the result in the top right quadrant of the screen. Only solution
+I found so far is to recompile Qt myself (with -opengl desktop option)
+Steps to compile:
+  - Open a Visual Studio x64 native command line
+  - Python 2 is also required (if you want qtwebengine) => install Anaconda or similar and activate its environment (Anaconda\Scripts\activate)
+  - Make a new build directory (e.g. C:\Qt\5.9.1\build64) and go inside it
+  - ..\Src\configure -opensource -opengl desktop
+  - nmake (or jom for parallel compilation if you have copied the downloaded files from qt in your build directory)
+  - The generated libraries can now be found in qtbase\bin and the plugins in plugins\
+  - Make a new Qt kit and locate the qmake file in build64\qtbase\bin
+  - Now, the program should run as it should from within Qtcreator (once you have copied the platform folder to the directory in which Gigaviewer is executed.
+  - When GigaViewer can find the old precompiled Qt libraries (in path), it will misbehave again..
+
 * Take a look at the configuration options mentionned in the Gigaviewer.pro file, to select the options you want to include.
   For the first compilation tests, it is best to leave all extra features turned off. In this way, the correct functioning of the Qt and Opencv libraries is checked.
   The Hdf5 option is a usefull extension, as it gives access to a more 'universal' single container movie format which is easily accessible from many different programs.

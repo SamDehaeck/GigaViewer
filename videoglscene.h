@@ -2,11 +2,11 @@
 #define VIDEOGLSCENE_H
 
 #include <QGraphicsScene>
-#include <qopenglfunctions_3_0.h>
+//#include <qopenglfunctions_3_3_compatibility.h>
 #include "opencv2/opencv.hpp"
 #include "fileinputdialog.h"
 
-class VideoGlScene : public QGraphicsScene , protected QOpenGLFunctions_3_0
+class VideoGlScene : public QGraphicsScene//, protected QOpenGLFunctions_3_3_Compatibility
 {
     Q_OBJECT
 public:

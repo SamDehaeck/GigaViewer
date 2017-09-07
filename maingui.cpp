@@ -6,7 +6,17 @@ MainGui::MainGui(QWidget *parent) :
 {
     setWindowTitle(tr("Gige Viewer"));
 //    view.setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers))); //anti-aliased
-    setViewport(new QOpenGLWidget);
+
+/*    QOpenGLWidget *widget = new QOpenGLWidget(parent);
+    QSurfaceFormat format;
+    format.setDepthBufferSize(24);
+    format.setStencilBufferSize(8);
+    format.setVersion(3, 3);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    widget->setFormat(format);
+    setViewport(widget);
+*/
+    setViewport(new QOpenGLWidget());
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     fileDialog = new FileInputDialog;

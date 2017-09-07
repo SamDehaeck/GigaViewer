@@ -2,7 +2,7 @@
 
 #include <QtGui>
 #include <QGraphicsProxyWidget>
-#include <qopenglfunctions_3_0.h>
+#include <QOpenGLFunctions_3_3_Compatibility>
 
 VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     QGraphicsScene(parent),didInitOpengl(0)
@@ -45,6 +45,8 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
 
         ini=ini+1;
     }
+
+
 }
 
 void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
@@ -55,12 +57,18 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
         qWarning("OpenGLScene: drawBackground needs a QGLWidget to be set as viewport on the graphics view");
         return;
     }
-    if (didInitOpengl==0) {
+
+/*    if (didInitOpengl==0) {
         initializeOpenGLFunctions();
         didInitOpengl=1;
-    }
+    }*/
+//    QOpenGLFunctions_3_2_Compatibility *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
 
+    QOpenGLFunctions_3_3_Compatibility *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+    f->initializeOpenGLFunctions();
     painter->beginNativePainting();
+
+
 
     //place image drawing code here
     int depth = imageBuff.depth();
@@ -84,18 +92,18 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     GLenum gldepth = GL_UNSIGNED_BYTE;
     if (depth==CV_16U) gldepth=GL_UNSIGNED_SHORT;
 
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    f->glEnable(GL_TEXTURE_2D);
+    f->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     GLuint mytex;
-    glGenTextures(1,&mytex);
-    glBindTexture(GL_TEXTURE_2D, mytex);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    f->glGenTextures(1,&mytex);
+    f->glBindTexture(GL_TEXTURE_2D, mytex);
+    f->glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);
+    f->glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);
+    f->glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     if (imageBuff.isContinuous()) glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    glTexImage2D(GL_TEXTURE_2D,0,cn,imageBuff.cols,imageBuff.rows,0,format,gldepth,imageBuff.data);
+    f->glTexImage2D(GL_TEXTURE_2D,0,cn,imageBuff.cols,imageBuff.rows,0,format,gldepth,imageBuff.data);
 
     //calculate projected size in order to keep aspect ratio intact
     int maxX=1024;
@@ -113,16 +121,16 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
         }
     }
 
-    glBegin(GL_QUADS);
+    f->glBegin(GL_QUADS);
 
-    glTexCoord2f(0.0,0.0); glVertex2f(0,0);
-    glTexCoord2f(1.0,0.0); glVertex2f(maxX,0.0);
-    glTexCoord2f(1.0,1.0); glVertex2f(maxX,maxY);
-    glTexCoord2f(0.0,1.0); glVertex2f(0.0,maxY);
+    f->glTexCoord2f(0.0,0.0); f->glVertex2f(0,0);
+    f->glTexCoord2f(1.0,0.0); f->glVertex2f(maxX,0.0);
+    f->glTexCoord2f(1.0,1.0); f->glVertex2f(maxX,maxY);
+    f->glTexCoord2f(0.0,1.0); f->glVertex2f(0.0,maxY);
 
-    glEnd();
-    glDisable(GL_TEXTURE_2D);
-    glDeleteTextures(1,&mytex);
+    f->glEnd();
+    f->glDisable(GL_TEXTURE_2D);
+    f->glDeleteTextures(1,&mytex);
 
 
     painter->endNativePainting();
