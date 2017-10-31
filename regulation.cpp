@@ -61,7 +61,7 @@ void Regulation::Configure (int type_regulation, int type_target, float r, int x
         e0 = 0;          // state e(k)
         e1 = 0;          // state e(k-1)
 
-        obstacle_x = 545;
+        obstacle_x = 545;                                     //position of the obstacle
         obstacle_y = 298;
     }
 }
@@ -143,14 +143,20 @@ void Regulation::Regulator2017 (float particle_x, float particle_y){
     float alphaFF = getAlpha(distFF_x,distFF_y);
 
     //opposite Kralchevsky axial force (from experimental model (fit exponential)) - input : [m], output : [N]
-//    double force_K =  5.8329 * pow(10,-7) * exp(-168.8263*distFF*0.001)
-//                      + 1.0887 * pow(10,-5) * exp(-808.8847*distFF*0.001);
+    double force_K =  5.8329 * pow(10,-7) * exp(-168.8263*distFF*0.001)
+                      + 1.0887 * pow(10,-5) * exp(-808.8847*distFF*0.001);
 
     //opposite Kralchevsky axial force (from experimental model (fit Bessel)) - input : [m], output : [N]
-    double a = 9.8888 * pow(10,-6);
-    double b = 800.5627;
-    double bessel = boost::math::cyl_bessel_k(1,b*distFF*0.001);
-    double force_K = a*bessel;
+//    double a = 9.8888 * pow(10,-6);
+//    double b = 800.5627;
+//    double bessel = boost::math::cyl_bessel_k(1,b*distFF*0.001);
+//    double force_K = a*bessel;
+
+    //opposite Kralchevsky axial force (theoretical model) - input : [m], output : [N]
+//    double a = 1.4384 * pow(10,-6);
+//    double b = 370.3704;
+//    double bessel = boost::math::cyl_bessel_k(1,b*distFF*0.001);
+//    double force_K = a*bessel;
 
     //Stokes to convert force_K to velocity
     double uFF = force_K / (6 * (double)M_PI * 1.0016 * pow(10,-3) * 0.0005);  // [m/s]

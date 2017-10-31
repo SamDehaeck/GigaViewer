@@ -99,9 +99,9 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
             if (contours[0].size() > 5) { //otherwise fitEllipse does not work
                 cv::RotatedRect contours_part = cv::fitEllipse(Mat(contours[0]));
-                cv::ellipse(outImage,contours_part,255,2);
-                cv::Point center_contours_part(contours_part.center.x,contours_part.center.y);
-                cv::circle(outImage,center_contours_part,2,255,-1);
+//                cv::ellipse(outImage,contours_part,255,2);
+//                cv::Point center_contours_part(contours_part.center.x,contours_part.center.y);
+//                cv::circle(outImage,center_contours_part,1,255,-1);
                 Ppoint[0] = contours_part.center.x;
                 Ppoint[1] = contours_part.center.y;
             }
@@ -156,7 +156,7 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
             currIm.image=outImage;
             //Adding all parameters in the 'dataToSave' vector
-            QString currentData(QString::number(Ppoint[0])          //x_particle
+            QString currentData(QString::number(Ppoint[0])          //x_particle (in px)
                     +" "
                     +QString::number(Ppoint[1])         //y_particle
                     +" "

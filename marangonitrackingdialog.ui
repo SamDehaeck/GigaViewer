@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>211</height>
+    <width>511</width>
+    <height>421</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,123 +16,339 @@
   <property name="windowOpacity">
    <double>0.800000000000000</double>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>120</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Control options</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>60</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Pattern type</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>60</y>
+     <width>91</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Spot</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Arc</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Circle</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="comboBox_2">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>90</y>
+     <width>91</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Identification</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Control</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Control with FF</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>90</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Operation mode</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>130</y>
+     <width>111</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Identification Options</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>9</y>
-     <width>381</width>
-     <height>191</height>
+     <y>160</y>
+     <width>71</width>
+     <height>16</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0" colspan="4">
-     <widget class="QCheckBox" name="activateBox">
-      <property name="text">
-       <string>Activate Processing</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Y-Position</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Threshold</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0" colspan="4" alignment="Qt::AlignHCenter">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Target Location</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="3">
-     <widget class="QSlider" name="horPosition">
-      <property name="maximum">
-       <number>1024</number>
-      </property>
-      <property name="value">
-       <number>500</number>
-      </property>
-      <property name="sliderPosition">
-       <number>500</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0" colspan="4">
-     <widget class="QPushButton" name="trackButton">
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
-      </property>
-      <property name="text">
-       <string>Track</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2" colspan="2">
-     <widget class="QSlider" name="thresholdSlider">
-      <property name="maximum">
-       <number>255</number>
-      </property>
-      <property name="pageStep">
-       <number>1</number>
-      </property>
-      <property name="value">
-       <number>100</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="tickPosition">
-       <enum>QSlider::NoTicks</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>X-Position</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="3">
-     <widget class="QSlider" name="vertPosition">
-      <property name="maximum">
-       <number>1024</number>
-      </property>
-      <property name="value">
-       <number>500</number>
-      </property>
-      <property name="sliderPosition">
-       <number>500</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="threshEdit">
-      <property name="text">
-       <string>100</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="text">
+    <string>Laser position</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit">
+   <property name="geometry">
+    <rect>
+     <x>142</x>
+     <y>190</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Laser-Particle Dist. [mm]</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_3">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>160</y>
+     <width>69</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Bottom</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Right</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Top</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Left</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QSlider" name="horizontalSlider">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>220</y>
+     <width>160</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>256</x>
+     <y>170</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Target Y-Position</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="activateBox">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>10</y>
+     <width>117</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Activate Processing</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>33</y>
+     <width>47</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Threshold</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horPosition">
+   <property name="geometry">
+    <rect>
+     <x>353</x>
+     <y>151</y>
+     <width>84</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>1024</number>
+   </property>
+   <property name="value">
+    <number>500</number>
+   </property>
+   <property name="sliderPosition">
+    <number>500</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="trackButton">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>195</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="text">
+    <string>Track</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QSlider" name="thresholdSlider">
+   <property name="geometry">
+    <rect>
+     <x>227</x>
+     <y>33</y>
+     <width>84</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+   <property name="pageStep">
+    <number>1</number>
+   </property>
+   <property name="value">
+    <number>100</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="tickPosition">
+    <enum>QSlider::NoTicks</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>256</x>
+     <y>145</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Target X-Position</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="vertPosition">
+   <property name="geometry">
+    <rect>
+     <x>353</x>
+     <y>176</y>
+     <width>84</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>1024</number>
+   </property>
+   <property name="value">
+    <number>500</number>
+   </property>
+   <property name="sliderPosition">
+    <number>500</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="threshEdit">
+   <property name="geometry">
+    <rect>
+     <x>64</x>
+     <y>33</y>
+     <width>133</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>100</string>
+   </property>
   </widget>
  </widget>
  <resources/>
