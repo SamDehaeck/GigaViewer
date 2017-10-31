@@ -118,3 +118,35 @@ void MarangoniTrackingDialog::on_threshEdit_textChanged(const QString &arg1)
     ui->thresholdSlider->setValue(tt);
     extractData();
 }
+
+//NEW BOXES ADDED by RONALD
+void MarangoniTrackingDialog::on_cbox_PatternType_currentIndexChanged(int index)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_cbox_OpMode_currentIndexChanged(int index)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_cbox_LasOrient_currentIndexChanged(int index)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_line_LasPartD_textChanged(const QString &arg1)
+{
+    float tt=ui->threshEdit->text().toFloat();
+
+    //If the user sets something outside 1.1-5, just replace that value witht the boundary
+    if (tt<1.1)
+    {tt=1.1;}
+
+    if (tt>5)
+    {tt=5;}
+
+    extractData();
+
+
+}

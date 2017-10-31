@@ -36,6 +36,14 @@ private slots:
 
     void on_threshEdit_textChanged(const QString &arg1);
 
+    void on_cbox_PatternType_currentIndexChanged(int index);
+
+    void on_cbox_OpMode_currentIndexChanged(int index);
+
+    void on_cbox_LasOrient_currentIndexChanged(int index);
+
+    void on_line_LasPartD_textChanged(const QString &arg1);
+
 private:
     bool extractData();
     bool tSliderPressed,xSliderPressed,ySliderPressed;

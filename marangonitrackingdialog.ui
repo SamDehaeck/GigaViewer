@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>511</width>
-    <height>421</height>
+    <width>449</width>
+    <height>276</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@
     <string>Pattern type</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox">
+  <widget class="QComboBox" name="cbox_PatternType">
    <property name="geometry">
     <rect>
      <x>120</x>
@@ -67,7 +67,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QComboBox" name="comboBox_2">
+  <widget class="QComboBox" name="cbox_OpMode">
    <property name="geometry">
     <rect>
      <x>120</x>
@@ -131,7 +131,7 @@
     <string>Laser position</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="line_LasPartD">
    <property name="geometry">
     <rect>
      <x>142</x>
@@ -146,15 +146,18 @@
     <rect>
      <x>10</x>
      <y>190</y>
-     <width>121</width>
-     <height>16</height>
+     <width>131</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Laser-Particle Dist. [mm]</string>
+    <string>Laser-Particle Dist. [mm] (Limit 1.1-5)</string>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox_3">
+  <widget class="QComboBox" name="cbox_LasOrient">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -183,19 +186,6 @@
      <string>Left</string>
     </property>
    </item>
-  </widget>
-  <widget class="QSlider" name="horizontalSlider">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>220</y>
-     <width>160</width>
-     <height>19</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
   </widget>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
