@@ -22,6 +22,8 @@ public:
     int SetAutoShutter(bool fitRange);
     bool SetRoiRows(int rows);
     bool SetRoiCols(int cols);
+    bool SetColourMode(bool useHighQuality);  // quality mode for debayering
+    bool SetPixelClock();
 
 private:
     HIDS hCam;
@@ -41,6 +43,7 @@ private:
     double camTimeOffset;
     cv::Mat buffer;
 //    QVector<cv::Mat> matFrames;
+    QString format;
 
 };
 
