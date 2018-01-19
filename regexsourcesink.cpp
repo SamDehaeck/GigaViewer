@@ -93,7 +93,7 @@ bool RegexSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 bool RegexSourceSink::RecordFrame(ImagePacket &source)
 {
-    if (source.pixFormat=="BAYERRG8") {
+/*    if (source.pixFormat=="BAYERRG8") {
         cv::Mat dummy(source.image.rows,source.image.cols,CV_8UC3);
         cv::cvtColor(source.image,dummy,CV_BayerRG2RGB);
         source.image=dummy;
@@ -108,8 +108,8 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
     } else {
         source.image=source.image.clone(); // needed otherwise recording crashes when fps too high.
     }
-
-
+*/
+/*
     QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(index,8,10,QLatin1Char('0'));
 #ifdef Q_OS_WIN32
     if (cv::imwrite(filenam.toStdString().c_str(),source.image)) {
@@ -117,14 +117,18 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
     if (cv::imwrite(filenam.toUtf8().data(),source.image)) {
 #endif
         index++;
-        if (startTime==-1) {
-            startTime=source.timeStamp;
-        }
+*/
 
-        timestamps.push_back((source.timeStamp-startTime));
-        return true;
+    cv::Mat temp=source.image.clone(); // needed otherwise recording crashes when fps too high.
+    if (startTime==-1) {
+        startTime=source.timeStamp;
+        pixFormat=source.pixFormat;
     }
-    return false;
+
+    timestamps.push_back((source.timeStamp-startTime));
+    frames.push_back(temp);
+    return true;
+
 }
 
 bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
@@ -158,12 +162,14 @@ bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, 
 
     index=0;
     timestamps.clear();
+    frames.clear();
     startTime=-1;
     return true;
 }
 
 bool RegexSourceSink::StopRecording()
 {
+    //first write timestamps
     QString filename=QString(dir+"/"+basename+"timestamps.txt");
 //    QString filename = "/home/sam/times.txt";
     QFile fileout(filename);
@@ -175,7 +181,33 @@ bool RegexSourceSink::StopRecording()
      fileout.close();
     }
 
+    // now write images; queue will be blocked while this is taking place!
+    // also perform conversion of bayer images here.
+    for (int i = 0; i < frames.size(); ++i) {
+        cv::Mat temp=frames.at(i);
 
+        if (pixFormat=="BAYERRG8") {
+            cv::Mat dummy(temp.rows,temp.cols,CV_8UC3);
+            cv::cvtColor(temp,dummy,CV_BayerRG2RGB);
+            temp=dummy;
+        } else if (pixFormat=="BAYERGB8") {
+            cv::Mat dummy(temp.rows,temp.cols,CV_8UC3);
+            cv::cvtColor(temp,dummy,CV_BayerGB2RGB);
+            temp=dummy;
+        } else if (pixFormat=="BAYERRG12") {
+            cv::Mat dummy(temp.rows,temp.cols,CV_16UC3);
+            cv::cvtColor(temp,dummy,CV_BayerRG2RGB);
+            temp=dummy;
+        }
+
+
+        QString filenam=QString(dir+"/"+basename+"%1"+extension).arg(i,8,10,QLatin1Char('0'));
+#ifdef Q_OS_WIN32
+        cv::imwrite(filenam.toStdString().c_str(),temp);
+#else
+        cv::imwrite(filenam.toUtf8().data(),temp);
+#endif
+    }
 
     return true;
 }

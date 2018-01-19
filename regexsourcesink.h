@@ -26,8 +26,10 @@ private:
     QString extension;
     int index;
     int nFrames;
+    QString pixFormat;
 
     QVector<double> timestamps;
+    QVector<cv::Mat> frames;
     double startTime;
 
 };
