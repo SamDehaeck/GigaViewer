@@ -10,7 +10,7 @@ PlaybackDialog::PlaybackDialog(QWidget *parent) :
     currentTimer=100;
     ui->RecFolder->setText(QDir::homePath());
 #ifndef ENABLE_HDF5
-    ui->codecBox->removeItem(1);
+    ui->codecBox->removeItem(2);
 #endif
 
     connect(&timer1,SIGNAL(timeout()), this, SLOT (finishedFirstTimer()));
@@ -117,7 +117,7 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
             int newVal=1000/vl[1].toInt();
             currentTimer=newVal;
         } else {
-            qDebug()<<"Could not understand fps setting";
+            qInfo()<<"Could not understand fps setting";
         }
         if (valStr.at(0)=='-') currentTimer=-currentTimer;
     } else {
@@ -128,7 +128,7 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
             currentTimer=valStr.toInt();
         }
     }
-//  qDebug()<<"delay="<<currentTimer;
+//  qInfo()<<"delay="<<currentTimer;
     emit newFps(currentTimer);
 }
 
@@ -146,14 +146,14 @@ void PlaybackDialog::showNewFps(int msec) {
 
 void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
 {
-//    qDebug()<<"Fps val given: "<<value;
+//    qInfo()<<"Fps val given: "<<value;
     double newFrameRate=1;
     if (value>10) {
         newFrameRate=value-9;
     } else {
         newFrameRate=value/10.0;
     }
-//    qDebug()<<"Converted new value "<<value<<" into new fps "<<newFrameRate;
+//    qInfo()<<"Converted new value "<<value<<" into new fps "<<newFrameRate;
     QString oldText=ui->fpsEdit->text();
     QString delayTxt;
     int newVal;
@@ -195,7 +195,7 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
         have2timers=false;
         int tim1,msecs1;
         if (parseInstruct(config1,tim1,msecs1)) {
-//            qDebug()<<"Got here with: "<<tim1<<" - "<<msecs1;
+//            qInfo()<<"Got here with: "<<tim1<<" - "<<msecs1;
             timer1.setInterval(1000*tim1);
             timer1.setSingleShot(true);
             if (msecs1>1) {
@@ -208,14 +208,14 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
 
         int tim2,msecs2;
         if (parseInstruct(config2,tim2,msecs2)) {
-//            qDebug()<<"Got here also with: "<<tim2<<" - "<<msecs2;
+//            qInfo()<<"Got here also with: "<<tim2<<" - "<<msecs2;
             if ((msecs2!=msecs1)&&msecs2>1) {
                 have2timers=true;
                 timer2.setInterval(1000*(tim1+tim2));
                 timer2.setSingleShot(true);
                 secondDelay=msecs2;
             } else {
-                qDebug()<<"Not a correct use of second timer fps: "<<msecs2<<" vs "<<msecs1;
+                qInfo()<<"Not a correct use of second timer fps: "<<msecs2<<" vs "<<msecs1;
             }
 
         }
@@ -305,9 +305,9 @@ void PlaybackDialog::finishedSecondTimer() {
 
 void PlaybackDialog::on_snapshotButton_clicked() {
     QString fold= QFileDialog::getSaveFileName(0,QString("Where should I save the snapshot?"));
-    //qDebug()<<"Gotten this output: "<<fold;
+    //qInfo()<<"Gotten this output: "<<fold;
     if (fold=="") {
-    //    qDebug()<<"Was cancelled, do nothing.";
+    //    qInfo()<<"Was cancelled, do nothing.";
     } else {
         emit recordSnapshot(fold);
     }

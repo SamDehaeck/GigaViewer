@@ -347,11 +347,16 @@
                </size>
               </property>
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <item>
                <property name="text">
                 <string>FMF</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>BUF-FMF</string>
                </property>
               </item>
               <item>

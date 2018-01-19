@@ -72,6 +72,7 @@ private:
     bool doPluginProcessing;
     int skipImages;
     int recSkip;
+    bool stoppingRecording;
 
 
 #ifdef TRACKING

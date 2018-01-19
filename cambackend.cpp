@@ -1,6 +1,7 @@
 #include "cambackend.h"
 #include "opencvsourcesink.h"
 #include "fmfsourcesink.h"
+#include "fmfbufferedsourcesink.h"
 #include "xvisourcesink.h"
 #include "mrfsourcesink.h"
 #include "regexsourcesink.h"
@@ -72,7 +73,7 @@ void CamBackend::run()
             }
         }
     } else {
-        qDebug()<<"Camera is not opened";
+        qInfo()<<"Camera is not opened";
     }
 }
 
@@ -83,7 +84,7 @@ void CamBackend::GrabFrame()
         if (reversePlay) incr=-1;
 
         if (!currSource->GrabFrame(currImage,incr)) {
-            qDebug()<<"Some error occured while grabbing the frame";
+            qInfo()<<"Some error occured while grabbing the frame";
             return;
         }
         if (currImage.image.rows==0) {
@@ -91,7 +92,7 @@ void CamBackend::GrabFrame()
             return;
         }
         if (format!=currImage.pixFormat) {
-    //        qDebug()<<"Switching data format";
+    //        qInfo()<<"Switching data format";
             format=currImage.pixFormat;
         }
 
@@ -124,9 +125,11 @@ void CamBackend::GrabFrame()
 
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
-        AdaptForDisplay(currImage);
+        if (!stoppingRecording) {  // stopping a recording can block the queue and overflow the buffers
+            AdaptForDisplay(currImage);
 
-        emit NewImageReady(currImage);
+            emit NewImageReady(currImage);
+        }
     }
 
 }
@@ -140,7 +143,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=true;
         doesCallBack=false;
 #else
-        qDebug()<<"HDF5 source/sink not compiled";
+        qInfo()<<"HDF5 source/sink not compiled";
         return false;
 #endif
     } else if (dev.contains(".fmf")) {
@@ -165,7 +168,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
 #else
-        qDebug()<<"AVT source not compiled";
+        qInfo()<<"AVT source not compiled";
         return false;
 #endif
     } else if (dev=="Vimba") {
@@ -174,7 +177,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=true;
 #else
-        qDebug()<<"Vimba source not compiled";
+        qInfo()<<"Vimba source not compiled";
         return false;
 #endif
     } else if (dev=="IDS") {
@@ -183,7 +186,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
 #else
-        qDebug()<<"IDS source not compiled";
+        qInfo()<<"IDS source not compiled";
         return false;
 #endif
     } else {
@@ -214,7 +217,6 @@ void CamBackend::StopAcquisition()
         StartRecording(false);
     }
 
-
     currSource->StopAcquisition();
     if (needTimer) quit();
     if (doesCallBack) quit();
@@ -232,7 +234,7 @@ void CamBackend::SetInterval(int newInt) {
     reversePlay=newInt<0;
     isPaused=newInt>3000000;
     if (!isPaused) {
-//        qDebug()<<"newInt:   "<<newInt;
+//        qInfo()<<"newInt:   "<<newInt;
         // if interval is too big, possible that timer of cameras not working => smaller timer and skip some images.
         double maxInterval=1000.0; // ask from camera/ current source
         double newNewInt(newInt);
@@ -240,7 +242,7 @@ void CamBackend::SetInterval(int newInt) {
                 double ratio=newInt/maxInterval;
                 skipImages=int(ceil(ratio));
                 newNewInt=1.0*newInt/skipImages;
-//                qDebug()<<"Will skip: "<<skipImages-1<<" images with interval of: "<<newNewInt;
+//                qInfo()<<"Will skip: "<<skipImages-1<<" images with interval of: "<<newNewInt;
         } else {
             skipImages=0;
         }
@@ -263,7 +265,12 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
     if (startRec) {
         recSkip=skip+1;
         if (codec.contains("FMF")) {
-            currSink=new FmfSourceSink();
+            if (codec.contains("BUF-FMF")) {
+                currSink=new FmfBufferedSourceSink();
+//                qInfo()<<"Doing buffered version";
+            } else {
+                currSink=new FmfSourceSink();
+            }
             if (format=="MONO8") {
                 codec="FMF8";
             } else if (format=="MONO12") {
@@ -305,7 +312,7 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
                 codec="HDFRGB8";
             }
 #else
-            qDebug()<<"Hdf5 source/sink not compiled in";
+            qInfo()<<"Hdf5 source/sink not compiled in";
 #endif
         } else {
             currSink=new OpencvSourceSink();
@@ -313,17 +320,21 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
         int fps=timer.interval()/10;
         bool succ=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
         if (!succ) {
-            qDebug()<<"Start recording failed!";
+            qInfo()<<"Start recording failed!";
             delete currSink;
             currSink=0;
             recording=false;
             return;
         }
+        stoppingRecording=false;
     } else { // stopping recording
         if (currSink!=0) {
+            recording=false;
+            stoppingRecording=true;  // to prevent the display queue to overflow!
             currSink->StopRecording();
             delete currSink;
             currSink=0;
+            stoppingRecording=false; // show images again on screen
         }
     }
     recording=startRec;
@@ -332,7 +343,7 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
 void CamBackend::skipForwardBackward(bool forward)
 {
     if (!currSource->SkipFrames(forward)) {
-        qDebug()<<"Skipping did not work";
+        qInfo()<<"Skipping did not work";
     }
 }
 
@@ -397,15 +408,19 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         }
     } else if (currImage.pixFormat=="BAYERRG8") { // do colour interpolation but only for showing to screen!
         if (currImage.image.channels()==1) {
-            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
-            currImage.image=dummy;
+            if (!recording) {  // when recording, don't bother doing interpolation only for display
+                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+                currImage.image=dummy;
+            }
         }
     } else if (currImage.pixFormat=="BAYERGB8") { // do colour interpolation but only for showing to screen!
         if (currImage.image.channels()==1) {
-            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-            cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
-            currImage.image=dummy;
+            if (!recording) {
+                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
+                cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
+                currImage.image=dummy;
+            }
         }
     } else if (currImage.pixFormat=="BAYERRG12") {
         double max;
@@ -413,9 +428,11 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
 
         if (currImage.image.channels()==1) {
-            cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_16UC3);
-            cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
-            currImage.image=dummy;
+            if (!recording) {  // when recording, don't bother doing interpolation only for display
+                cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_16UC3);
+                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+                currImage.image=dummy;
+            }
         }
 
 
@@ -423,7 +440,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
 //        cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
 //        cv::cvtColor(currImage.image,dummy,CV_RGB2BGR);
 //        currImage.image=dummy;
-//        qDebug()<<"Got a RGB8 frame"; //Nothing to do
+//        qInfo()<<"Got a RGB8 frame"; //Nothing to do
     } else if (currImage.pixFormat=="FLOAT") {
         double min,max;
         cv::minMaxLoc(currImage.image,&min,&max);
@@ -432,13 +449,15 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         cv::Mat temp;
         currImage.image.convertTo(temp,CV_8U,stretch,shift);
         currImage.image=temp.clone();
-        //qDebug()<<"Got a Float frame";
+        //qInfo()<<"Got a Float frame";
     } else if (currImage.pixFormat=="BOOL") {
         cv::Mat temp;
         currImage.image.convertTo(temp,CV_8U,255,0);
         currImage.image=temp.clone();
+    } else if (currImage.pixFormat=="BGR8") {
+        //nothing to do
     } else {
-        qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
+        qInfo()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
 }
 
@@ -469,7 +488,7 @@ bool CamBackend::setSettingsPlugin(ImagePacket& ,QStringList ) {
 #ifdef TRACKING
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     if (settings["pluginName"]=="MarangoniTracking") {
-//        qDebug()<<"should inform marangoni";
+//        qInfo()<<"should inform marangoni";
         tracker.ChangeSettings(settings);
     }
 
@@ -479,7 +498,7 @@ void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
 #ifdef ELLIPSE
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     if (settings["pluginName"]=="EllipseDetection") {
-//        qDebug()<<"should inform marangoni";
+//        qInfo()<<"should inform marangoni";
         tracker.ChangeSettings(settings);
     }
 
