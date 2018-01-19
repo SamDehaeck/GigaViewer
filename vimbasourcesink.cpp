@@ -32,15 +32,15 @@ void VimbaSourceSink::setFormat(QString formatstring) {
         } else if (format=="RGB8Packed") {
             err=pFeature->SetValue(VmbPixelFormatRgb8);
         } else {
-            qDebug()<<"Pixel Format not yet working in Gigaviewer: "<<format;
+            qInfo()<<"Pixel Format not yet working in Gigaviewer: "<<format;
         }
         if (err!=VmbErrorSuccess) {
-            qDebug()<<"Could not set requested pixel format.";
+            qInfo()<<"Could not set requested pixel format.";
         }
         std::string form;
         err=pFeature->GetValue(form);
-//        qDebug()<<"Working in "<<QString::fromStdString(form)<<" mode";
-//                                qDebug()<<"Will work in Mono8 mode";
+//        qInfo()<<"Working in "<<QString::fromStdString(form)<<" mode";
+//                                qInfo()<<"Will work in Mono8 mode";
     }
 }
 
@@ -64,7 +64,7 @@ bool VimbaSourceSink::Init()
             if (cameras.size()==0) {
                 CameraPtr ipCam;
                 if ( VmbErrorSuccess == system.OpenCameraByID("169.254.1.55",VmbAccessModeFull,ipCam)) {
-                     qDebug()<<"IP camera opened";
+                     qInfo()<<"IP camera opened";
                      cameras.push_back(ipCam);
                      camIsOpen=true;
                 }
@@ -74,13 +74,13 @@ bool VimbaSourceSink::Init()
             if (cameras.size()>0) {
                 if (cameras.size()>1) {
                     QStringList cams;
-                    qDebug() << "Cameras found: " << cameras.size();  // should also implement Qinputdialog to let the user choose which one to use
+                    qInfo() << "Cameras found: " << cameras.size();  // should also implement Qinputdialog to let the user choose which one to use
                     for (uint i=0;i<cameras.size();i++) {
                         CameraPtr cam=cameras[i];
                         std::string namestr;
                         err=cam->GetName(namestr);
                         cams<<QString::fromStdString(namestr);
-                        qDebug()<<"Next Camera is: "<<QString::fromStdString(namestr);
+                        qInfo()<<"Next Camera is: "<<QString::fromStdString(namestr);
                     }
 
                     bool camok;
@@ -102,7 +102,7 @@ bool VimbaSourceSink::Init()
                 err=pCamera->GetName(namestr);
                 err=pCamera->GetID(camID);
                 if( VmbErrorSuccess == err )    {
-                    qDebug()<<"Opening camera "<<QString::fromStdString(namestr);
+                    qInfo()<<"Opening camera "<<QString::fromStdString(namestr);
 
                     if (!camIsOpen) err=pCamera->Open(VmbAccessModeFull);
                     if (err==VmbErrorSuccess) {
@@ -147,12 +147,12 @@ bool VimbaSourceSink::Init()
                         if (err==VmbErrorSuccess) {
                             err=pFeature->GetValue(camFreq);
                             if (err==VmbErrorSuccess) {
-                                qDebug()<<"Camera freq is "<<(1.0*camFreq);
+                                qInfo()<<"Camera freq is "<<(1.0*camFreq);
                             } else {
-                                qDebug()<<"Could not extract freq: "<<err;
+                                qInfo()<<"Could not extract freq: "<<err;
                             }
                         } else {
-                            qDebug()<<"Could not query frequency: "<<err<<" => Will use LUT";
+                            qInfo()<<"Could not query frequency: "<<err<<" => Will use LUT";
                             if (namestr=="GE1050") {
                                 camFreq=79861111;
                             } else if (namestr=="GE1910") {
@@ -160,7 +160,7 @@ bool VimbaSourceSink::Init()
                             } else if (namestr=="GE2040") {
                                 camFreq=79861111;
                             } else {
-                                qDebug()<<"Model not yet in LUT => unreliable timestamps";
+                                qInfo()<<"Model not yet in LUT => unreliable timestamps";
                                 camFreq=79861111;
                             }
                         }
@@ -222,7 +222,7 @@ bool VimbaSourceSink::Init()
                                 items<<"RGB8Packed";
                             } else {
                                 if (!QString::fromStdString(pixF[i]).contains("12Packed")) {
-                                    qDebug()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
+                                    qInfo()<<"This pixel-mode not yet available in Gigaviewer: "<<QString::fromStdString(pixF[i]);
                                 }
                             }
 
@@ -234,7 +234,7 @@ bool VimbaSourceSink::Init()
                         if (ok && !item.isEmpty()) {
                             format=item;
                             setFormat(format);
-//                            qDebug()<<"Selected "<<format;
+//                            qInfo()<<"Selected "<<format;
                         }
 
 
@@ -249,19 +249,19 @@ bool VimbaSourceSink::Init()
                     }
                 }
             } else {
-                qDebug()<<"Zero cameras found";
+                qInfo()<<"Zero cameras found";
                 return false;
             }
 
 
 
         } else {
-            qDebug() << "Could not list cameras. Error code: " << err;
+            qInfo() << "Could not list cameras. Error code: " << err;
             return false;
         }
 
     } else {
-        qDebug() << "Could not start system. Error code: " << err;
+        qInfo() << "Could not start system. Error code: " << err;
         return false;
     }
 
@@ -272,9 +272,9 @@ bool VimbaSourceSink::Init()
 bool VimbaSourceSink::StartAcquisition(QString dev)
 {
     if (dev!="Vimba") {
-        qDebug()<<"Device name incorrect for Vimba: "<<dev;
+        qInfo()<<"Device name incorrect for Vimba: "<<dev;
     }
-//    qDebug()<<"Vimba Start Acquisition";
+//    qInfo()<<"Vimba Start Acquisition";
     SetShutter(100);
     SetInterval(100);
     initialStamp=0; // to make sure I start counting time from zero
@@ -287,7 +287,7 @@ bool VimbaSourceSink::StopAcquisition()
     VmbErrorType err;
     err=pCamera->StopContinuousImageAcquisition();
     if (err!=VmbErrorSuccess) {
-        qDebug()<<"Stopping did not work: "<<err;
+        qInfo()<<"Stopping did not work: "<<err;
     }
     return true;
 }
@@ -296,19 +296,19 @@ bool VimbaSourceSink::ReleaseCamera()
 {
     VmbErrorType err=pCamera->Close();
     if (err!=VmbErrorSuccess) {
-        qDebug()<<"Problem closing the camera";
+        qInfo()<<"Problem closing the camera";
     }
     err=system.Shutdown();
     if (err!=VmbErrorSuccess) {
-        qDebug()<<"Problem shutting down Vimba";
+        qInfo()<<"Problem shutting down Vimba";
     }
     return true;
 }
 
 bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-//    qDebug()<<"Format is: "<<format;
-    if (indexIncrement<0) qDebug()<<"Cannot stream backwards";
+//    qInfo()<<"Format is: "<<format;
+    if (indexIncrement<0) qInfo()<<"Cannot stream backwards";
 
     AVT::VmbAPI::FramePtr pFrame=frameWatcher->GetFrame();
     VmbErrorType err;
@@ -317,12 +317,12 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
     err=pFrame->GetPixelFormat(pixFormat);
     err=pFrame->GetHeight(height);
     err=pFrame->GetWidth(width);
-//    qDebug()<<"Received frame with size: "<<width<<"x"<<height;
+//    qInfo()<<"Received frame with size: "<<width<<"x"<<height;
     if ((pixFormat==VmbPixelFormatMono8)||(pixFormat==VmbPixelFormatBayerRG8)||(pixFormat==VmbPixelFormatBayerGB8)) {
         target.image=cv::Mat(height,width,CV_8U);
         err=pFrame->GetImage(target.image.data); // assign the frame image buffer pointer to the target image
         if (err!=VmbErrorSuccess) {
-            qDebug()<<"Something went wrong assigning the data";
+            qInfo()<<"Something went wrong assigning the data";
         }
         if (pixFormat==VmbPixelFormatMono8) target.pixFormat="MONO8";
         if (pixFormat==VmbPixelFormatBayerRG8) target.pixFormat="BAYERRG8";
@@ -331,9 +331,9 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         target.image=cv::Mat(height,width,CV_16U);
         err=pFrame->GetImage(target.image.data);
         if (err!=VmbErrorSuccess) {
-            qDebug()<<"Something went wrong with the reception of the 12 bit image: "<<err;
+            qInfo()<<"Something went wrong with the reception of the 12 bit image: "<<err;
         } else {
-            //qDebug()<<"12-bit image should be moving up the stack";
+            //qInfo()<<"12-bit image should be moving up the stack";
         }
         if (pixFormat==VmbPixelFormatMono12) target.pixFormat="MONO12";
         if (pixFormat==VmbPixelFormatMono14) target.pixFormat="MONO14";
@@ -348,15 +348,15 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         //target.image=dummy;
 
         if (err!=VmbErrorSuccess) {
-            qDebug()<<"Something went wrong assigning the data";
+            qInfo()<<"Something went wrong assigning the data";
         }
         if (pixFormat==VmbPixelFormatRgb8) target.pixFormat="RGB8";
 
     } else {
-        qDebug()<<"Other pixel formats not yet working";
+        qInfo()<<"Other pixel formats not yet working";
     }
 
-//    qDebug()<<"target format is: "<<target.pixFormat;
+//    qInfo()<<"target format is: "<<target.pixFormat;
 
     VmbUint64_t id;
     err=pFrame->GetFrameID(id);
@@ -368,10 +368,10 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         initialStamp=stamp;
         qint64 currMsec=QDateTime::currentMSecsSinceEpoch();
         timeOffset=currMsec;
-//        qDebug()<<"StartTime: "<<currMsec<<" vs "<<timeOffset;
+//        qInfo()<<"StartTime: "<<currMsec<<" vs "<<timeOffset;
     }
     target.timeStamp=timeOffset+1000.0*(stamp-initialStamp)/(1.0*camFreq);
-//        qDebug()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
+//        qInfo()<<"Time Stamp in ms: "<<(target.timeStamp-timeOffset);
 
     pCamera->QueueFrame( pFrame ); // requeue here. Not sure what will happen if buffer too small!
 
@@ -388,36 +388,36 @@ int VimbaSourceSink::SetInterval(int msec)
         err=pCamera->GetFeatureByName("AcquisitionFrameRate",pFeature);
     }
     if (err==VmbErrorSuccess) {
-        qDebug()<<"Could find the framerate handle";
+        qInfo()<<"Could find the framerate handle";
         err=pFeature->SetValue(acqRate); // this should be continuous
         if (err==VmbErrorSuccess) {
             frameRate=acqRate;
-            qDebug()<<"New frame rate is: "<<frameRate;
+            qInfo()<<"New frame rate is: "<<frameRate;
             return msec;
         } else {
-            qDebug()<<"Setting fps did not work, will set it to the max possible: "<<err;
+            qInfo()<<"Setting fps did not work, will set it to the max possible: "<<err;
             err=pCamera->GetFeatureByName("AcquisitionFrameRateLimit",pFeature);
             double maxRate;
             if (err==VmbErrorSuccess) {
                 err=pFeature->GetValue(maxRate);
                 if (acqRate>maxRate) {
-                    qDebug()<<"Trying to set freq beyond the current limit: "<<maxRate;
+                    qInfo()<<"Trying to set freq beyond the current limit: "<<maxRate;
                     err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
                     acqRate=maxRate;
                     err=pFeature->SetValue(acqRate);
                     if (err!=VmbErrorSuccess) {
-                        qDebug()<<"Setting to max also did not work!";
+                        qInfo()<<"Setting to max also did not work!";
                         acqRate=maxRate-1;
                         err=pFeature->SetValue(acqRate);
                     }
                     frameRate=acqRate;
-                    qDebug()<<"actual framerate now: "<<frameRate;
+                    qInfo()<<"actual framerate now: "<<frameRate;
                     return (int)(1000.0/acqRate);
                 }
             }
         }
     }
-    qDebug()<<"Could not find the framerate handle";
+    qInfo()<<"Could not find the framerate handle";
     return false;
 }
 
@@ -430,7 +430,7 @@ bool VimbaSourceSink::SetShutter(int shutTime)
         err=pFeature->SetValue(dShut);
         if (err==VmbErrorSuccess) {
             exposure=shutTime;
-//            qDebug()<<"New shutter time is: "<<dShut;
+//            qInfo()<<"New shutter time is: "<<dShut;
             return true;
         }
     } else {
@@ -440,19 +440,19 @@ bool VimbaSourceSink::SetShutter(int shutTime)
             err=pFeature->SetValue(dShut);
             if (err==VmbErrorSuccess) {
                 exposure=shutTime;
-                qDebug()<<"ExposureTime worked";
+                qInfo()<<"ExposureTime worked";
                 return true;
             }
         }
 
     }
-    qDebug()<<"Setting shutter did not work: "<<err;
+    qInfo()<<"Setting shutter did not work: "<<err;
     return false;
 }
 
 int VimbaSourceSink::SetAutoShutter(bool fitRange)
 {
-//    qDebug()<<"Vimba set auto shutter";
+//    qInfo()<<"Vimba set auto shutter";
     FeaturePtr pFeature;
     VmbErrorType err;
     double oldShut;
@@ -466,21 +466,21 @@ int VimbaSourceSink::SetAutoShutter(bool fitRange)
 
         if (fitRange) {
             err=pFeature->SetValue("FitRange"); // Fit Range algorithm
-            if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set Fit Range";
+            if (err!=VmbErrorSuccess) qInfo()<<"Couldn't set Fit Range";
         } else {
             err=pFeature->SetValue("Mean"); // Mean algorithm
-            if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set Mean";
+            if (err!=VmbErrorSuccess) qInfo()<<"Couldn't set Mean";
         }
     } else {
-        qDebug()<<"Couldn't set the auto-algorithm";
+        qInfo()<<"Couldn't set the auto-algorithm";
     }
 
     err=pCamera->GetFeatureByName("ExposureAutoOutliers",pFeature);
     if (err==VmbErrorSuccess) {
         err=pFeature->SetValue(10); // 0.1% of the top pixels considered as outliers (important for fitRange algorithm!)
-        if (err!=VmbErrorSuccess) qDebug()<<"Couldn't set num value for outliers";
+        if (err!=VmbErrorSuccess) qInfo()<<"Couldn't set num value for outliers";
     } else {
-        qDebug()<<"Couldn't set the auto-outliers";
+        qInfo()<<"Couldn't set the auto-outliers";
     }
 
     // now ready to do the once-off autosetting
@@ -488,16 +488,16 @@ int VimbaSourceSink::SetAutoShutter(bool fitRange)
     if (err==VmbErrorSuccess) {
         err=pFeature->SetValue("Once");
         if (err!=VmbErrorSuccess) {
-            qDebug()<<"Once did not work: "<<err;
+            qInfo()<<"Once did not work: "<<err;
         }
     } else {
-        qDebug()<<"Did not find auto feature";
+        qInfo()<<"Did not find auto feature";
     }
 
     double newShut;
     err=pCamera->GetFeatureByName("ExposureTimeAbs",pFeature);
     if (err!=VmbErrorSuccess) {
-        qDebug()<<"Could not lock exposureFeature";
+        qInfo()<<"Could not lock exposureFeature";
     }
 
     err=pFeature->GetValue(newShut);
@@ -509,7 +509,7 @@ int VimbaSourceSink::SetAutoShutter(bool fitRange)
             Sleeper::msleep(300);
             err=pFeature->GetValue(newShut);
             if (err!=VmbErrorSuccess) {
-                qDebug()<<"Could not get exposure value: "<<err;
+                qInfo()<<"Could not get exposure value: "<<err;
             } else {
                 succ=true;
             }
@@ -541,14 +541,14 @@ std::vector<std::string> VimbaSourceSink::listOptions(FeaturePtr pFeature) {
         pFeature->IsValueAvailable(vals[i].c_str(),ok);
         if (ok) {
             realVals.push_back(vals[i]);
-//            qDebug()<<"Valid value: " << QString::fromStdString(vals[i]);
+//            qInfo()<<"Valid value: " << QString::fromStdString(vals[i]);
         }
     }
     return realVals;
 }
 
 bool VimbaSourceSink::SetRoiRows(int rows) {
-    qDebug()<<"Setting the rows";
+    qInfo()<<"Setting the rows";
     if (rows>maxHeight) {
         rows=maxHeight;
     }
@@ -559,7 +559,7 @@ bool VimbaSourceSink::SetRoiRows(int rows) {
         err=pFeature->SetValue(rows);
         if (err==VmbErrorSuccess) {
             height=rows;
-            qDebug()<<"Should be here";
+            qInfo()<<"Should be here";
         } else {
             if (err==VmbErrorInvalidAccess) { // probably not possible to set ROI while images are streaming
                 err=pCamera->StopContinuousImageAcquisition();
@@ -571,22 +571,22 @@ bool VimbaSourceSink::SetRoiRows(int rows) {
 //                            err=pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
                             height=rows;
                             if (err==VmbErrorSuccess) {
-                                qDebug()<<"Restart successfull";
+                                qInfo()<<"Restart successfull";
                             } else {
-                                qDebug()<<"Restart did not work"<<err;
+                                qInfo()<<"Restart did not work"<<err;
                             }
 
                         }
                     }
                 }
             } else {
-                qDebug()<<"Or perhaps here";
+                qInfo()<<"Or perhaps here";
             }
 
         }
 
     } else {
-        qDebug()<<"Setting Rows did not work";
+        qInfo()<<"Setting Rows did not work";
     }
     return true;
 }
@@ -594,7 +594,7 @@ bool VimbaSourceSink::SetRoiRows(int rows) {
 bool VimbaSourceSink::SetRoiCols(int cols) {
     if (cols==width) {
         return true; //nothing to do
-        qDebug()<<"Nothing to do for columns";
+        qInfo()<<"Nothing to do for columns";
     }
     if (cols>maxWidth) {
         cols=maxWidth;
@@ -617,9 +617,9 @@ bool VimbaSourceSink::SetRoiCols(int cols) {
 //                            err=pCamera->StartContinuousImageAcquisition(bufCount,IFrameObserverPtr(frameWatcher));
                             width=cols;
                             if (err==VmbErrorSuccess) {
-                                qDebug()<<"Restart successfull";
+                                qInfo()<<"Restart successfull";
                             } else {
-                                qDebug()<<"Restart did not work"<<err;
+                                qInfo()<<"Restart did not work"<<err;
                             }
 
                         }
@@ -629,7 +629,7 @@ bool VimbaSourceSink::SetRoiCols(int cols) {
 
         }
     } else {
-        qDebug()<<"Setting Cols did not work";
+        qInfo()<<"Setting Cols did not work";
     }
     return true;
 }
