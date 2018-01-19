@@ -2,7 +2,7 @@
 
 #include <QtGui>
 #include <QGraphicsProxyWidget>
-#include <QOpenGLFunctions_3_3_Compatibility>
+#include <QOpenGLFunctions_3_0>
 
 VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     QGraphicsScene(parent),didInitOpengl(0)
@@ -62,9 +62,9 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
         initializeOpenGLFunctions();
         didInitOpengl=1;
     }*/
-//    QOpenGLFunctions_3_2_Compatibility *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_2_Compatibility>();
+    QOpenGLFunctions_3_0 *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_0>();
 
-    QOpenGLFunctions_3_3_Compatibility *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
+//    QOpenGLFunctions_3_3_Compatibility *f = QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_3_3_Compatibility>();
     f->initializeOpenGLFunctions();
     painter->beginNativePainting();
 
