@@ -33,7 +33,7 @@
 #endif
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0)
+    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0),stoppingRecording(false)
 #ifdef TRACKING
   ,tracker(50,1)
 #endif
