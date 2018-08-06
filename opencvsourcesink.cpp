@@ -15,7 +15,7 @@ bool OpencvSourceSink::StartAcquisition(QString dev) {
 #else
         camera.open(dev.toUtf8().data());
 #endif
-        nFrames=camera.get(CV_CAP_PROP_FRAME_COUNT);
+        nFrames=static_cast<int>(round(camera.get(CV_CAP_PROP_FRAME_COUNT))); // not sure about the round
         liveFeed=false;
     }
     return camera.isOpened();
@@ -79,7 +79,7 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
 //    qDebug()<<camera.get(CV_CAP_PROP_POS_FRAMES);
 
     if (!liveFeed) {
-        target.seqNumber=camera.get(CV_CAP_PROP_POS_FRAMES);
+        target.seqNumber=static_cast<int>(round(camera.get(CV_CAP_PROP_POS_FRAMES)));
     } else {
         target.seqNumber=target.seqNumber+1;
     }
@@ -103,7 +103,7 @@ bool OpencvSourceSink::SkipFrames(bool forward)
 {
 //    qDebug()<<"Number of frames"<<nFrames;
     if (!liveFeed) {
-        int currPos=camera.get(CV_CAP_PROP_POS_FRAMES);
+        int currPos=static_cast<int>(round(camera.get(CV_CAP_PROP_POS_FRAMES)));
         int skipping = 0;
         if (forward) {
             skipping=nFrames/10;

@@ -24,7 +24,7 @@ private:
     uint32_t bitsperpixel;
     QString dataformat;
     int rows,cols;
-    int nFrames;
+    uint nFrames;
     int currPos;
 };
 

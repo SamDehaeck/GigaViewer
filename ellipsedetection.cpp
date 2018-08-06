@@ -34,7 +34,7 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
             currIm.pixFormat="MONO8";
         }
         if (currIm.pixFormat=="MONO8") {
-            int newT=threshold*255/100.0;  //change here if it needs to work for 16-bit
+            int newT=static_cast<int>(round(threshold*255/100.0));  //change here if it needs to work for 16-bit
 
             int apSize=3;
             // Find edge pixels

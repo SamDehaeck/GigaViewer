@@ -12,7 +12,7 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
     QPointF pos(10, 10);
     foreach (dial, controlDialogs) {
         //now make the control dialogues
-        QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(0, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
+        QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(nullptr, Qt::Dialog|Qt::CustomizeWindowHint|Qt::WindowTitleHint);
         proxy->setWidget(dial);
         addItem(proxy);
 
@@ -109,15 +109,15 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     int maxX=1024;
     int maxY=768;
     if (imageBuff.rows!=0) {
-        double aspRatio=imageBuff.rows/(double)imageBuff.cols;
-        double windowAspRatio=this->height()/(double)this->width();
+        double aspRatio=static_cast<double>(imageBuff.rows)/imageBuff.cols;
+        double windowAspRatio=static_cast<double>(this->height())/this->width();
         if (aspRatio>windowAspRatio) {
             // amount of rows is limiting factor
-            maxY=this->height();
-            maxX=maxY/aspRatio;
+            maxY=static_cast<int>(round(this->height()));
+            maxX=static_cast<int>(round(maxY/aspRatio));
         } else {
-            maxX=this->width();
-            maxY=maxX*aspRatio;
+            maxX=static_cast<int>(round(this->width()));
+            maxY=static_cast<int>(round(maxX*aspRatio));
         }
     }
 

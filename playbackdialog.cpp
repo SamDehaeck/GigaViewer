@@ -78,7 +78,7 @@ void PlaybackDialog::on_toolButton_clicked()
 {
     QString old = ui->RecFolder->text();
 //    if (old=="") {
-        QString fold= QFileDialog::getExistingDirectory(0,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
+        QString fold= QFileDialog::getExistingDirectory(nullptr,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 //    } else {
 //        QString fold= QFileDialog::getExistingDirectory(this,tr("Select recording folder"),QDir::homePath(),QFileDialog::ShowDirsOnly);
 //    }
@@ -139,7 +139,7 @@ void PlaybackDialog::newFrameNumberReceived(int nr)
 }
 
 void PlaybackDialog::showNewFps(int msec) {
-    int fps=(int)(1000.0/msec);
+    int fps=static_cast<int>(round(1000.0/msec));
     QString fpstext="1/"+QString::number(fps);
     ui->fpsEdit->setText(fpstext);
 }
@@ -159,10 +159,10 @@ void PlaybackDialog::on_horizontalSlider_valueChanged(int value)
     int newVal;
     if (oldText.at(0)=='-') {
         delayTxt=QString("-1/%1").arg(newFrameRate);
-        newVal=(int)(-1000/newFrameRate);
+        newVal=static_cast<int>(round(-1000/newFrameRate));
     } else {
         delayTxt=QString("1/%1").arg(newFrameRate);
-        newVal=(int)(1000/newFrameRate);
+        newVal=static_cast<int>(round(1000/newFrameRate));
     }
     ui->fpsEdit->setText(delayTxt);
 
@@ -179,7 +179,7 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
     QString instruct;
     bool ok=true;
     if (recording) {
-        instruct=QInputDialog::getText(NULL,"Shutdown timer instructions","Format ~ '2m10s@30fps/3h@0.5fps' : ");
+        instruct=QInputDialog::getText(nullptr,"Shutdown timer instructions","Format ~ '2m10s@30fps/3h@0.5fps' : ");
         // check if format is ok
         QRegExp rx("(.+)/(.+)");
         int pos=0;
@@ -275,7 +275,7 @@ bool PlaybackDialog::parseInstruct(QString instruct, int& sec, int& msecdelay) {
         if (pos!=-1) {
             double fp=fpsSearch.cap(1).toDouble(&ok);
             if (ok) {
-                msecdelay=1000.0/fp;
+                msecdelay=static_cast<int>(round(1000.0/fp));
             }
         }
     }
@@ -304,7 +304,7 @@ void PlaybackDialog::finishedSecondTimer() {
 }
 
 void PlaybackDialog::on_snapshotButton_clicked() {
-    QString fold= QFileDialog::getSaveFileName(0,QString("Where should I save the snapshot?"));
+    QString fold= QFileDialog::getSaveFileName(nullptr,QString("Where should I save the snapshot?"));
     //qInfo()<<"Gotten this output: "<<fold;
     if (fold=="") {
     //    qInfo()<<"Was cancelled, do nothing.";

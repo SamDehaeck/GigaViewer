@@ -1,6 +1,7 @@
 #include "hdf5sourcesink.h"
 #include "opencv2/opencv.hpp"
 #include <QInputDialog>
+#include <QMessageBox>
 
 using namespace H5;
 
@@ -54,7 +55,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
             finalDataset=goodSets[0];
         } else {
             bool ok;
-            QString item = QInputDialog::getItem(NULL, "Which dataset to open",
+            QString item = QInputDialog::getItem(nullptr, "Which dataset to open",
                                                 "Options:", items, 0, false, &ok);
             if (ok && !item.isEmpty()) {
                 finalDataset=item.toStdString();
@@ -69,7 +70,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
         dataset=hFile->openDataSet(finalDataset);
         dataspace = dataset.getSpace();
 
-        int ndims = dataspace.getSimpleExtentDims( dims, NULL);
+        int ndims = dataspace.getSimpleExtentDims( dims, nullptr);
         if (ndims!=3) qDebug()<<"Rank is not 3: "<<ndims;
         /*qDebug() << "rank " << ndims << ", dimensions " <<
           (unsigned long)(dims[0]) << " x " <<
@@ -106,18 +107,18 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
              if (size==1) {
                  if (dataformat=="RGB8") {
                      readType=PredType::NATIVE_UCHAR;
-                     frame=cv::Mat(dims[1],dims[2]/3.,CV_8UC3);
+                     frame=cv::Mat(static_cast<int>(dims[1]),static_cast<int>(round(dims[2]/3.)),CV_8UC3);
 //                     dataformat="RGB8";
                  } else {
                     readType=PredType::NATIVE_UCHAR;
-                    frame=cv::Mat(dims[1],dims[2],CV_8U);
+                    frame=cv::Mat(static_cast<int>(dims[1]),static_cast<int>(dims[2]),CV_8U);
                     if (!hasFormat) {
                         dataformat="MONO8";
                     }
                  }
              } else if (size==2) {
                  readType=PredType::NATIVE_UINT16;
-                 frame=cv::Mat(dims[1],dims[2],CV_16U);
+                 frame=cv::Mat(static_cast<int>(dims[1]),static_cast<int>(dims[2]),CV_16U);
                  if (!hasFormat) {
                     dataformat="MONO14"; // not knowing if it is 12 or 14, 14 is the safer choice for displaying will check attribute later.
                  }
@@ -131,7 +132,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
         } else if (dataclass== H5T_FLOAT){
             dataformat="FLOAT";
             readType=PredType::NATIVE_FLOAT;
-            frame=cv::Mat(dims[1],dims[2],CV_32F);
+            frame=cv::Mat(static_cast<int>(dims[1]),static_cast<int>(dims[2]),CV_32F);
         } else if (dataclass==H5T_COMPOUND) { //typically a complex number => no meaningfull way to show this so exit
             qDebug()<<"Data set has compound type - will exit";
             return false;
@@ -139,7 +140,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
             qDebug()<<"Detected a bool dataset";
             dataformat="BOOL";
             readType=PredType::NATIVE_B8;
-            frame=cv::Mat(dims[1],dims[2],CV_8U);
+            frame=cv::Mat(static_cast<int>(dims[1]),static_cast<int>(dims[2]),CV_8U);
         } else {
             qDebug()<<"Data set has unknown type - will exit"<<dataclass;
             return false;
@@ -152,13 +153,13 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
             DataSet timeset=hFile->openDataSet(timestring);
             DataSpace timespace = timeset.getSpace();
             hsize_t timedim[1];
-            int ndims = timespace.getSimpleExtentDims( timedim, NULL);
+            int ndims = timespace.getSimpleExtentDims( timedim, nullptr);
             if (ndims!=1) qDebug()<<"Rank is not 1: "<<ndims;
 
-            cv::Mat timeMat=cv::Mat(1,timedim[0],CV_64F);
+            cv::Mat timeMat=cv::Mat(1,static_cast<int>(timedim[0]),CV_64F);
             timeset.read(timeMat.data,PredType::NATIVE_DOUBLE);
 
-            for (uint i=0;i<timedim[0];i++) {
+            for (int i=0;i<static_cast<int>(timedim[0]);i++) {
                 timestamps.push_back(timeMat.at<double>(0,i));
             }
         }
@@ -166,8 +167,8 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
         index=0;
 
-    } catch (Exception e) {
-        qDebug()<<"Error occured: "<<e.getCDetailMsg();
+    } catch (const Exception& e) {
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(e.getDetailMsg()));
         return false;
     }
 
@@ -176,7 +177,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
 bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    if ((index+indexIncrement >= dims[0])||((int)index+indexIncrement <-1)) {
+    if ((static_cast<int>(index)+indexIncrement >= static_cast<int>(dims[0]))||(static_cast<int>(index)+indexIncrement <-1)) { // watch out for conversion
         return true;
     }
     try {
@@ -206,14 +207,14 @@ bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
         target.image=frame.clone();
 
         target.pixFormat=dataformat;
-        target.seqNumber=index;
+        target.seqNumber=static_cast<int>(index); // be carefull of overflows!!
         if (timepresent) {
             target.timeStamp=timestamps[index];
         }
-        index=index+indexIncrement;
+        index=index+static_cast<ulong>(indexIncrement);
         return true;
-    } catch (Exception e) {
-        qDebug()<<"Error occured: "<<e.getCDetailMsg();
+    } catch (const Exception& e) {
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(e.getDetailMsg()));
         return false;
     }
 
@@ -224,8 +225,8 @@ bool Hdf5SourceSink::StopAcquisition()
     try {
         hFile->close();
         delete hFile;
-    } catch (Exception e) {
-        qDebug()<<"Error occured: "<<e.getCDetailMsg();
+    } catch (const Exception& e) {
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(e.getDetailMsg()));
         return false;
     }
 
@@ -302,20 +303,21 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
 
 
 
-    recrows=rows;
-    reccols=cols;
+    recrows=static_cast<hsize_t>(rows);
+    reccols=static_cast<hsize_t>(cols);
     if (dataformat=="RGB8") {
-        reccols=cols*3;
+        reccols=static_cast<hsize_t>(cols*3);
     }
-    hsize_t      dims[3]  = { 1,(uint)recrows, (uint)reccols};  // dataset dimensions at creation
+    hsize_t      dims[3]  = { 1,recrows,reccols};  // dataset dimensions at creation
 
-    hsize_t      maxdims[3] = {H5S_UNLIMITED, (uint)recrows,(uint)reccols};
+    hsize_t unlimSize=static_cast<hsize_t>(static_cast<hssize_t>(-1));
+    hsize_t      maxdims[3] = {unlimSize, recrows,reccols};
     DataSpace mspace1( 3, dims, maxdims);
     /*
      * Modify dataset creation properties, i.e. enable chunking.
      */
 
-    hsize_t      chunk_dims[3] ={1,(uint)recrows, (uint)reccols};
+    hsize_t      chunk_dims[3] ={1,recrows, reccols};
     cparms.setChunk( 3, chunk_dims );
     /*
      * Set fill value for the dataset
@@ -397,7 +399,7 @@ bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
         hsize_t dumbIm[2];
         dumbIm[0]=recrows;
         dumbIm[1]=reccols;
-        DataSpace memspac(2,dumbIm,NULL);
+        DataSpace memspac(2,dumbIm,nullptr);
 
         dataset.write(source.image.data,readType,memspac,filespace);
 
@@ -410,9 +412,9 @@ bool Hdf5SourceSink::RecordFrame(ImagePacket &source)
 bool Hdf5SourceSink::StopRecording()
 {
     // first record timestamps
-    cv::Mat doubleT=cv::Mat(1,timestamps.size(),CV_64F);
-    for (uint l=0;l<timestamps.size();l++) {
-        doubleT.at<double>(0,l)=timestamps[l];
+    cv::Mat doubleT=cv::Mat(1,static_cast<int>(timestamps.size()),CV_64F);
+    for (size_t l=0;l<timestamps.size();l++) {
+        doubleT.at<double>(0,static_cast<int>(l))=timestamps[l];
     }
     hsize_t  hdims[1]={timestamps.size()};
     H5::DataSpace dataspaceT=DataSpace( 1, hdims );
@@ -434,16 +436,16 @@ bool Hdf5SourceSink::IsOpened()
 bool Hdf5SourceSink::SkipFrames(bool forward) {
     int skipping = 0;
     if (forward) {
-        skipping=dims[0]/10;
+        skipping=static_cast<int>(round(dims[0]/10.0));
     } else {
-        skipping=-(int)dims[0]/50;
+        skipping=-static_cast<int>(round(dims[0]/50.0));
     }
 //    qDebug()<<"Will try to skip "<<skipping<<" frames";
 
-    if ((index+skipping >= dims[0]-1)||((int)index+skipping <0)) {
+    if ((static_cast<int>(index)+skipping >= static_cast<int>(dims[0]-1))||(static_cast<int>(index)+skipping <0)) {
         return true;
     }
 
-    index+=skipping;
+    index+=static_cast<ulong>(skipping);
     return true;
 }

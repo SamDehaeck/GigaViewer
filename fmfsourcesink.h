@@ -22,9 +22,9 @@ private:
     FILE * fmf;
     FILE * fmfrec;
     int fmfnpixels;
-    uint64_t headersize;
-    uint64_t recheadersize;
-    uint64_t recNframespos;
+    long headersize;
+    long recheadersize;
+    long recNframespos;
     uint64_t bytesperchunk;
     uint32_t bitsperpixel;
     QString dataformat;

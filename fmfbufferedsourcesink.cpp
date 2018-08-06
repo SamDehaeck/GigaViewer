@@ -6,124 +6,14 @@ bool FmfBufferedSourceSink::Init()
     return true;
 }
 
-bool FmfBufferedSourceSink::StartAcquisition(QString dev)
+bool FmfBufferedSourceSink::StartAcquisition(QString)
 {
-    uint32_t formatlen = 5;
-    uint32_t version = 3;
-    char dataf[15];
-    int sizeofuint32 = 4;
-    int sizeofuint64 = 8;
-
-//    ListIndex=0;
-//    lastPrinted=0;
-
-//    char* thename=dev.toUtf8().data();
-//    const char* thename=dev.toStdString().c_str();
-//    qInfo()<<"Wil read: "<<dev<<" => "<<thename<<" or "<<dev.toStdString().c_str();
-//    fmf = fopen(thename,"rb");
-#ifdef Q_OS_WIN32
-    fmf = fopen(dev.toStdString().c_str(),"rb");
-#else
-    fmf = fopen(dev.toUtf8().data(),"rb");
-#endif
-    if(fread(&version,sizeofuint32,1,fmf) < 1){
-        fprintf(stderr,"Error reading version number of input fmf file.\n");
-        exit(1);
-    }
-
-    if (version==3) {
-          // format length
-          if(fread(&formatlen,sizeofuint32,1,fmf)<1){
-            fprintf(stderr,"Error reading format length to output fmf file.\n");
-            exit(1);
-          }
-
-          // format string
-          if(fread(dataf,sizeof(char),formatlen,fmf)<formatlen){
-            fprintf(stderr,"Error reading format string to output fmf file.\n");
-            exit(1);
-          }
-          dataf[formatlen]='\0';
-          dataformat=dataf;
-          if (dataformat=="MONO8") {
-//              qInfo()<<"Recognised Mono8 FMF-file";
-          } else if (dataformat=="MONO12") {
-//              qInfo()<<"Recognised Mono12 FMF-file";
-          } else if (dataformat=="MONO14") {
-//              qInfo()<<"Recognised Mono14 FMF-file";
-          } else if (dataformat=="BAYERRG8") {
-//              qInfo()<<"Recognised BayerRG8 FMF-file";
-          } else if (dataformat=="BAYERRG12") {
-              qInfo()<<"Recognised BayerRG12 FMF-file";
-          } else if (dataformat=="BAYERGB8") {
-//              qInfo()<<"Recognised BayerGB8 FMF-file";
-          } else if (dataformat=="RGB8") {
-              qInfo()<<"Recognised RGB8 FMF-file";
-          } else {
-              qInfo()<<"Unrecognised format "<<dataformat;
-          }
-//          std::string dataf(dataformat);
-
-
-          // bits per pixel
-          if(fread(&bitsperpixel,sizeofuint32,1,fmf)<1){
-            fprintf(stderr,"Error reading bits per pixel to output fmf file.\n");
-            exit(1);
-          }
-//          qInfo()<<"Formatlen, dataformat, bitsperpixel"<<formatlen<<", "<<dataformat<<", "<<bitsperpixel;
-
-    }
-
-    uint32_t rowsRead;
-    uint32_t colsRead;
-      // height of the frame
-    if(fread(&rowsRead,sizeofuint32,1,fmf)<1){
-        fprintf(stderr,"Error writing frame height to output fmf file.\n");
-        exit(1);
-    }
-    rows=rowsRead;
-
-    // width of the frame
-    if(fread(&colsRead,sizeofuint32,1,fmf)<1){
-        fprintf(stderr,"Error writing frame width to output fmf file.\n");
-        exit(1);
-    }
-    cols=colsRead;
-
-    // bytes encoding a frame
-    if(fread(&bytesperchunk,sizeofuint64,1,fmf)<1){
-        fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
-        exit(1);
-    }
-
-    // number of frames
-    uint64_t nRead;
-    if(fread(&nRead,sizeofuint64,1,fmf)<1){
-        fprintf(stderr,"Error writing number of frames to output fmf file.\n");
-        exit(1);
-    }
-    headersize = ftell(fmf);
-//    qInfo()<<"Header size of fmf is: "<<headersize;
-
-#ifdef Q_OS_WIN32
-    _fseeki64(fmf,0,SEEK_END);
-    nFrames=(_ftelli64(fmf)-headersize)/bytesperchunk;
-#else
-    fseek(fmf,0,SEEK_END);
-    nFrames=(ftell(fmf)-headersize)/bytesperchunk;
-#endif
-    if (abs(nFrames)!=int(nRead)) qInfo()<<"Wrong number of frames reported"<<nRead<<"versus calculated"<<nFrames;
-    fseek(fmf,headersize,SEEK_SET);
-    currPos=0;
-
-
-//    qInfo()<<"Found: "<<bytesperchunk<<" - "<<nRead<<" - "<<nFrames<<" - "<<bitsperpixel;
+    qInfo()<<"Should only write into buffered FMF";
     return true;
 }
 
 bool FmfBufferedSourceSink::StopAcquisition()
 {
-    fclose(fmf);
     return true;
 }
 
@@ -132,49 +22,9 @@ bool FmfBufferedSourceSink::ReleaseCamera()
     return true;
 }
 
-bool FmfBufferedSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
+bool FmfBufferedSourceSink::GrabFrame(ImagePacket &, int)
 {
-    if ((currPos+indexIncrement >= nFrames-1)||(currPos+indexIncrement <0)) {
-        return true;
-    }
-    if (indexIncrement!=1) {
-#ifdef Q_OS_WIN32
-                _fseeki64(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
-#else
-                fseek(fmf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
-#endif
-    }
-//    if (index!=-1) {
-//        fseek(fmf,headersize+index*bytesperchunk,SEEK_SET); //modify this to use currPos to jump around less
-//    }
-
-    if (fread(&target.timeStamp,sizeof(double),1,fmf)) {
-        // change CV_8U to instance variable datatype
-        cv::Mat temp;
-        if (dataformat!="RGB8") {
-            if (bitsperpixel==8) {
-                temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
-                uint amread=fread(temp.data, 1, rows*cols, fmf);
-                if (amread==(uint)(rows*cols)) target.image=temp.clone();
-            } else {
-                temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
-                uint amread=fread(temp.ptr<uint16_t>(0), 2, rows*cols, fmf);
-                if (amread==(uint)(rows*cols)) target.image=temp.clone();
-            }
-        } else {
-            temp = cv::Mat(rows,cols,CV_8UC3); // normally this implies that the data of temp is continuous
-            uint amread=fread(temp.data, 1, 3*rows*cols, fmf);
-            if (amread==(uint)(3*rows*cols)) target.image=temp.clone();
-        }
-
-        currPos+=indexIncrement;
-        target.seqNumber=currPos;
-        target.pixFormat=dataformat;
-        return true;
-
-    }
-
-    return false;
+    return true;
 }
 
 bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
@@ -185,7 +35,7 @@ bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
             return false;
         }
 
-        if (startTime==-1) {
+        if (startTime<-0.99) {
             startTime=source.timeStamp;
         }
 
@@ -202,8 +52,6 @@ bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
 bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, int reccols, int recrows)
 {
     uint32_t version = 3;
-    int sizeofuint32 = 4;
-    int sizeofuint64 = 8;
     uint32_t formatlen;
 //    uint32_t bitsperpixel;
 //    std::string dataformat;
@@ -278,13 +126,13 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
 #endif
 //    fmfrec = fopen(filenam.toUtf8().data(),"wb");
 
-    if(fwrite(&version,sizeofuint32,1,fmfrec) < 1){
+    if(fwrite(&version,sizeof(uint32_t),1,fmfrec) < 1){
         fprintf(stderr,"Error writing version number of input fmf file.\n");
         exit(1);
     }
 
     // format length
-    if(fwrite(&formatlen,sizeofuint32,1,fmfrec)<1){
+    if(fwrite(&formatlen,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing format length to output fmf file.\n");
         exit(1);
     }
@@ -296,7 +144,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
     }
 
     // bits per pixel
-    if(fwrite(&bitsperpixel,sizeofuint32,1,fmfrec)<1){
+    if(fwrite(&bitsperpixel,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing bits per pixel to output fmf file.\n");
         exit(1);
     }
@@ -304,25 +152,25 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
 //    uint32_t rowsRead;
 //    uint32_t colsRead;
       // height of the frame
-    if(fwrite(&rows,sizeofuint32,1,fmfrec)<1){
+    if(fwrite(&rows,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing frame height to output fmf file.\n");
         exit(1);
     }
 
     // width of the frame
-    if(fwrite(&cols,sizeofuint32,1,fmfrec)<1){
+    if(fwrite(&cols,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing frame width to output fmf file.\n");
         exit(1);
     }
 
 
     if (dataformat=="RGB8") {
-        bytesperchunk=3*bitsperpixel*rows*cols/8+sizeof(double);
+        bytesperchunk=static_cast<ulong>(3*bitsperpixel*static_cast<ulong>(round(rows*cols/8))+sizeof(double));
     } else {
-        bytesperchunk=bitsperpixel*rows*cols/8+sizeof(double);
+        bytesperchunk=static_cast<ulong>(bitsperpixel*static_cast<ulong>(round(rows*cols/8))+sizeof(double));
     }
     // bytes encoding a frame
-    if(fwrite(&bytesperchunk,sizeofuint64,1,fmfrec)<1){
+    if(fwrite(&bytesperchunk,sizeof(uint64_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
         exit(1);
     }
@@ -332,7 +180,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
     recNframespos=ftell(fmfrec);
 
     uint64_t nRead=0; //will have to write this when closing the recording
-    if(fwrite(&nRead,sizeofuint64,1,fmfrec)<1){
+    if(fwrite(&nRead,sizeof(uint64_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing number of frames to output fmf file.\n");
         exit(1);
     }
@@ -347,10 +195,9 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
 bool FmfBufferedSourceSink::StopRecording()
 {
     recording=false;
-    int sizeofuint64 = 8;
-    uint64_t nWritten=frames.size();
+    uint64_t nWritten=static_cast<ulong>(frames.size());
     fseek(fmfrec,recNframespos,SEEK_SET);
-    if (fwrite(&nWritten,sizeofuint64,1,fmfrec)<1) qInfo()<<"Error writing number of frames to fmf file";
+    if (fwrite(&nWritten,sizeof(uint64_t),1,fmfrec)<1) qInfo()<<"Error writing number of frames to fmf file";
     //fclose(fmfrec);
 
     // now write out FMF
@@ -361,19 +208,19 @@ bool FmfBufferedSourceSink::StopRecording()
     //        if (source.image.depth()==2)
             cv::Mat temp=frames.at(i);//.clone();
             if (temp.channels()==3) {
-                if (fwrite(temp.data,1,3*temp.rows*temp.cols,fmfrec)!=uint(3*temp.rows*temp.cols)) {
+                if (fwrite(temp.data,1,static_cast<size_t>(3*temp.rows*temp.cols),fmfrec)!=static_cast<size_t>(3*temp.rows*temp.cols)) {
                     qWarning()<<"Issue with writing of frame";
                     break;
                 }
             } else {
                 if (dataformat.contains("8")) {
                     //qInfo()<<"Writing matrix";
-                    if (fwrite(temp.data,1,temp.rows*temp.cols,fmfrec)!=uint(temp.rows*temp.cols)) {
+                    if (fwrite(temp.data,1,static_cast<size_t>(temp.rows*temp.cols),fmfrec)!=static_cast<size_t>(temp.rows*temp.cols)) {
                         qWarning()<<"Issue with writing of frame";
                         break;
                     }
                 } else if ((dataformat.contains("12"))||(dataformat.contains("14"))) {
-                    if (fwrite(temp.ptr<uint16_t>(0),2,temp.rows*temp.cols,fmfrec)!=uint(temp.rows*temp.cols)) {
+                    if (fwrite(temp.ptr<uint16_t>(0),2,static_cast<size_t>(temp.rows*temp.cols),fmfrec)!=static_cast<size_t>(temp.rows*temp.cols)) {
                         qWarning()<<"Issue with writing of frame";
                         break;
                     } else {
@@ -428,19 +275,19 @@ bool FmfBufferedSourceSink::SkipFrames(bool forward) {
 #ifdef Q_OS_WIN32
     _fseeki64(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
 #else
-    fseek(fmf,(skipping-1)*bytesperchunk,SEEK_CUR);
+    fseek(fmf,(skipping-1)*static_cast<long>(bytesperchunk),SEEK_CUR);
 #endif
     currPos+=skipping;
     return true;
 }
 
 QDataStream &operator<<(QDataStream &out, const cv::Mat &matrix) {
-    uint totSize=matrix.rows*matrix.cols;
+    int totSize=(matrix.rows*matrix.cols);
     if (matrix.channels()==3) {
         totSize=totSize*3;
     }
     //uint bitspp=8;
-    for (uint i=0;i<totSize;i++) {
+    for (int i=0;i<totSize;i++) {
         out<<matrix.at<uint8_t>(i);
     }
     return out;

@@ -8,40 +8,27 @@ bool MrfSourceSink::Init()
 
 bool MrfSourceSink::StartAcquisition(QString dev)
 {
-//    uint32_t formatlen = 5;
-//    uint32_t version = 3;
-//    char dataf[15];
-    int sizeofuint32 = 4;
-//    int sizeofuint64 = 8;
-
-//    ListIndex=0;
-//    lastPrinted=0;
-
-//    char* thename=dev.toUtf8().data();
-//    const char* thename=dev.toStdString().c_str();
-//    qDebug()<<"Wil read: "<<dev<<" => "<<thename<<" or "<<dev.toStdString().c_str();
-//    fmf = fopen(thename,"rb");
 #ifdef Q_OS_WIN32
     mrf = fopen(dev.toStdString().c_str(),"rb");
 #else
     mrf = fopen(dev.toUtf8().data(),"rb");
 #endif
     uint firstNums[8];
-    if (fread(&firstNums,sizeofuint32,8,mrf) < 1) {
+    if (fread(&firstNums,sizeof(uint32_t),8,mrf) < 1) {
         fprintf(stderr,"Error reading first part of input Mrf file.\n");
         return false;
     }
 
     nFrames=firstNums[4];
-    rows=firstNums[6];
-    cols=firstNums[5];
+    rows=static_cast<int>(firstNums[6]);
+    cols=static_cast<int>(firstNums[5]);
     bitsperpixel=firstNums[7];
     if (bitsperpixel==8) {
         dataformat="MONO8";
-        bytesperchunk=rows*cols;
+        bytesperchunk=static_cast<ulong>(rows*cols);
     } else {
         dataformat="MONO16";
-        bytesperchunk=2*rows*cols;
+        bytesperchunk=static_cast<ulong>(2*rows*cols);
     }
     uint userdat=firstNums[3]-20;
 
@@ -50,7 +37,7 @@ bool MrfSourceSink::StartAcquisition(QString dev)
     headersize=_ftelli64(mrf);
 #else
     fseek(mrf,userdat,SEEK_CUR);
-    headersize=ftell(mrf);
+    headersize=static_cast<ulong>(ftell(mrf));
 #endif
 
 
@@ -73,26 +60,26 @@ bool MrfSourceSink::ReleaseCamera()
 
 bool MrfSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    if ((currPos+indexIncrement >= nFrames-1)||(currPos+indexIncrement <0)) {
+    if ((currPos+indexIncrement >= static_cast<int>(nFrames)-1)||(currPos+indexIncrement <0)) {
         return true;
     }
     if (indexIncrement!=1) {
 #ifdef Q_OS_WIN32
                 _fseeki64(mrf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
 #else
-                fseek(mrf,(indexIncrement-1)*bytesperchunk,SEEK_CUR);
+                fseek(mrf,(indexIncrement-1)*static_cast<long>(bytesperchunk),SEEK_CUR);
 #endif
     }
 
     cv::Mat temp;
     if (bitsperpixel==8) {
         temp = cv::Mat(rows,cols,CV_8U); // normally this implies that the data of temp is continuous
-        uint amread=fread(temp.data, 1, rows*cols, mrf);
-        if (amread==(uint)(rows*cols)) target.image=temp.clone();
+        size_t amread=fread(temp.data, 1, static_cast<size_t>(rows*cols), mrf);
+        if (amread==static_cast<size_t>(rows*cols)) target.image=temp.clone();
     } else {
         temp = cv::Mat(rows,cols,CV_16U); // normally this implies that the data of temp is continuous
-        uint amread=fread(temp.ptr<uint16_t>(0), 2, rows*cols, mrf);
-        if (amread==(uint)(rows*cols)) target.image=temp.clone();
+        size_t amread=fread(temp.ptr<uint16_t>(0), 2, static_cast<size_t>(rows*cols), mrf);
+        if (amread==static_cast<size_t>(rows*cols)) target.image=temp.clone();
     }
 
 
@@ -119,7 +106,7 @@ bool MrfSourceSink::SkipFrames(bool forward) {
     }
 //    qDebug()<<"Will try to skip "<<skipping<<" frames";
 
-    if ((currPos+skipping >= nFrames-1)||(currPos+skipping <0)) {
+    if ((currPos+skipping >= static_cast<int>(nFrames)-1)||(currPos+skipping <0)) {
         return true;
     }
 
@@ -127,7 +114,7 @@ bool MrfSourceSink::SkipFrames(bool forward) {
 #ifdef Q_OS_WIN32
     _fseeki64(mrf,(skipping-1)*bytesperchunk,SEEK_CUR);
 #else
-    fseek(mrf,(skipping-1)*bytesperchunk,SEEK_CUR);
+    fseek(mrf,(skipping-1)*static_cast<long>(bytesperchunk),SEEK_CUR);
 #endif
     currPos+=skipping;
     return true;

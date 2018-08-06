@@ -33,7 +33,7 @@
 #endif
 
 CamBackend::CamBackend(QObject *parent) :
-    QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0),stoppingRecording(false)
+    QThread(parent),currSink(nullptr),currSource(nullptr), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0),stoppingRecording(false)
 #ifdef TRACKING
   ,tracker(50,1)
 #endif
@@ -61,7 +61,7 @@ void CamBackend::run()
 {
     if (currSource->IsOpened()) {
         if (needTimer) {
-            emit startTheTimer(timerInterval); // needs to be started in a slot for interthread communication purposes...
+            emit startTheTimer(static_cast<int>(round(timerInterval))); // needs to be started in a slot for interthread communication purposes...
             exec(); //will go beyond this point when quit() is send from within this thread
             emit stopTheTimer();
         } else if (doesCallBack) { // Vimba does this and we should just wait till quit is called
@@ -227,7 +227,7 @@ void CamBackend::ReleaseCamera()
 {
     currSource->ReleaseCamera();
     delete currSource;
-    currSource=0;
+    currSource=nullptr;
 }
 
 void CamBackend::SetInterval(int newInt) {
@@ -248,11 +248,11 @@ void CamBackend::SetInterval(int newInt) {
         }
 
         if (needTimer) {
-            timer.setInterval(std::abs(newNewInt));
+            timer.setInterval(static_cast<int>(round(std::abs(newNewInt))));
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
-            int newFps=currSource->SetInterval(std::abs(newNewInt));
-            if (newFps!=newNewInt) {
+            int newFps=currSource->SetInterval(static_cast<int>(round(std::abs(newNewInt))));
+            if (abs(newFps-newNewInt)<1e-5) {
                 emit fpsChanged(newFps);
             }
         }
@@ -322,18 +322,18 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
         if (!succ) {
             qInfo()<<"Start recording failed!";
             delete currSink;
-            currSink=0;
+            currSink=nullptr;
             recording=false;
             return;
         }
         stoppingRecording=false;
     } else { // stopping recording
-        if (currSink!=0) {
+        if (currSink!=nullptr) {
             recording=false;
             stoppingRecording=true;  // to prevent the display queue to overflow!
             currSink->StopRecording();
             delete currSink;
-            currSink=0;
+            currSink=nullptr;
             stoppingRecording=false; // show images again on screen
         }
     }
@@ -360,7 +360,7 @@ void CamBackend::willStopTheTimer()
 
 void CamBackend::SetShutter(int shut)
 {
-    if (currSource!=0) {
+    if (currSource!=nullptr) {
         if (currSource->SetShutter(shut)) {
             emit shutterChanged(shut);
         }
@@ -369,7 +369,7 @@ void CamBackend::SetShutter(int shut)
 
 void CamBackend::SetAutoShutter(bool fitRange)
 {
-    if (currSource!=0) {
+    if (currSource!=nullptr) {
         int val= currSource->SetAutoShutter(fitRange);
         if (val!=0) {
             emit shutterChanged(val);
@@ -395,7 +395,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
     if (currImage.pixFormat.contains("MONO")) {
         if (currImage.image.depth()==2) { //0: CV_8U - 1: CV_8S - 2: CV_16U - 3: CV_16S
             double max;
-            cv::minMaxLoc(currImage.image,NULL,&max);
+            cv::minMaxLoc(currImage.image,nullptr,&max);
             if (currImage.pixFormat=="MONO12") {
                 if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
             } else if (currImage.pixFormat=="MONO14") {
@@ -424,7 +424,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         }
     } else if (currImage.pixFormat=="BAYERRG12") {
         double max;
-        cv::minMaxLoc(currImage.image,NULL,&max);
+        cv::minMaxLoc(currImage.image,nullptr,&max);
         if (max<4096) currImage.image=currImage.image*16;  //16 only correct for scaling up 12bit images!!
 
         if (currImage.image.channels()==1) {

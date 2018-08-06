@@ -26,7 +26,7 @@ void CameraControlsDialog::on_IntensityButton_clicked()
 void CameraControlsDialog::GotNewSample(ImagePacket imP)
 {
     double max;
-    cv::minMaxLoc(imP.image,NULL,&max);
+    cv::minMaxLoc(imP.image,nullptr,&max);
     ui->IntensLabel->setText(QString::number(max));
     ui->ROIRows->setText(QString::number(imP.image.rows));
     ui->ROICols->setText(QString::number(imP.image.cols));
