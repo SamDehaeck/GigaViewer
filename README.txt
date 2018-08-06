@@ -18,7 +18,7 @@ Installation:
 * Precompiled (standalone) binaries are available for Windows which do not require any installation.
 * The format of the recorded FMF files is documented on http://code.astraw.com/projects/motmot/fly-movie-format.html. From this site,
   also some tools can be downloaded for converting these files. A simple access from python is also possible using the included FMF.py file.
-  To use it do (from a Python 2.7 interface):
+  To use it do:
     import FMF
     vid=FMF.FMF("myfile.fmf")
     vid.I    #=> this is the 3D-matrix containing your movie; to show a single image do imshow(vid.I[0])

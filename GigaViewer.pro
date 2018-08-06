@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = GigaViewer
 TEMPLATE = app
 
-CONFIG += HDF5       # enable HDF5 format for storing and reading files
+#CONFIG += HDF5       # enable HDF5 format for storing and reading files
 #CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
 #CONFIG += ELLIPSE
 #CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
