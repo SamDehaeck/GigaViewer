@@ -117,7 +117,7 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
             int newVal=1000/vl[1].toInt();
             currentTimer=newVal;
         } else {
-            qInfo()<<"Could not understand fps setting";
+            qDebug()<<"Could not understand fps setting";
         }
         if (valStr.at(0)=='-') currentTimer=-currentTimer;
     } else {
@@ -215,7 +215,7 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
                 timer2.setSingleShot(true);
                 secondDelay=msecs2;
             } else {
-                qInfo()<<"Not a correct use of second timer fps: "<<msecs2<<" vs "<<msecs1;
+                qDebug()<<"Not a correct use of second timer fps: "<<msecs2<<" vs "<<msecs1;
             }
 
         }

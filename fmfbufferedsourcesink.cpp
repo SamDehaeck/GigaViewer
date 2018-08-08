@@ -8,7 +8,7 @@ bool FmfBufferedSourceSink::Init()
 
 bool FmfBufferedSourceSink::StartAcquisition(QString)
 {
-    qInfo()<<"Should only write into buffered FMF";
+    qDebug()<<"Should only write into buffered FMF";
     return true;
 }
 
@@ -31,7 +31,7 @@ bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
 {
     if (recording) {
         if (source.pixFormat!=dataformat) {
-            qInfo()<<"Image pixel format different from written fmf-header: "<<source.pixFormat<<" - "<<dataformat;
+            qDebug()<<"Image pixel format different from written fmf-header: "<<source.pixFormat<<" - "<<dataformat;
             return false;
         }
 
@@ -39,11 +39,11 @@ bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
             startTime=source.timeStamp;
         }
 
-        timestamps.push_back((source.timeStamp-startTime));
+        timestamps.push_back((source.timeStamp));
         frames.push_back(source.image); //should I use a clone here???
         //qInfo()<<"Currently there are "<<QString::number(frames.size())<<" in memory";
     } else {
-        qInfo()<<"Received a frame while not recording!!";
+        qDebug()<<"Received a frame while not recording!!";
     }
 
     return true;
@@ -106,7 +106,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
         if (pos>-1) {
             basename=rx.cap(1)+"/"+rx.cap(2);
         } else {
-            qInfo()<<"Recording Folder does not exist";
+            qDebug()<<"Recording Folder does not exist";
             QDateTime mom = QDateTime::currentDateTime();
             basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
         }
@@ -197,7 +197,7 @@ bool FmfBufferedSourceSink::StopRecording()
     recording=false;
     uint64_t nWritten=static_cast<ulong>(frames.size());
     fseek(fmfrec,recNframespos,SEEK_SET);
-    if (fwrite(&nWritten,sizeof(uint64_t),1,fmfrec)<1) qInfo()<<"Error writing number of frames to fmf file";
+    if (fwrite(&nWritten,sizeof(uint64_t),1,fmfrec)<1) qDebug()<<"Error writing number of frames to fmf file";
     //fclose(fmfrec);
 
     // now write out FMF
@@ -228,7 +228,7 @@ bool FmfBufferedSourceSink::StopRecording()
                         break;
                     }
                 } else {
-                    qInfo()<<"Problem with dataformat: "<<dataformat;
+                    qDebug()<<"Problem with dataformat: "<<dataformat;
                     break;
                 }
             }

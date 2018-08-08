@@ -5,7 +5,8 @@
 #include "xvisourcesink.h"
 #include "mrfsourcesink.h"
 #include "regexsourcesink.h"
-#include <QDebug>
+#include <QtGlobal>
+#include <QtDebug>
 #include <cmath>
 
 #ifdef PVAPI
@@ -73,7 +74,7 @@ void CamBackend::run()
             }
         }
     } else {
-        qInfo()<<"Camera is not opened";
+        qDebug()<<"Camera is not opened";
     }
 }
 
@@ -84,7 +85,7 @@ void CamBackend::GrabFrame()
         if (reversePlay) incr=-1;
 
         if (!currSource->GrabFrame(currImage,incr)) {
-            qInfo()<<"Some error occured while grabbing the frame";
+            qDebug()<<"Some error occured while grabbing the frame";
             return;
         }
         if (currImage.image.rows==0) {
@@ -168,7 +169,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
 #else
-        qInfo()<<"AVT source not compiled";
+        qDebug()<<"AVT source not compiled";
         return false;
 #endif
     } else if (dev=="Vimba") {
@@ -177,7 +178,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=true;
 #else
-        qInfo()<<"Vimba source not compiled";
+        qDebug()<<"Vimba source not compiled";
         return false;
 #endif
     } else if (dev=="IDS") {
@@ -186,7 +187,7 @@ bool CamBackend::StartAcquisition(QString dev)
         needTimer=false;
         doesCallBack=false;
 #else
-        qInfo()<<"IDS source not compiled";
+        qDebug()<<"IDS source not compiled";
         return false;
 #endif
     } else {
@@ -320,7 +321,7 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
         int fps=timer.interval()/10;
         bool succ=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
         if (!succ) {
-            qInfo()<<"Start recording failed!";
+            qDebug()<<"Start recording failed!";
             delete currSink;
             currSink=nullptr;
             recording=false;
@@ -343,7 +344,7 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
 void CamBackend::skipForwardBackward(bool forward)
 {
     if (!currSource->SkipFrames(forward)) {
-        qInfo()<<"Skipping did not work";
+        qDebug()<<"Skipping did not work";
     }
 }
 
@@ -457,7 +458,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
     } else if (currImage.pixFormat=="BGR8") {
         //nothing to do
     } else {
-        qInfo()<<"Format in grab frame not understood: "<<currImage.pixFormat;
+        qDebug()<<"Format in grab frame not understood: "<<currImage.pixFormat;
     }
 }
 

@@ -42,6 +42,7 @@ private:
     double camTimeStep;
     double camTimeOffset;
     cv::Mat buffer;
+    double timeOffset;
 //    QVector<cv::Mat> matFrames;
     QString format;
 
