@@ -320,13 +320,12 @@ bool AvtSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
-int AvtSourceSink::SetInterval(int msec)
+double AvtSourceSink::SetInterval(double msec)
 {
-    double fps = 1000.0/((double)msec);
+    double fps = 1000.0/msec;
     tPvFloat32 fpsFloat=1.0;
     if (fps>1) {
-        fpsFloat=(int)fps;
-        qDebug()<<"Rounded framerate will be"<<fpsFloat;
+        fpsFloat=fps;
     } else {
         fpsFloat=fps;
     }
