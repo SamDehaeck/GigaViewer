@@ -379,16 +379,16 @@ bool VimbaSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 
 }
 
-int VimbaSourceSink::SetInterval(int msec)
+double VimbaSourceSink::SetInterval(double msec)
 {
     FeaturePtr pFeature;
-    double acqRate=1000.0/(1.0*msec);
+    double acqRate=1000.0/(msec);
     VmbErrorType err=pCamera->GetFeatureByName("AcquisitionFrameRateAbs",pFeature);
     if (err!=VmbErrorSuccess) {
         err=pCamera->GetFeatureByName("AcquisitionFrameRate",pFeature);
     }
     if (err==VmbErrorSuccess) {
-        qDebug()<<"Could find the framerate handle";
+//        qDebug()<<"Could find the framerate handle";
         err=pFeature->SetValue(acqRate); // this should be continuous
         if (err==VmbErrorSuccess) {
             frameRate=acqRate;
@@ -412,7 +412,7 @@ int VimbaSourceSink::SetInterval(int msec)
                     }
                     frameRate=acqRate;
                     qDebug()<<"actual framerate now: "<<frameRate;
-                    return (int)(1000.0/acqRate);
+                    return (1000.0/acqRate);
                 }
             }
         }

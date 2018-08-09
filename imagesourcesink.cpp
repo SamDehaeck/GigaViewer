@@ -36,7 +36,7 @@ bool ImageSourceSink::IsOpened() {
     return false;
 }
 
-int ImageSourceSink::SetInterval(int) {
+double ImageSourceSink::SetInterval(double) {
     return 0;
 }
 

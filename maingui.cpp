@@ -68,11 +68,11 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
 
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
-    connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
+    connect(playDialog,SIGNAL(newFps(double)),this,SLOT(gotNewFps(double)));
     connect(playDialog,SIGNAL(recordNow(bool,QString,QString,int)),this,SIGNAL(startRecording(bool,QString,QString,int)));
     connect(playDialog,SIGNAL(jumpFrames(bool)),this,SIGNAL(skipFrames(bool)));
     connect(this,SIGNAL(newFrameNrShowing(int)),playDialog,SLOT(newFrameNumberReceived(int)));
-    connect(this,SIGNAL(showNewFps(int)),playDialog,SLOT(showNewFps(int)));
+    connect(this,SIGNAL(showNewFps(double)),playDialog,SLOT(showNewFps(double)));
     connect(playDialog,SIGNAL(recordSnapshot(QString)),this,SLOT(getSnapshot(QString)));
 
     connect(camDialog,SIGNAL(NeedNewSample()),this,SLOT(needNewSample()));
@@ -159,12 +159,12 @@ void MainGui::stopButtonPressed()
     this->parentWidget()->setWindowTitle("GigaViewer");
 }
 
-void MainGui::gotNewFps(int fps)
+void MainGui::gotNewFps(double fps)
 {
     emit implementNewFps(fps);
 }
 
-void MainGui::gotNewFpsFromBackend(int fps)
+void MainGui::gotNewFpsFromBackend(double fps)
 {
     emit showNewFps(fps);
 }

@@ -35,8 +35,8 @@ signals:
     void newAvtFeedNeeded(bool start);
     void newVimbaFeedNeeded(bool start);
     void newIdsFeedNeeded(bool start);
-    void implementNewFps(int fps);
-    void showNewFps(int msec);
+    void implementNewFps(double fps);
+    void showNewFps(double msec);
     void startRecording(bool start,QString recfold,QString codec,int skipping);
     void closeApplic();
     void newSampleReady(ImagePacket matrix);
@@ -60,8 +60,8 @@ public slots:
     void IdsFeedPressed();
     void newMoviePressed(QString theString);
     void stopButtonPressed();
-    void gotNewFps(int fps);
-    void gotNewFpsFromBackend(int fps);
+    void gotNewFps(double fps);
+    void gotNewFpsFromBackend(double fps);
     void gotNewShutSpeed(int shut);
     void needNewSample();
     void getSnapshot(QString location);

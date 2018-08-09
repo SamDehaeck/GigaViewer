@@ -361,7 +361,7 @@ bool IdsSourceSink::SetColourMode(bool useHighQuality) {
     return false;
 }
 
-int IdsSourceSink::SetInterval(int msec) {
+double IdsSourceSink::SetInterval(double msec) {
     double fps = 1000.0/((double)msec);
 
     double min=0.0,max=0.0,interv=0.0;
@@ -370,7 +370,7 @@ int IdsSourceSink::SetInterval(int msec) {
     maxFps = 1 / min;
     minFps = 1 / max;
 //    minstep = (1 / min) - (1 / (min + interv));
-//    qDebug()<<"Min fps: "<<minFps<<" max fps: "<<maxFps<<" and interval "<<minstep;
+//    qDebug()<<"Min fps: "<<minFps<<" max fps: "<<maxFps<<" and interval "<<interv;
     if (fps<minFps) {
         qDebug()<<"Wanted to go below minimum fps "<<minFps;  // should reduce clock settings to try and reach it
         fps=minFps;
@@ -380,8 +380,9 @@ int IdsSourceSink::SetInterval(int msec) {
     }
 
     double newfps=0.0;
+//    qDebug()<<"Setting fps to "<<fps;
     is_SetFrameRate(hCam,fps,&newfps);
-//    qDebug()<<"Tried to set to: "<<fps<<" and got to "<<newfps;
+    qDebug()<<"Tried to set to: "<<fps<<" and got to "<<newfps;
 
     camTimeStep=1000.0/newfps;
     return camTimeStep;

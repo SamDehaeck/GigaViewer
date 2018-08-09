@@ -128,8 +128,12 @@ void CamBackend::GrabFrame()
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         if (!stoppingRecording) {  // stopping a recording can block the queue and overflow the buffers
             AdaptForDisplay(currImage);
-
-            emit NewImageReady(currImage);
+            if (timerInterval<10) {
+                int skipShows=static_cast<int>(round(15.0/timerInterval));
+                if (currImage.seqNumber%skipShows==0) emit NewImageReady(currImage);
+            } else {
+                emit NewImageReady(currImage);
+            }
         }
     }
 
@@ -231,7 +235,7 @@ void CamBackend::ReleaseCamera()
     currSource=nullptr;
 }
 
-void CamBackend::SetInterval(int newInt) {
+void CamBackend::SetInterval(double newInt) {
     reversePlay=newInt<0;
     isPaused=newInt>3000000;
     if (!isPaused) {
@@ -249,10 +253,10 @@ void CamBackend::SetInterval(int newInt) {
         }
 
         if (needTimer) {
-            timer.setInterval(static_cast<int>(round(std::abs(newNewInt))));
+            timer.setInterval(static_cast<int>(round(std::abs(newNewInt))));  // cannot do better here than integer accuracy
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
-            int newFps=currSource->SetInterval(static_cast<int>(round(std::abs(newNewInt))));
+            int newFps=currSource->SetInterval(std::abs(newNewInt));
             if (abs(newFps-newNewInt)<1e-5) {
                 emit fpsChanged(newFps);
             }

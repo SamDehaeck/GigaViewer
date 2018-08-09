@@ -20,7 +20,7 @@ public:
     bool StartAcquisition(QString dev="0");
     void StopAcquisition();
     void ReleaseCamera();
-    void SetInterval(int newInt);
+    void SetInterval(double newInt);
     void SetShutter(int shut);
     void SetAutoShutter(bool fitRange);
     void AdaptForDisplay(ImagePacket& newIm);
@@ -34,7 +34,7 @@ public:
 signals:
     void NewImageReady(ImagePacket im);
     void shutterChanged(int newTime);
-    void fpsChanged(int msec);
+    void fpsChanged(double msec);
     void startTheTimer(int interval);
     void stopTheTimer();
 

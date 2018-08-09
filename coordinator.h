@@ -20,7 +20,7 @@ public slots:
     void StartNewAVT(bool startNew);
     void StartNewVimba(bool startNew);
     void StartNewIds(bool startNew);
-    void changeFps(int newFps);
+    void changeFps(double newFps);
     void stopAcquisition();
     void changeShutter (int time);
     void setAutoShutter (bool fitRange);

@@ -21,7 +21,7 @@ public:
 
 signals:
     void stopPlayback();
-    void newFps(int fps);
+    void newFps(double fps);
     void jumpFrames(bool forward);
     void recordNow(bool checked,QString recFold, QString codec,int recordSkip);
     void recordSnapshot(QString SnapshotName);
@@ -48,17 +48,17 @@ private slots:
 
 public slots:
     void newFrameNumberReceived(int nr);
-    void showNewFps(int msec);
+    void showNewFps(double msec);
 
 private:
-    bool parseInstruct(QString instruct,int& sec,int& msecdelay);
+    bool parseInstruct(QString instruct, int& sec, double &msecdelay);
 
 
     Ui::PlaybackDialog *ui;
-    int currentTimer;
+    double currentTimer;
     bool recording;
     bool have2timers;
-    int secondDelay;
+    double secondDelay;
     QTimer timer1,timer2;  // typical use case only requires two timers
     QString config1,config2; // to go with the two timers
 };

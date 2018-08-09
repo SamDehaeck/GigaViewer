@@ -114,18 +114,18 @@ void PlaybackDialog::on_fpsEdit_returnPressed()
     if (valStr.contains("/")) {
         QStringList vl=valStr.split("/");
         if (vl.count()==2) {
-            int newVal=1000/vl[1].toInt();
-            currentTimer=newVal;
+            currentTimer=1000.0/vl[1].toInt();
         } else {
             qDebug()<<"Could not understand fps setting";
         }
         if (valStr.at(0)=='-') currentTimer=-currentTimer;
     } else {
-        int tim1,msecs1;
+        int tim1;
+        double msecs1;
         if (parseInstruct(valStr,tim1,msecs1)) {
-            currentTimer=tim1*1000;
+            currentTimer=tim1*1000.0;   // shouldn't this be msecs1???
         } else {
-            currentTimer=valStr.toInt();
+            currentTimer=valStr.toDouble();
         }
     }
 //  qInfo()<<"delay="<<currentTimer;
@@ -138,8 +138,8 @@ void PlaybackDialog::newFrameNumberReceived(int nr)
     ui->RightStatus->setText(frameTxt);
 }
 
-void PlaybackDialog::showNewFps(int msec) {
-    int fps=static_cast<int>(round(1000.0/msec));
+void PlaybackDialog::showNewFps(double msec) {
+    double fps=1000.0/msec;
     QString fpstext="1/"+QString::number(fps);
     ui->fpsEdit->setText(fpstext);
 }
@@ -193,7 +193,8 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
         }
 
         have2timers=false;
-        int tim1,msecs1;
+        int tim1;
+        double msecs1;
         if (parseInstruct(config1,tim1,msecs1)) {
 //            qInfo()<<"Got here with: "<<tim1<<" - "<<msecs1;
             timer1.setInterval(1000*tim1);
@@ -206,7 +207,8 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
             ok=false;
         }
 
-        int tim2,msecs2;
+        int tim2;
+        double msecs2;
         if (parseInstruct(config2,tim2,msecs2)) {
 //            qInfo()<<"Got here also with: "<<tim2<<" - "<<msecs2;
             if ((msecs2!=msecs1)&&msecs2>1) {
@@ -242,7 +244,7 @@ void PlaybackDialog::on_recTimedButton_toggled(bool checked)
     }
 }
 
-bool PlaybackDialog::parseInstruct(QString instruct, int& sec, int& msecdelay) {
+bool PlaybackDialog::parseInstruct(QString instruct, int& sec, double& msecdelay) {
     QRegExp secSearch("(\\d+)s");
     QRegExp minSearch("(\\d+)m");
     QRegExp hourSearch("(\\d+)h");
@@ -275,7 +277,7 @@ bool PlaybackDialog::parseInstruct(QString instruct, int& sec, int& msecdelay) {
         if (pos!=-1) {
             double fp=fpsSearch.cap(1).toDouble(&ok);
             if (ok) {
-                msecdelay=static_cast<int>(round(1000.0/fp));
+                msecdelay=1000.0/fp;
             }
         }
     }
