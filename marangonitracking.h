@@ -18,7 +18,6 @@ private:
     int targetX;
     int targetY;
     bool activated;
-    bool shouldTrack;
 
     void savingData ();
     QString dataToSave;
@@ -27,6 +26,8 @@ private:
     int target_type;
 
     float radius;
+
+    float X_las_manual, Y_las_manual;
 
     Regulation myRegulator;
 
@@ -47,6 +48,8 @@ public:
     MarangoniTracking(int thresh,int nrParticles);
     void ChangeSettings(QMap<QString,QVariant> settings);
     bool processImage(ImagePacket& currIm);
+    QMap<QString,QVariant> settingsBKUP;
+
 };
 
 #endif // MARANGONITRACKING_H

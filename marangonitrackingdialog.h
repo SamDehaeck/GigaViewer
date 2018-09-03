@@ -20,7 +20,6 @@ signals:
 
 private slots:
     void on_activateBox_stateChanged(int val);
-    void on_trackButton_clicked(bool checked);
 
     void on_thresholdSlider_sliderPressed();
     void on_thresholdSlider_sliderReleased();
@@ -44,9 +43,42 @@ private slots:
 
     void on_line_LasPartD_textChanged(const QString &arg1);
 
+    void on_line_kp_editingFinished();
+
+    void on_line_Ti_editingFinished();
+
+    void on_line_Td_editingFinished();
+
+    void on_line_Usat_editingFinished();
+
+    void on_line_Tt_editingFinished();
+
+    void on_line_Tsamp_editingFinished();
+
+    void on_line_Kff_editingFinished();
+
+    void on_Xlaser_slider_sliderPressed();
+
+    void on_Xlaser_slider_sliderReleased();
+
+    void on_Xlaser_slider_valueChanged(int value);
+
+    void on_Ylaser_slider_sliderPressed();
+
+    void on_Ylaser_slider_sliderReleased();
+
+    void on_Ylaser_slider_valueChanged(int value);
+
+    void on_chkbox_Tracking_stateChanged(int arg1);
+
+    void on_line_Xtarg_textChanged(const QString &arg1);
+
+    void on_line_Ytarg_textChanged(const QString &arg1);
+
 private:
     bool extractData();
     bool tSliderPressed,xSliderPressed,ySliderPressed;
+    bool xLaserSlider_pressed,yxLaserSlider_pressed;
 
 
 
