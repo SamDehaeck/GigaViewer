@@ -18,7 +18,9 @@ private:
     int targetX;
     int targetY;
     bool activated;
-    bool shouldTrack;
+    float timeStamp;
+
+    bool firstScan;
 
     void savingData ();
     QString dataToSave;
@@ -28,15 +30,32 @@ private:
 
     float radius;
 
+    float X_las_manual, Y_las_manual, A_las_manual, R_pat_manual, Aux_pat_manual;
+    int SampleRate, SampleSense;
+    float Ident_dist, Ident_radius, Ident_aux;
+    int Ident_dir;
+
     Regulation myRegulator;
 
 #ifdef Q_OS_WIN32
     MirrorControl mirCtrl;          //Mirror object used to access to the MirrorControl functions
 #endif
 
-    float Ppoint[2];
+    float Ppoint[2][10], Ppoint_minus_1[2][10];
+    float Pangle[10], Pangle_minus_1[10];
     std::vector<std::vector<cv::Point>> contoursP;
     std::vector<cv::Vec4i> hierachyP;
+    bool orderPart(float point[][10], float point_minus_1[][10], float angle[], float angle_minus_[], int Nro);
+
+    void analizeImage(ImagePacket& currIm);
+
+    void drawLaser(cv::Mat outImage);
+    void drawTarget(cv::Mat outImage);
+    void drawParticles(cv::Mat outImage);
+    void drawObstacle(cv::Mat outImage);
+
+    QString setdata();
+    QString runMirrorCalibration();
 
 #ifdef Q_OS_WIN32
     bool initializeMirror();       //Used to initialize the MEM
@@ -44,9 +63,11 @@ private:
 #endif
 
 public:
-    MarangoniTracking(int thresh,int nrParticles);
+    MarangoniTracking();
     void ChangeSettings(QMap<QString,QVariant> settings);
     bool processImage(ImagePacket& currIm);
+    QMap<QString,QVariant> settingsBKUP;
+
 };
 
 #endif // MARANGONITRACKING_H

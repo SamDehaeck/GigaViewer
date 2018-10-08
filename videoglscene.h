@@ -13,10 +13,17 @@ public:
     void drawBackground(QPainter *painter, const QRectF &);
 
     cv::Mat imageBuff;
+    int maxX;
+    int maxY;
 
 signals:
+    void LclickOnImage(QPointF p);
+    void RclickOnImage(QPointF p);
 
 public slots:
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)override;
 
 private:
 

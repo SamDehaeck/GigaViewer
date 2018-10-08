@@ -64,6 +64,8 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
 #ifdef TRACKING
     connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
+    connect(theScene,SIGNAL(LclickOnImage(QPointF)),trackDialog,SLOT(LclickOnImageDetected(QPointF)));
+    connect(theScene,SIGNAL(RclickOnImage(QPointF)),trackDialog,SLOT(RclickOnImageDetected(QPointF)));
 #endif
 
     setScene(theScene);

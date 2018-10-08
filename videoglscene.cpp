@@ -39,7 +39,7 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
         proxy->setPos(pos.x() - rect.x(), pos.y() - rect.y());
 
         // now will add the offset for placing the next dialog as we have the size now
-        if (ini==0) pos += QPointF(650,-350);  //This is the base Y offset for the extra panels
+        if (ini==0) pos += QPointF(1200,-350);  //This is the base Y offset for the extra panels
         pos += QPointF(0,10 + rect.height());
 
         ini=ini+1;
@@ -93,8 +93,10 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
     glTexImage2D(GL_TEXTURE_2D,0,cn,imageBuff.cols,imageBuff.rows,0,format,gldepth,imageBuff.data);
 
     //calculate projected size in order to keep aspect ratio intact
-    int maxX=1024;
-    int maxY=768;
+
+    maxX=1024;
+    maxY=768;
+
     if (imageBuff.rows!=0) {
         double aspRatio=imageBuff.rows/(double)imageBuff.cols;
         double windowAspRatio=this->height()/(double)this->width();
@@ -122,6 +124,24 @@ void VideoGlScene::drawBackground(QPainter *painter, const QRectF &)
 
     painter->endNativePainting();
 
+}
+
+void VideoGlScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    const QPointF p = mouseEvent->scenePos();
+    QPointF pRel;
+
+    if ((p.x()<maxX)&&(p.y()<maxY)){
+        pRel.setX(p.x()/maxX);
+        pRel.setY(p.y()/maxY);
+//        qDebug()<<"Mouse click X="<<QString::number(p.x()/maxX)<<"\tY="<<QString::number(p.y()/maxY);
+        if (mouseEvent->button() == Qt::LeftButton)
+            emit LclickOnImage(pRel);
+        if (mouseEvent->button() == Qt::RightButton)
+            emit RclickOnImage(pRel);
+    }
+    mouseEvent->ignore();
+    QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 

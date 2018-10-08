@@ -20,7 +20,6 @@ signals:
 
 private slots:
     void on_activateBox_stateChanged(int val);
-    void on_trackButton_clicked(bool checked);
 
     void on_thresholdSlider_sliderPressed();
     void on_thresholdSlider_sliderReleased();
@@ -44,9 +43,74 @@ private slots:
 
     void on_line_LasPartD_textChanged(const QString &arg1);
 
+    void on_line_PatternR_textChanged(const QString &arg1);
+
+    void on_line_PatternA_textChanged(const QString &arg1);
+
+    void on_line_kp_editingFinished();
+
+    void on_line_Ti_editingFinished();
+
+    void on_line_Td_editingFinished();
+
+    void on_line_Usat_editingFinished();
+
+    void on_line_Tt_editingFinished();
+
+    void on_line_Tsamp_editingFinished();
+
+    void on_line_Kff_editingFinished();
+
+    void on_Xlaser_slider_sliderPressed();
+
+    void on_Xlaser_slider_sliderReleased();
+
+    void on_Xlaser_slider_valueChanged(int value);
+
+    void on_Ylaser_slider_sliderPressed();
+
+    void on_Ylaser_slider_sliderReleased();
+
+    void on_Ylaser_slider_valueChanged(int value);
+
+    void on_Alaser_slider_sliderPressed();
+
+    void on_Alaser_slider_sliderReleased();
+
+    void on_Alaser_slider_valueChanged(int value);
+
+    void on_Rpattern_slider_sliderPressed();
+
+    void on_Rpattern_slider_sliderReleased();
+
+    void on_Rpattern_slider_valueChanged(int value);
+
+    void on_Aux_slider_sliderPressed();
+
+    void on_Aux_slider_sliderReleased();
+
+    void on_Aux_slider_valueChanged(int value);
+
+    void on_cbox_SampleSense_currentIndexChanged(int index);
+
+    void on_line_SampleRate_editingFinished();
+
+    void on_chkbox_Tracking_stateChanged(int arg1);
+
+    void on_line_Xtarg_textChanged(const QString &arg1);
+
+    void on_line_Ytarg_textChanged(const QString &arg1);
+
+    void on_spinBox_NroPart_valueChanged(int i);
+
+    void LclickOnImageDetected(QPointF p);
+    void RclickOnImageDetected(QPointF p);
+
 private:
     bool extractData();
-    bool tSliderPressed,xSliderPressed,ySliderPressed;
+    bool tSliderPressed,xSliderPressed,ySliderPressed,aSliderPressed;
+    bool xLaserSlider_pressed,yLaserSlider_pressed,aLaserSlider_pressed;
+    bool rPatternSlider_pressed,aPatternSlider_pressed;
 
 
 

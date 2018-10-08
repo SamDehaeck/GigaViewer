@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 
     MainWindow win;
     MainGui view;
+
     Coordinator theBoss(&view);
     win.setCentralWidget(&view);
 

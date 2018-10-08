@@ -27,7 +27,7 @@
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(0),currSource(0), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false)
 #ifdef TRACKING
-  ,tracker(50,1),doPluginProcessing(false)
+  ,tracker(),doPluginProcessing(false)
 #endif
 {
     connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
