@@ -118,19 +118,6 @@
     <enum>Qt::Horizontal</enum>
    </property>
   </widget>
-  <widget class="QLabel" name="label_11">
-   <property name="geometry">
-    <rect>
-     <x>100</x>
-     <y>380</y>
-     <width>341</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>U(s)=Kp(E(s)+1/(Ti s) E(s)+Td s^2 E(s))+ 1/(Tt s) (Usat(s)-U(s))</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
     <rect>
@@ -296,19 +283,6 @@
      <width>61</width>
      <height>20</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_20">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>340</y>
-     <width>131</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Tt=f( Tsamp,Ti)</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="chkbox_Tracking">
@@ -706,7 +680,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>241</width>
+     <width>243</width>
      <height>131</height>
     </rect>
    </property>
@@ -789,6 +763,11 @@
       <item>
        <property name="text">
         <string>Multiplex test</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Closed Path Following</string>
        </property>
       </item>
      </widget>
@@ -888,7 +867,71 @@
       </property>
      </spacer>
     </item>
+    <item row="4" column="1">
+     <widget class="QCheckBox" name="checkBox_orientation">
+      <property name="text">
+       <string>Orientation</string>
+      </property>
+     </widget>
+    </item>
    </layout>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>340</y>
+     <width>191</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Path</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>10</y>
+      <width>171</width>
+      <height>73</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="line_PathL"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_29">
+       <property name="text">
+        <string>A [mm]</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="line_PathA"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_28">
+       <property name="text">
+        <string>L [mm]</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <zorder>layoutWidget</zorder>
   <zorder>label_2</zorder>
@@ -897,7 +940,6 @@
   <zorder>horPosition</zorder>
   <zorder>label_3</zorder>
   <zorder>vertPosition</zorder>
-  <zorder>label_11</zorder>
   <zorder>label_13</zorder>
   <zorder>label_14</zorder>
   <zorder>label_15</zorder>
@@ -912,12 +954,12 @@
   <zorder>line_Tsamp</zorder>
   <zorder>label_19</zorder>
   <zorder>line_Kff</zorder>
-  <zorder>label_20</zorder>
   <zorder>chkbox_Tracking</zorder>
   <zorder>line_Xtarg</zorder>
   <zorder>line_Ytarg</zorder>
   <zorder>groupBox</zorder>
   <zorder>groupBox_2</zorder>
+  <zorder>groupBox_3</zorder>
  </widget>
  <resources/>
  <connections/>

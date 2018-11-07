@@ -21,6 +21,8 @@ signals:
 private slots:
     void on_activateBox_stateChanged(int val);
 
+    void on_checkBox_orientation_stateChanged(int val);
+
     void on_thresholdSlider_sliderPressed();
     void on_thresholdSlider_sliderReleased();
     void on_thresholdSlider_valueChanged(int value);
@@ -46,6 +48,10 @@ private slots:
     void on_line_PatternR_textChanged(const QString &arg1);
 
     void on_line_PatternA_textChanged(const QString &arg1);
+
+    void on_line_PathL_textChanged(const QString &arg1);
+
+    void on_line_PathA_textChanged(const QString &arg1);
 
     void on_line_kp_editingFinished();
 

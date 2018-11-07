@@ -15,7 +15,14 @@ Regulation::Regulation() {                                        //Creation of 
 
     ptsNumb = 100;                                                          //Cutting the circle into ptsNumb portions
 
-    vectorLength = 100;                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
+    vectorLength = 100;                                              //100 for 180°, 68 for 122.4° and 32 for 57.6°
+
+    path_N=200;
+    path_PrevIndex=-1;
+    path_cA=0;
+    path_cL=0;
+
+    U_sat_global=5.4;
 
     Factor_pixTOmm = 0.064453;                  //Factor to convert pixels to mm = 65/1024
     x_part_minus_1=0; y_part_minus_1 =0;                //Variable to store the previopus particle position to compute the Particle velocity
@@ -89,21 +96,24 @@ void Regulation::Configure_FB (int program_ID, float r_Figure, int x_target, int
     counter = 0;
     k_p =kp;    T_i =Ti;    T_d = Td;  T_s = Tsamp;  //Feedback Controller gains and sampling time
     T_t =Tt;        //Anti-windup gain and Input saturation
+    FB_C1=k_p*(1+T_s/T_i+T_d/T_s);
+    FB_C2=k_p*(-1+2*T_d/T_s);
+    FB_C3=k_p*(T_d/T_s);
 
 
 
-    //Arc + Circle control strategy DIMITRI
-    if( (regulation_type == 1) || (regulation_type == 2) ){
-        qDebug() << "Creation of the figure";
-        float stepAngle = (float)M_PI*2 / ptsNumb;
-        for( int i = 0; i < ptsNumb; i++ ){
-            figure_x[i] = radius*cos( i * stepAngle );
-            figure_y[i] = radius*sin( i * stepAngle );
-        }
-    }
-    else{
-        qDebug()<<"Use of point actuation. No figure creation";
-    }
+//    //Arc + Circle control strategy DIMITRI
+//    if( (regulation_type == 1) || (regulation_type == 2) ){
+//        qDebug() << "Creation of the figure";
+//        float stepAngle = (float)M_PI*2 / ptsNumb;
+//        for( int i = 0; i < ptsNumb; i++ ){
+//            figure_x[i] = radius*cos( i * stepAngle );
+//            figure_y[i] = radius*sin( i * stepAngle );
+//        }
+//    }
+//    else{
+//        qDebug()<<"Use of point actuation. No figure creation";
+//    }
 
     u_i = 0;
     u = 0;
@@ -555,29 +565,53 @@ void Regulation::run_Traj_Generator(float x_particle, float y_particle, float x_
 
 }
 
-bool Regulation::run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float dlim, float radius)
+int Regulation::distanceComp(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float fmin, float fhys)
 {
-    float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
-    if (pattern_type==1)
-        dL-=radius;
     float dx=x_particle2-x_particle;
     float dy=y_particle2-y_particle;
     float d=sqrt(dx*dx+dy*dy);
-    if (d>dlim)
-        return 0;
+    static bool hysFlag=1;
+
+    float x_err = x_targ - x_particle;
+    float y_err = y_targ - y_particle;
+
+
+    e_0 = Factor_pixTOmm*sqrt((x_err*x_err) + (y_err*y_err));
+
+    objectifReached=e_0<0.25;
+
+    if (d<dlim*fmin){
+        hysFlag=1;
+        return 2;
+    }
+    if (hysFlag)
+        dlim*=fhys;
+    if (d<dlim){
+        hysFlag=1;
+        return 1;
+    }
+    hysFlag=0;
+    return 0;
+}
+
+void Regulation::run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float radius)
+{
+    float dx=x_particle2-x_particle;
+    float dy=y_particle2-y_particle;
+    float d=sqrt(dx*dx+dy*dy);
+    float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
+    if (pattern_type==1)
+        dL-=radius;    
     x_las=x_particle2-dL*dx/d;
     y_las=y_particle2-dL*dy/d;
     middleAngle=atan2(-dy,-dx);
-    return 1;
 }
 
-bool Regulation::run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float radiussent)
+void Regulation::run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float radiussent)
 {
     float dx=x_particle2-x_particle;
     float dy=y_particle2-y_particle;
     float d=sqrt(dx*dx+dy*dy);
-    if (d>dlim)
-        return 0;
     float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
     radius=radiussent;
     if (pattern_type==1)
@@ -608,7 +642,6 @@ bool Regulation::run_SmartShielding(float x_particle, float y_particle, float x_
         y_las=y_particle2+dL*dauxy/daux;
         middleAngle=atan2(dauxy,dauxx);
     }
-    return 1;
 }
 
 
@@ -651,9 +684,10 @@ void Regulation::run_Cont_FB (float x_particle, float y_particle, float x_targ, 
         objectifReached=0;
         //Full equation but I compute first the part not affected by the Antiwindup gain and then I correct the input
         //u_0 = u_minus_2 + k_p*( (1+T_s/2.0/T_i+2*T_d/T_s)*e_0 + (T_s/T_i - 4*T_d/T_s)*e_minus_1 + (T_s/2.0/T_i-1+2*T_d/T_s)*e_minus_2 ) + T_s/2.0/T_t*(e_sat_0+2*e_sat_minus_1+e_sat_minus_2);
-        u_0 = u_minus_2 + k_p*( (1+T_s/2.0/T_i+2*T_d/T_s)*e_0 + (T_s/T_i - 4*T_d/T_s)*e_minus_1 + (T_s/2.0/T_i-1+2*T_d/T_s)*e_minus_2 ); //Non saturated input
 
+        //u_0 = u_minus_2 + k_p*( (1+T_s/2.0/T_i+2*T_d/T_s)*e_0 + (T_s/T_i - 4*T_d/T_s)*e_minus_1 + (T_s/2.0/T_i-1+2*T_d/T_s)*e_minus_2 ); //Non saturated input
 
+        u_0=u_minus_1+FB_C1*e_0+FB_C2*e_minus_1+FB_C3*e_minus_2;
 
 
         // Saturation: Remember that U is r_dot_part in mm/s. U_sat_global by default should be 5.4 mm/s
@@ -736,6 +770,7 @@ void Regulation::run_Cont_FB (float x_particle, float y_particle, float x_targ, 
         //e_ang =0;
 
         theta_corr_FB = e_ang*0.25;      //As it is now, the Velocity Direction controller has a fixed proportional gain of 0.5
+        theta_part_targ = atan2(y_targ-y_particle,x_targ-x_particle );
     }
     else
     {
@@ -744,6 +779,85 @@ void Regulation::run_Cont_FB (float x_particle, float y_particle, float x_targ, 
         resetIntegratorVariables();
     }
 
+
+    //x_part_BEF = x_particle;                y_part_BEF = y_particle;            //Store the particle position previous value to compute the velocity direction Theta_part
+                                                                                //EVEN if the particle is inside the tolerance region, it is better to store the previous particle position
+    x_part_minus_2 = x_part_minus_1;  x_part_minus_1= x_particle;               //Variables to
+    y_part_minus_2 = y_part_minus_1;  y_part_minus_1= y_particle;
+
+    FRAMECOUNTER++;
+}
+
+void Regulation::run_Cont_FB_vel(float x_particle, float y_particle)
+{
+    //FILTERING STAGE
+    if (FRAMECOUNTER==1)
+    {   //First iteration, fill the previous particle positions with the actual one
+        x_part_minus_2 =  x_particle; x_part_minus_1 =  x_particle;
+        y_part_minus_2 =  y_particle; y_part_minus_1 =  y_particle;
+    }else if (FRAMECOUNTER==2)
+    {
+        x_particle = x_particle/2.0 + x_part_minus_1/2.0;           //Second iteration, only the previous value is available so I just filter using the two
+        y_particle = y_particle/2.0 + y_part_minus_1/2.0;
+    } else
+    {
+        x_particle = x_particle/3.0 + x_part_minus_1/3.0 + x_part_minus_2/3.0;  //Third iteration, finally, I have the proper previous values to start using the entitre filter
+        y_particle = y_particle/3.0 + y_part_minus_1/3.0 + y_part_minus_2/3.0;
+    }
+
+    float ux, uy;
+    //Derivative
+    ux=(x_particle-x_part_minus_1)*Factor_pixTOmm/T_s;
+    uy=(x_particle-x_part_minus_1)*Factor_pixTOmm/T_s;
+
+    //conversion cartesian to polar coordinates
+    float u_curr=sqrt(ux*ux+uy*uy);
+
+
+    e_0 = u_path-u_curr;
+
+
+    u_0=u_minus_1+FB_C1*e_0+FB_C2*e_minus_1+FB_C3*e_minus_2;
+
+
+    // Saturation: Remember that U is r_dot_part in mm/s. U_sat_global by default should be 5.4 mm/s
+    if (u_0 >= U_sat_global){
+        u_sat = U_sat_global;           //Saturated in the positive sense
+    }
+    else if (u_0 <= -U_sat_global){
+        u_sat = -U_sat_global;          //Saturated in the negative sense
+    }
+    else{
+        u_sat = u_0;                    // Non saturation
+    }
+    //After I consider the non Linearity, then I can finally use the integral anti-windup
+    //My last question, should I only take the proportional part or everything to compute the current error??? According to the scheme I think it should be everything.
+
+    e_sat_0 = u_sat - u_0;                      //where E_sat = U_sat - u(k)   U_sat is the maximum input we can command to the system
+                                                //NOTE: If u_0 was not saturated, the difference will be 0 so this operation will be useless.
+
+    u_0 = u_0 + T_s/2.0/T_t*(e_sat_0+2*e_sat_minus_1+e_sat_minus_2) ; //Saturated input FINAL
+
+
+
+    // Saturation: Remember that U is r_dot_part in mm/s. U_sat_global by default should be 5.4 mm/s
+    if (u_0 >= U_sat_global){
+        u_0 = U_sat_global;           //Saturated in the positive sense
+    }
+    else if (u_0 <= -U_sat_global){
+        u_0 = -U_sat_global;          //Saturated in the negative sense
+    }
+    else{
+        u_0 = u_0;                    // Non saturation
+    }
+
+
+
+
+    //After I compute this, I save these values for the next iteration
+    e_minus_2 = e_minus_1;               e_minus_1 = e_0;
+    u_minus_2 = u_minus_1;             u_minus_1 = u_0;
+    e_sat_minus_2 = e_sat_minus_1;      e_sat_minus_1 = e_sat_0;
 
     //x_part_BEF = x_particle;                y_part_BEF = y_particle;            //Store the particle position previous value to compute the velocity direction Theta_part
                                                                                 //EVEN if the particle is inside the tolerance region, it is better to store the previous particle position
@@ -850,7 +964,7 @@ void Regulation::run_Ident(float x_particle, float y_particle, float dist_LasPar
 }
 
 
-void Regulation::get_Laser_Position(float x_particle, float y_particle, float x_targ, float y_targ){
+void Regulation::get_Laser_Position(float x_particle, float y_particle){
 
     if (e_0>0.25)               //Error is in [mm]
     {
@@ -862,8 +976,7 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle, float x_
         {
             u_Final = u_0;                  //NOTE this should be u_feedforward + u_feedback TO CODE LATER
             theta_corr_Final = theta_corr_FB;   //NOTE this should be theta_corr_FB + theta_corr_FF TO CODE LATER
-        }else if (prog_mode==2)
-        {
+        }else if (prog_mode==2){
              qDebug()<<"FB "<< u_0 <<"  FF  "<<u_0_FF;
             //Use equations 5.12 a and b to compose the final U and Theta_corr to send to the controller
             u_Final = sqrt(u_0*u_0 + u_0_FF*u_0_FF + 2*u_0*u_0_FF*cos(theta_corr_FF-theta_corr_FB));
@@ -882,19 +995,17 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle, float x_
         //u_steady-state [mm/s] to r_las-part [mm]
         double r_las_part, theta_las_part;
         if (u_Final >= 0){
-            r_las_part = velocity2distance(u_0);
+            r_las_part = velocity2distance(u_Final);
         }
         else{
-            r_las_part = velocity2distance(-u_0);
+            r_las_part = velocity2distance(-u_Final);
         }
+        theta_las_part = theta_part_targ-theta_corr_Final;       //Eq 5.2 thesis Theta_las-part= Theta_part-targ - theta_corr
 
-
-
-        theta_las_part = atan2(y_targ-y_particle,x_targ-x_particle ) - theta_corr_Final;        //Eq 5.2 thesis Theta_las-part= Theta_part-targ - theta_corr
         middleAngle=theta_las_part+M_PI;
 
-        x_las = x_particle - r_las_part * cos(theta_las_part) /Factor_pixTOmm  ;               //Compute the laser position using the formula and converting to Pixels
-        y_las = y_particle - r_las_part * sin(theta_las_part) /Factor_pixTOmm ;                 //NOTE x_particle is in [pixel] and r_las_part [mm]. X_las must be in PIXELS
+        x_las = x_particle + r_las_part * cos(middleAngle) /Factor_pixTOmm  ;               //Compute the laser position using the formula and converting to Pixels
+        y_las = y_particle + r_las_part * sin(middleAngle) /Factor_pixTOmm ;                 //NOTE x_particle is in [pixel] and r_las_part [mm]. X_las must be in PIXELS
 
     }
     else
@@ -910,6 +1021,45 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle, float x_
 
 
 }
+
+void Regulation::get_Laser_Position_vel(float x_particle, float y_particle)
+{
+    if (true)               //Desired velocity
+    {
+        //float u_Final, theta_corr_Final;
+
+        //To program the long formula to combine both answers
+
+
+        //u_steady-state [mm/s] to r_las-part [mm]
+        double r_las_part;
+        if (u_0 >= 0){
+            r_las_part = velocity2distance(u_0);
+        }
+        else{
+            r_las_part = velocity2distance(-u_0);
+        }
+
+
+        x_las = x_particle + r_las_part * cos(middleAngle) /Factor_pixTOmm  ;               //Compute the laser position using the formula and converting to Pixels
+        y_las = y_particle + r_las_part * sin(middleAngle) /Factor_pixTOmm ;                 //NOTE x_particle is in [pixel] and r_las_part [mm]. X_las must be in PIXELS
+
+    }
+    else
+    {
+        if (pattern_type==0)
+        {
+        x_las = 0.0;     y_las = 0.0;       //Put the laser as far away as possible from the target if the particle is inside the tolerance region OR draw the circular pattern
+        } else if (pattern_type==1)
+        {
+            //DRAW the circular pattern
+        }
+    }
+
+
+}
+
+
 
 void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given){
     //If we are in Manual mode, assign the given laser position to the regulator object
@@ -942,7 +1092,7 @@ void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, flo
         }
         else{
             for(int j=0; j<ptsNumb; j++){
-                var_aux1=2.0*M_PI*((double)j)/((double)(ptsNumb));
+                var_aux1=A_pattern_given*2.0*M_PI*((double)j)/((double)(ptsNumb));
                 x_vector[j] = X_laser_given+radius_pattern*cos(var_aux1);
                 y_vector[j] = Y_laser_given+radius_pattern*sin(var_aux1);
             }
@@ -1003,4 +1153,248 @@ void Regulation::resetIntegratorVariables()
     e_0 = 0.0;  e_minus_1=0.0;  e_minus_2=0.0;
     e_sat_0=0.0;    e_sat_minus_1=0.0;  e_sat_minus_2=0.0;
     e_ang=0.0;      theta_corr_FB = 0.0;    theta_corr_FF = 0.0;    theta_corr=0.0;
+}
+
+void Regulation::multiplexLAserPosition(int index)
+{
+    x_las_mult[index]=x_las;
+    y_las_mult[index]=y_las;
+    middleAngle_mult[index]=middleAngle;
+    pattern_radius_mult[index]=pattern_radius;
+    pattern_aux_mult[index]=pattern_aux;
+}
+
+void Regulation::demultiplexLAserPosition(int index)
+{
+    x_las=x_las_mult[index];
+    y_las=y_las_mult[index];
+    middleAngle=middleAngle_mult[index];
+    pattern_radius=pattern_radius_mult[index];
+    pattern_aux=pattern_aux_mult[index];
+}
+
+void Regulation::computeClosedPath()
+{
+    qDebug()<<"Path Creation";
+    path_totD=0;
+    for (int i=0; i<path_N; i++){
+        path_x[i]=20/Factor_pixTOmm*cos(2*M_PI*i/path_N)+512;
+        path_y[i]=15/Factor_pixTOmm*sin(4*M_PI*i/path_N)+512;
+    }
+    for (int i=0; i<path_N; i++){
+        int ip=i+1;
+        if (ip>=path_N)
+            ip-=path_N;
+        path_A[i]=atan2(path_y[ip]-path_y[i],path_x[ip]-path_x[i]);
+        float dx=(path_x[ip]-path_x[i]);
+        float dy=(path_y[ip]-path_y[i]);
+        path_D[i]=sqrt(dx*dx+dy*dy);
+        path_totD+=path_D[i];
+    }
+    for (int i=0; i<path_N; i++){
+        int im=i-1;
+        if (im<0)
+            im+=path_N;
+        float angdiff=abs(path_A[i]-path_A[im]);
+        if (angdiff>M_PI/2)
+            angdiff=abs(angdiff-M_PI);
+//        path_K[i]=2*angdiff/(path_D[i]+path_D[im]);
+        qDebug()<<path_K[i];
+    }
+    path_meanD=path_totD/path_N;
+    path_PrevIndex=-1;
+}
+
+void Regulation::computeOpenPath()
+{
+    path_totD=0;
+    for (int i=0; i<path_N; i++){
+        path_x[i]=20/Factor_pixTOmm*i/(path_N-1)+512-10/Factor_pixTOmm;
+        path_y[i]=10/Factor_pixTOmm*sin(5*M_PI*i/(path_N-1))+512;
+    }
+    for (int i=0; i<path_N-1; i++){
+        int ip=i+1;
+        path_A[i]=atan2(path_y[ip]-path_y[i],path_x[ip]-path_x[i]);
+        float dx=(path_x[ip]-path_x[i]);
+        float dy=(path_y[ip]-path_y[i]);
+        path_D[i]=sqrt(dx*dx+dy*dy);
+        path_totD+=path_D[i];
+        path_Dac[i]=path_totD;
+    }
+    for (int i=0; i<path_N-1; i++){
+        path_Dac[i]=path_totD-path_Dac[i];
+    }
+    path_K[0]=0;
+    for (int i=1; i<path_N-1; i++){
+        int im=i-1;
+        float angdiff=abs(path_A[i]-path_A[im]);
+        if (angdiff>M_PI/2)
+            angdiff=abs(angdiff-M_PI);
+        path_K[i]=2*angdiff/(path_D[i]+path_D[im]);
+    }
+    path_K[path_N-1]=0;
+    path_meanD=path_totD/(path_N-1);
+}
+
+void Regulation::run_ClosedPath_Following(float x_particle, float y_particle)
+{
+    int indexmin;
+    int space=50;
+    float dxmin, dymin, d2min;
+    if (path_PrevIndex<0){
+        indexmin=0;
+        dxmin=x_particle-path_x[indexmin];
+        dymin=y_particle-path_y[indexmin];
+        d2min=dxmin*dxmin+dymin*dymin;
+        for (int i=1;i<path_N;i++){
+            float dx=x_particle-path_x[i];
+            float dy=y_particle-path_y[i];
+            float d2=dx*dx+dy*dy;
+            if (d2<d2min){
+                dxmin=dx;
+                dymin=dy;
+                d2min=d2;
+                indexmin=i;
+            }
+        }
+    }else{
+        indexmin=path_PrevIndex;
+        dxmin=x_particle-path_x[indexmin];
+        dymin=y_particle-path_y[indexmin];
+        d2min=dxmin*dxmin+dymin*dymin;
+        for (int i=1; i<=space; i++){
+            int ip=path_PrevIndex+i;
+            if (ip>=path_N)
+                ip-=path_N;
+            int im=path_PrevIndex-i;
+            if (im<0)
+                im+=path_N;
+            float dx=x_particle-path_x[ip];
+            float dy=y_particle-path_y[ip];
+            float d2=dx*dx+dy*dy;
+            if (d2<d2min){
+                dxmin=dx;
+                dymin=dy;
+                d2min=d2;
+                indexmin=ip;
+            }
+            dx=x_particle-path_x[im];
+            dy=y_particle-path_y[im];
+            d2=dx*dx+dy*dy;
+            if (d2<d2min){
+                dxmin=dx;
+                dymin=dy;
+                d2min=d2;
+                indexmin=im;
+            }
+        }
+    }
+
+    int ip=indexmin+1;
+    if (ip>=path_N)
+        ip-=path_N;
+    int im=indexmin-1;
+    if (im<0)
+        im+=path_N;
+    float dxp=x_particle-path_x[ip];
+    float dyp=y_particle-path_y[ip];
+    float d2p=dxp*dxp+dyp*dyp;
+    float dxm=x_particle-path_x[im];
+    float dym=y_particle-path_y[im];
+    float d2m=dxm*dxm+dym*dym;
+    float angle;
+    if (d2p<=d2m){
+        angle=path_A[indexmin];
+    }else{
+        angle=path_A[im];
+    }
+
+    float d=-sin(angle)*dxmin+cos(angle)*dymin;
+    middleAngle=angle-atan2(d,path_cL/Factor_pixTOmm)+M_PI;
+    u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm);
+
+    path_PrevIndex=indexmin;
+}
+
+void Regulation::run_openPath_Following(float x_particle, float y_particle)
+{
+    int indexmin;
+    int space=50;
+    float dxmin, dymin, d2min;
+    if (path_PrevIndex<0){
+        indexmin=0;
+        dxmin=x_particle-path_x[indexmin];
+        dymin=y_particle-path_y[indexmin];
+        d2min=dxmin*dxmin+dymin*dymin;
+        for (int i=1;i<path_N;i++){
+            float dx=x_particle-path_x[i];
+            float dy=y_particle-path_y[i];
+            float d2=dx*dx+dy*dy;
+            if (d2<d2min){
+                dxmin=dx;
+                dymin=dy;
+                d2min=d2;
+                indexmin=i;
+            }
+        }
+    }else{
+        indexmin=path_PrevIndex;
+        dxmin=x_particle-path_x[indexmin];
+        dymin=y_particle-path_y[indexmin];
+        d2min=dxmin*dxmin+dymin*dymin;
+        for (int i=1; i<=space; i++){
+            int ip=path_PrevIndex+i;
+            int im=path_PrevIndex-i;
+            float dx,dy,d2;
+            if (ip<path_N){
+                dx=x_particle-path_x[ip];
+                dy=y_particle-path_y[ip];
+                d2=dx*dx+dy*dy;
+                if (d2<d2min){
+                    dxmin=dx;
+                    dymin=dy;
+                    d2min=d2;
+                    indexmin=ip;
+                }
+            }
+            if (im>=0){
+            dx=x_particle-path_x[im];
+            dy=y_particle-path_y[im];
+            d2=dx*dx+dy*dy;
+            if (d2<d2min){
+                dxmin=dx;
+                dymin=dy;
+                d2min=d2;
+                indexmin=im;
+            }
+            }
+        }
+    }
+
+    int ip=indexmin+1;
+    int im=indexmin-1;
+    float angle;
+    if (ip>=path_N){
+        angle=path_A[im];
+    }else if (im<0){
+        angle=path_A[indexmin];
+    }else{
+        float dxp=x_particle-path_x[ip];
+        float dyp=y_particle-path_y[ip];
+        float d2p=dxp*dxp+dyp*dyp;
+        float dxm=x_particle-path_x[im];
+        float dym=y_particle-path_y[im];
+        float d2m=dxm*dxm+dym*dym;
+        if (d2p<=d2m){
+            angle=path_A[indexmin];
+        }else{
+            angle=path_A[im];
+        }
+    }
+
+    float d=-sin(angle)*dxmin+cos(angle)*dymin;
+    middleAngle=angle-atan2(d,path_cL/Factor_pixTOmm)+M_PI;
+    u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm)*(1-exp(-path_Dac[indexmin]*Factor_pixTOmm/2.0));
+
+    path_PrevIndex=indexmin;
 }

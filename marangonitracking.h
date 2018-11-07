@@ -15,6 +15,7 @@ class MarangoniTracking
 private:
     int threshold;
     int nrParts;
+    bool checkOrientation;
     int targetX;
     int targetY;
     bool activated;
@@ -53,6 +54,7 @@ private:
     void drawTarget(cv::Mat outImage);
     void drawParticles(cv::Mat outImage);
     void drawObstacle(cv::Mat outImage);
+    void drawPath(cv::Mat outImage, bool closed);
 
     QString setdata();
     QString runMirrorCalibration();

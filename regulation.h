@@ -24,6 +24,10 @@ private:
     double T_s;         //Sampling time
     double k_ff;        //Feedforward gain
 
+    double FB_C1;
+    double FB_C2;
+    double FB_C3;
+
     float start_x;
     float start_y;
 
@@ -46,13 +50,6 @@ private:
     float y_part_minus_1, y_part_minus_2;
 
 
-    //ALWAYS 100
-    float figure_x[100];                                            //Variables used for the figure drawing
-    float figure_y[100];
-
-    //ALWAYS 100
-
-
 
     int increment;
     float radius;
@@ -71,26 +68,46 @@ public:
     void Regulator2017(float particle_x, float particle_y);             //Must be called when the position of the particule moves
                                                                         //Adrien's version
     void run_Cont_FB(float x_particle, float y_particle, float x_targ, float y_targ);               //General routine to compute the error and the input of the FeedBack controller
+    void run_Cont_FB_vel(float x_particle, float y_particle);
     void run_Cont_FF(float x_particle, float y_particle, float x_targ, float y_targ);              //General routine to compute the error and the input of the FeedForward controller
 
     void run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, float aux_pattern, int direction);
     void run_Traj_Generator(float x_particle, float y_particle, float x_targ, float y_targ);      //Routine to create and ASSIGN the required points of a trajectory
 
-    bool run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float dlim, float radius);
-    bool run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float radius);
+    int distanceComp(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float fmin, float fhys);
+    void run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float radius);
+    void run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float radius);
 
-    void get_Laser_Position(float particle_x, float particle_y, float x_targ, float y_targ);
+    void get_Laser_Position(float particle_x, float particle_y);
+    void get_Laser_Position_vel(float x_particle, float y_particle);
     void compute_Laser_Pattern(int patterntype, float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given);
 
     void resetIntegratorVariables();
 
+    void multiplexLAserPosition(int index);
+    void demultiplexLAserPosition(int index);
+
+    void computeClosedPath();
+    void computeOpenPath();
+
+    void run_ClosedPath_Following(float x_particle, float y_particle);
+    void run_openPath_Following(float x_particle, float y_particle);
+
     int regulation_type, pattern_type;                                            //used to define which type of figure is used
     int target_type, prog_mode;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
 
-    float laser_x, x_las;                                                        //For point control, correspond to the new position of the laser...
-    float laser_y, y_las;                                                        //...for the figure control, correspond to the center of the figure
+    float x_las;                                                        //For point control, correspond to the new position of the laser...
+    float y_las;                                                        //...for the figure control, correspond to the center of the figure
+    float middleAngle;
 
     float pattern_radius, pattern_aux;
+
+    float x_las_mult[10];
+    float y_las_mult[10];
+    float middleAngle_mult[10];
+    float pattern_radius_mult[10];
+    float pattern_aux_mult[10];
+    int nrLaserSpot;
 
     QList<float> x_traj;                                    //Lists used to define the trajectory to the goal
     QList<float> y_traj;
@@ -103,7 +120,7 @@ public:
     float x_vector[100];                                             //100 for 180°, 68 for 122.4° and 32 for 57.6°
     float y_vector[100];
 
-    float middleAngle;
+
     float Factor_pixTOmm;                           //Factor to convert
     int FRAMECOUNTER;                               //Variable to detect when 1 second has passed
 
@@ -114,6 +131,7 @@ public:
     //NEW ERROR and INPUT variables for my program Ronald 2018
 
     double u_0;  double u_minus_1;   double u_minus_2;   // u(k)  u(k-1)*JUST used to keep track nothing else   u(k-2)
+    double u_path;
     double e_0;     double e_minus_1;   double e_minus_2;       // e(k)   e(k-1)    e(k-2)
     double e_sat_0;     double e_sat_minus_1;   double e_sat_minus_2;  // E_sat(k)   E_sat(k-1)   E_sat(k)     where E_sat = U_sat - u(k)   U_sat is the maximum input we can command to the system
 
@@ -123,9 +141,22 @@ public:
 
 
     double u_0_FF;
-    double theta_corr_FF, theta_corr;    //Error and input for the angle
+    double theta_corr_FF, theta_corr, theta_part_targ;    //Error and input for the angle
 
     double u_Final, theta_corr_Final;   //Final u values to send to the controller
+
+    float path_x[200];                                            //Variables used for the figure drawing
+    float path_y[200];
+    int path_N;
+    float path_A[200];
+    float path_D[200];
+    float path_Dac[200];
+    float path_K[200];
+    float path_cA;
+    float path_cL;
+    float path_totD;
+    float path_meanD;
+    int path_PrevIndex;
 
 
 };

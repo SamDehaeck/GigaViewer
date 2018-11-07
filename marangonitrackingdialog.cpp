@@ -19,6 +19,7 @@ bool MarangoniTrackingDialog::extractData() {
     settings["activated"]=ui->activateBox->isChecked();
     settings["threshold"]=ui->thresholdSlider->value();
     settings["NroPart"]=ui->spinBox_NroPart->value();
+    settings["Orientation"]=ui->checkBox_orientation->isChecked();
     settings["targetX"]=ui->horPosition->value();
     settings["targetY"]=ui->vertPosition->value();
     //New control gains
@@ -54,6 +55,9 @@ bool MarangoniTrackingDialog::extractData() {
     settings["SampleSense"] = ui->cbox_SampleSense->currentIndex();
     settings["TrackingON"]=ui->chkbox_Tracking->isChecked();        //0 Not activated, 1 Activated
 
+    settings["PathL"] = ui->line_PathL->text();
+    settings["PathA"] = ui->line_PathA->text();
+
     emit stateChanged(settings);
 
 /*
@@ -75,6 +79,11 @@ MarangoniTrackingDialog::~MarangoniTrackingDialog()
 void MarangoniTrackingDialog::on_activateBox_stateChanged(int val)
 {
 
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_checkBox_orientation_stateChanged(int val)
+{
     extractData();
 }
 
@@ -230,6 +239,15 @@ void MarangoniTrackingDialog::on_cbox_PatternType_currentIndexChanged(int index)
         ui->line_Tt->clear();       ui->line_Tt->insert("0.0");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
 
+    } else if( Program_Id == 700) //Path following
+    {ui->line_kp->clear();      ui->line_kp->insert("0.5603");
+        ui->line_Ti->clear();       ui->line_Ti->insert("0.1267");
+        ui->line_Td->clear();       ui->line_Td->insert("0.0");
+        ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
+        ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
+        ui->line_PathL->clear();    ui->line_PathL->insert("1");
+        ui->line_PathA->clear();    ui->line_PathA->insert("5");
+
     }
 
 
@@ -269,6 +287,15 @@ void MarangoniTrackingDialog::on_cbox_OpMode_currentIndexChanged(int index)
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.0");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
+
+    } else if( Program_Id == 700) //Path following
+    {ui->line_kp->clear();      ui->line_kp->insert("0.5603");
+        ui->line_Ti->clear();       ui->line_Ti->insert("0.1267");
+        ui->line_Td->clear();       ui->line_Td->insert("0.0");
+        ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
+        ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
+        ui->line_PathL->clear();    ui->line_PathL->insert("1");
+        ui->line_PathA->clear();    ui->line_PathA->insert("5");
 
     }
 
@@ -310,6 +337,16 @@ void MarangoniTrackingDialog::on_line_PatternR_textChanged(const QString &arg1)
     extractData();
 }
 void MarangoniTrackingDialog::on_line_PatternA_textChanged(const QString &arg1)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_line_PathL_textChanged(const QString &arg1)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_line_PathA_textChanged(const QString &arg1)
 {
     extractData();
 }

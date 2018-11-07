@@ -16,6 +16,7 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
+#include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
@@ -38,7 +39,6 @@ public:
     QSlider *horPosition;
     QLabel *label_3;
     QSlider *vertPosition;
-    QLabel *label_11;
     QLabel *label_13;
     QLabel *label_14;
     QLabel *label_15;
@@ -53,7 +53,6 @@ public:
     QLineEdit *line_Tsamp;
     QLabel *label_19;
     QLineEdit *line_Kff;
-    QLabel *label_20;
     QCheckBox *chkbox_Tracking;
     QLineEdit *line_Xtarg;
     QLineEdit *line_Ytarg;
@@ -103,6 +102,14 @@ public:
     QLabel *label;
     QLineEdit *threshEdit;
     QSpacerItem *verticalSpacer;
+    QCheckBox *checkBox_orientation;
+    QGroupBox *groupBox_3;
+    QWidget *widget;
+    QFormLayout *formLayout;
+    QLineEdit *line_PathL;
+    QLabel *label_29;
+    QLineEdit *line_PathA;
+    QLabel *label_28;
 
     void setupUi(QDialog *MarangoniTrackingDialog)
     {
@@ -138,9 +145,6 @@ public:
         vertPosition->setValue(500);
         vertPosition->setSliderPosition(500);
         vertPosition->setOrientation(Qt::Horizontal);
-        label_11 = new QLabel(MarangoniTrackingDialog);
-        label_11->setObjectName(QStringLiteral("label_11"));
-        label_11->setGeometry(QRect(100, 380, 341, 31));
         label_13 = new QLabel(MarangoniTrackingDialog);
         label_13->setObjectName(QStringLiteral("label_13"));
         label_13->setGeometry(QRect(10, 310, 21, 20));
@@ -183,9 +187,6 @@ public:
         line_Kff = new QLineEdit(MarangoniTrackingDialog);
         line_Kff->setObjectName(QStringLiteral("line_Kff"));
         line_Kff->setGeometry(QRect(30, 380, 61, 20));
-        label_20 = new QLabel(MarangoniTrackingDialog);
-        label_20->setObjectName(QStringLiteral("label_20"));
-        label_20->setGeometry(QRect(240, 340, 131, 16));
         chkbox_Tracking = new QCheckBox(MarangoniTrackingDialog);
         chkbox_Tracking->setObjectName(QStringLiteral("chkbox_Tracking"));
         chkbox_Tracking->setGeometry(QRect(20, 280, 151, 17));
@@ -362,7 +363,7 @@ public:
 
         layoutWidget = new QWidget(MarangoniTrackingDialog);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(10, 40, 241, 131));
+        layoutWidget->setGeometry(QRect(10, 40, 243, 131));
         gridLayout_2 = new QGridLayout(layoutWidget);
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
         gridLayout_2->setContentsMargins(0, 0, 0, 0);
@@ -440,6 +441,44 @@ public:
 
         gridLayout_2->addItem(verticalSpacer, 3, 0, 1, 1);
 
+        checkBox_orientation = new QCheckBox(layoutWidget);
+        checkBox_orientation->setObjectName(QStringLiteral("checkBox_orientation"));
+
+        gridLayout_2->addWidget(checkBox_orientation, 4, 1, 1, 1);
+
+        groupBox_3 = new QGroupBox(MarangoniTrackingDialog);
+        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        groupBox_3->setGeometry(QRect(370, 340, 191, 61));
+        groupBox_3->setAlignment(Qt::AlignCenter);
+        groupBox_3->setFlat(false);
+        widget = new QWidget(groupBox_3);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(9, 10, 171, 73));
+        formLayout = new QFormLayout(widget);
+        formLayout->setObjectName(QStringLiteral("formLayout"));
+        formLayout->setContentsMargins(0, 0, 0, 0);
+        line_PathL = new QLineEdit(widget);
+        line_PathL->setObjectName(QStringLiteral("line_PathL"));
+
+        formLayout->setWidget(0, QFormLayout::FieldRole, line_PathL);
+
+        label_29 = new QLabel(widget);
+        label_29->setObjectName(QStringLiteral("label_29"));
+        label_29->setWordWrap(true);
+
+        formLayout->setWidget(1, QFormLayout::LabelRole, label_29);
+
+        line_PathA = new QLineEdit(widget);
+        line_PathA->setObjectName(QStringLiteral("line_PathA"));
+
+        formLayout->setWidget(1, QFormLayout::FieldRole, line_PathA);
+
+        label_28 = new QLabel(widget);
+        label_28->setObjectName(QStringLiteral("label_28"));
+        label_28->setWordWrap(true);
+
+        formLayout->setWidget(0, QFormLayout::LabelRole, label_28);
+
         layoutWidget->raise();
         label_2->raise();
         label_4->raise();
@@ -447,7 +486,6 @@ public:
         horPosition->raise();
         label_3->raise();
         vertPosition->raise();
-        label_11->raise();
         label_13->raise();
         label_14->raise();
         label_15->raise();
@@ -462,12 +500,12 @@ public:
         line_Tsamp->raise();
         label_19->raise();
         line_Kff->raise();
-        label_20->raise();
         chkbox_Tracking->raise();
         line_Xtarg->raise();
         line_Ytarg->raise();
         groupBox->raise();
         groupBox_2->raise();
+        groupBox_3->raise();
 
         retranslateUi(MarangoniTrackingDialog);
 
@@ -481,7 +519,6 @@ public:
         label_4->setText(QApplication::translate("MarangoniTrackingDialog", "Target Y-Position", 0));
         activateBox->setText(QApplication::translate("MarangoniTrackingDialog", "Turn ON mirror and Activate Processing", 0));
         label_3->setText(QApplication::translate("MarangoniTrackingDialog", "Target X-Position", 0));
-        label_11->setText(QApplication::translate("MarangoniTrackingDialog", "U(s)=Kp(E(s)+1/(Ti s) E(s)+Td s^2 E(s))+ 1/(Tt s) (Usat(s)-U(s))", 0));
         label_13->setText(QApplication::translate("MarangoniTrackingDialog", "Kp", 0));
         label_14->setText(QApplication::translate("MarangoniTrackingDialog", "Ti", 0));
         label_15->setText(QApplication::translate("MarangoniTrackingDialog", "Td", 0));
@@ -491,7 +528,6 @@ public:
         label_18->setText(QApplication::translate("MarangoniTrackingDialog", "Tsamp=1/FPS", 0));
         line_Tsamp->setText(QApplication::translate("MarangoniTrackingDialog", "0.0666", 0));
         label_19->setText(QApplication::translate("MarangoniTrackingDialog", "K ff", 0));
-        label_20->setText(QApplication::translate("MarangoniTrackingDialog", "Tt=f( Tsamp,Ti)", 0));
         chkbox_Tracking->setText(QApplication::translate("MarangoniTrackingDialog", "Activate linear Tracking", 0));
         groupBox->setTitle(QApplication::translate("MarangoniTrackingDialog", "Identification", 0));
         label_8->setText(QApplication::translate("MarangoniTrackingDialog", "Laser position", 0));
@@ -543,10 +579,15 @@ public:
          << QApplication::translate("MarangoniTrackingDialog", "Mirror Calibration", 0)
          << QApplication::translate("MarangoniTrackingDialog", "2 Particles Control", 0)
          << QApplication::translate("MarangoniTrackingDialog", "Multiplex test", 0)
+         << QApplication::translate("MarangoniTrackingDialog", "Closed Path Following", 0)
         );
         label_21->setText(QApplication::translate("MarangoniTrackingDialog", "Nro particles", 0));
         label->setText(QApplication::translate("MarangoniTrackingDialog", "Threshold", 0));
         threshEdit->setText(QApplication::translate("MarangoniTrackingDialog", "70", 0));
+        checkBox_orientation->setText(QApplication::translate("MarangoniTrackingDialog", "Orientation", 0));
+        groupBox_3->setTitle(QApplication::translate("MarangoniTrackingDialog", "Path", 0));
+        label_29->setText(QApplication::translate("MarangoniTrackingDialog", "A [mm]", 0));
+        label_28->setText(QApplication::translate("MarangoniTrackingDialog", "L [mm]", 0));
     } // retranslateUi
 
 };
