@@ -7,10 +7,21 @@
 float Regulation::velocity2distance(float v)
 {
     float d = (-1/1.433)*log(v/26.086);
+    if (pattern_type==1)
+        d-=pattern_radius*Factor_pixTOmm;
     return d;
 }
 
-Regulation::Regulation() {                                        //Creation of the regulation object
+void Regulation::PathIsReady()
+{
+//    qDebug()<<"NewPathReady";
+    pathready=true;
+    pathisvalid=Path_watcher.result();
+}
+
+Regulation::Regulation():
+    myPathFinding()
+{                                        //Creation of the regulation object
     qDebug()<<"Creation of Regulation object";
 
     ptsNumb = 100;                                                          //Cutting the circle into ptsNumb portions
@@ -38,60 +49,29 @@ Regulation::Regulation() {                                        //Creation of 
     x_obst = 545;                                     //position of the obstacle
     y_obst = 298;                       //For now, I just replace the default position found by Adrien, but in the future, this should always be inserted in the program
 
+    shield_dLim=160;
+    shield_fHys=1.3;
 
+    firstpath=true;
+    pathready=false;
+
+    QObject::connect(&Path_watcher, SIGNAL(finished()), this, SLOT(PathIsReady()));
 }
 
-
-void Regulation::Configure (int type_regulation, int type_target, float r){
-
-    regulation_type = type_regulation; target_type = type_target; radius = r;
-    increment = 0;
-    counter = 0;
-
-    //k_p =kp;    T_i =Ti;    T_d = Td; T_t =Tt;    T_s = Tsamp;  k_ff = Usat;
-
-    //        k_p =2.6653; T_i =20.2429;  T_t =0.00164; T_s = 0.0666; 15FPS for some reasons   k_ff = 0.7;
-            k_p =2.6653;
-            T_i =20.2429;                                          //Creation of the regulator parameters
-            T_t =0.00164;
-            T_s = 0.0666;                                          //IDS limited to 15FPS for some reasons
-            k_ff = 0.7;
-
-
-    u_i = 0;
-    u = 0;                                                                      //reset of internal states of the regulator and actuation variable
-    u_sat = 0;
-    objectifReached = false;
-
-
-    //parameters for Regulator2017 Dot only ADRIEN
-    if (regulation_type == 3) {
-//        k_p =2.6653;
-//        T_i =20.2429;                                          //Creation of the regulator parameters
-//        T_t =0.00164;
-//        T_s = 0.0666;                                          //IDS limited to 15FPS for some reasons
-//        k_ff = 0.7;
-
-        u0 = 0;          // state u(k)
-        u1 = 0;          // state u(k-1)
-        e0 = 0;          // state e(k)
-        e1 = 0;          // state e(k-1)
-
-        x_obst = 545;                                     //position of the obstacle
-        y_obst = 298;
-    }
+void Regulation::Configure_Figure(float r_Figure, float a_Figure)
+{
+    pattern_radius=r_Figure;
+    pattern_aux=a_Figure;
 }
 
-
-
-void Regulation::Configure_FB (int program_ID, float r_Figure, int x_target, int y_target, float kp, float Ti, float Td, float Tt, float Usat, float Tsamp){
+void Regulation::Configure_FB (float kp, float Ti, float Td, float Tt, float Usat, float Tsamp){
 
      //prog_mode = program_ID/100;        // 0 for identification    1 for feedback control   2 Feedback+Feedforward control
      //pattern_type = program_ID%100;     // 0 for point-wise pattern     1 for arc+circle pattern
 
      target_type=0;                 //NOTE THIS IS JUST TO CHECK WHERE this variable gets its weird value
 
-     radius = r_Figure;
+
     increment = 0;
     counter = 0;
     k_p =kp;    T_i =Ti;    T_d = Td;  T_s = Tsamp;  //Feedback Controller gains and sampling time
@@ -516,110 +496,103 @@ void Regulation::Configure_FF(float x_obstacle, float y_obstacle, float Kff)
 
 
 
-void Regulation::run_Traj_Generator(float x_particle, float y_particle, float x_targ, float y_targ){
-    //FRAMECOUNTER++;         //Has a value of 1 here already
-//    if (Flag_LinearTracking)     //To define the trajectory, I must define where is the particle and where it should go.
-//    {
-        if (FRAMECOUNTER==1)
-        {
-            x_traj.append(x_particle);   y_traj.append(y_particle);
-            float Des_Velocity = 4.0/Factor_pixTOmm;           //Stablish a given desired velocity in mm/s and convert it to mm/s
-            float Des_direction = atan2(y_targ-y_particle,x_targ-x_particle );
-            float size_traj= abs((x_targ-x_particle)/(Des_Velocity*T_s*cos(Des_direction)))+1;          //Number of parts on which to split the vector the +1 is to compensate the added initial value
-            int ii=1;
+//void Regulation::run_Traj_Generator(float x_particle, float y_particle, float x_targ, float y_targ){
+//    //FRAMECOUNTER++;         //Has a value of 1 here already
+////    if (Flag_LinearTracking)     //To define the trajectory, I must define where is the particle and where it should go.
+////    {
+//        if (FRAMECOUNTER==1)
+//        {
+//            x_traj.append(x_particle);   y_traj.append(y_particle);
+//            float Des_Velocity = 4.0/Factor_pixTOmm;           //Stablish a given desired velocity in mm/s and convert it to mm/s
+//            float Des_direction = atan2(y_targ-y_particle,x_targ-x_particle );
+//            float size_traj= abs((x_targ-x_particle)/(Des_Velocity*T_s*cos(Des_direction)))+1;          //Number of parts on which to split the vector the +1 is to compensate the added initial value
+//            int ii=1;
 
-            qDebug() << "Desired velocity and direction"<<Des_Velocity  << Des_direction;
-            qDebug() << "Particle position "<<x_traj.at(0)  << y_traj.at(0);
-            qDebug() << "Target position "<<x_targ  << y_targ;
-            qDebug() << "Number of points "<<size_traj  << floor(size_traj);
+//            qDebug() << "Desired velocity and direction"<<Des_Velocity  << Des_direction;
+//            qDebug() << "Particle position "<<x_traj.at(0)  << y_traj.at(0);
+//            qDebug() << "Target position "<<x_targ  << y_targ;
+//            qDebug() << "Number of points "<<size_traj  << floor(size_traj);
 
-            for (ii = 1 ; ii < floor(size_traj); ii++)
-            {
-                x_traj.append(x_traj[ii-1] +Des_Velocity*T_s*cos(Des_direction) );     //I create the trajectory based on finite differences X + deltaX
-                y_traj.append(y_traj[ii-1] +Des_Velocity*T_s*sin(Des_direction) );
+//            for (ii = 1 ; ii < floor(size_traj); ii++)
+//            {
+//                x_traj.append(x_traj[ii-1] +Des_Velocity*T_s*cos(Des_direction) );     //I create the trajectory based on finite differences X + deltaX
+//                y_traj.append(y_traj[ii-1] +Des_Velocity*T_s*sin(Des_direction) );
 
-            }
-             x_traj.append(x_targ);     y_traj.append(y_targ);                      //As a last step, append the target value to the array
+//            }
+//             x_traj.append(x_targ);     y_traj.append(y_targ);                      //As a last step, append the target value to the array
 
-            for (ii = 0; ii < x_traj.size(); ii++) {
+//            for (ii = 0; ii < x_traj.size(); ii++) {
 
-                qDebug() << x_traj.at(ii)  << y_traj.at(ii);
+//                qDebug() << x_traj.at(ii)  << y_traj.at(ii);
 
-            }
+//            }
 
-        }
+//        }
 
-        //I will enter this cycle even with the value of 1, which is that even in the first iteration I should be moving somewhere
-        if (FRAMECOUNTER<=x_traj.size())
-        {
-                    x_targ = x_traj[FRAMECOUNTER];      y_targ = y_traj[FRAMECOUNTER];      //Assign the target position from the list as long as there are elements
-                    qDebug() << "Current target" << x_targ  << y_targ;
-        } else if (FRAMECOUNTER> x_traj.size())
-        {                                                                                   //IN THEORY I SHOULD NEVER REACH THIS STATE
-            //x_targ = x_traj.last();         y_targ = y_traj.last();                         //When there are no more elements, just keep the last element
-            x_targ = x_particle;            y_targ = y_particle;                           //Alternatively, we can stop the tracking by saying that the particle is at the target location which would force the controller to stop
-            qDebug() << "Current target" << x_targ  << y_targ;
-        }
+//        //I will enter this cycle even with the value of 1, which is that even in the first iteration I should be moving somewhere
+//        if (FRAMECOUNTER<=x_traj.size())
+//        {
+//                    x_targ = x_traj[FRAMECOUNTER];      y_targ = y_traj[FRAMECOUNTER];      //Assign the target position from the list as long as there are elements
+//                    qDebug() << "Current target" << x_targ  << y_targ;
+//        } else if (FRAMECOUNTER> x_traj.size())
+//        {                                                                                   //IN THEORY I SHOULD NEVER REACH THIS STATE
+//            //x_targ = x_traj.last();         y_targ = y_traj.last();                         //When there are no more elements, just keep the last element
+//            x_targ = x_particle;            y_targ = y_particle;                           //Alternatively, we can stop the tracking by saying that the particle is at the target location which would force the controller to stop
+//            qDebug() << "Current target" << x_targ  << y_targ;
+//        }
 
-    //}
+//    //}
 
-}
+//}
 
-int Regulation::distanceComp(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float fmin, float fhys)
+
+bool Regulation::run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ)
 {
-    float dx=x_particle2-x_particle;
-    float dy=y_particle2-y_particle;
-    float d=sqrt(dx*dx+dy*dy);
     static bool hysFlag=1;
-
-    float x_err = x_targ - x_particle;
-    float y_err = y_targ - y_particle;
-
-
-    e_0 = Factor_pixTOmm*sqrt((x_err*x_err) + (y_err*y_err));
-
-    objectifReached=e_0<0.25;
-
-    if (d<dlim*fmin){
-        hysFlag=1;
-        return 2;
-    }
-    if (hysFlag)
-        dlim*=fhys;
-    if (d<dlim){
-        hysFlag=1;
-        return 1;
-    }
-    hysFlag=0;
-    return 0;
-}
-
-void Regulation::run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float radius)
-{
     float dx=x_particle2-x_particle;
     float dy=y_particle2-y_particle;
     float d=sqrt(dx*dx+dy*dy);
     float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
-    if (pattern_type==1)
-        dL-=radius;    
+    float dTx=x_targ-x_particle;
+    float dTy=y_targ-y_particle;
+    float dT=sqrt(dTx*dTx+dTy*dTy);
+
+    float dlim=shield_dLim;
+    if (hysFlag)
+        dlim*=shield_fHys;
+    if (d>dlim){
+        hysFlag=0;
+        return false;
+    }
+    hysFlag=1;
+
     x_las=x_particle2-dL*dx/d;
     y_las=y_particle2-dL*dy/d;
     middleAngle=atan2(-dy,-dx);
+    return true;
 }
 
-void Regulation::run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float radiussent)
+bool Regulation::run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ)
 {
+    static bool hysFlag=1;
     float dx=x_particle2-x_particle;
     float dy=y_particle2-y_particle;
     float d=sqrt(dx*dx+dy*dy);
     float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
-    radius=radiussent;
-    if (pattern_type==1)
-        dL-=radius;
     float dTx=x_targ-x_particle;
     float dTy=y_targ-y_particle;
-    float dTsq=dTx*dTx+dTy*dTy;
-    float proj=(dx*dTx+dy*dTy)/dTsq;
+    float dT=sqrt(dTx*dTx+dTy*dTy);
+
+    float dlim=shield_dLim;
+    if (hysFlag)
+        dlim*=shield_fHys;
+    if (d>dlim){
+        hysFlag=0;
+        return false;
+    }
+    hysFlag=1;
+
+    float proj=(dx*dTx+dy*dTy)/dT/dT;
 
     if (proj<=0){
         x_las=x_particle2-dL*dx/d;
@@ -642,6 +615,7 @@ void Regulation::run_SmartShielding(float x_particle, float y_particle, float x_
         y_las=y_particle2+dL*dauxy/daux;
         middleAngle=atan2(dauxy,dauxx);
     }
+    return true;
 }
 
 
@@ -932,7 +906,7 @@ void Regulation::run_Cont_FF (float x_particle, float y_particle, float x_targ, 
 
 }
 
-void Regulation::run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, float aux_pattern, int direction)
+void Regulation::run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, int direction,float A_pattern_given)
 {
     float dist_LasCent;
     if (pattern_type==0){
@@ -959,8 +933,12 @@ void Regulation::run_Ident(float x_particle, float y_particle, float dist_LasPar
         y_las=y_particle;
         middleAngle=M_PI;
     }
-    pattern_radius=radius_pattern/Factor_pixTOmm;
-    pattern_aux=aux_pattern;
+    pattern_aux=A_pattern_given;pattern_radius=radius_pattern;
+}
+
+void Regulation::run_ManualMode(float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given)
+{
+    x_las=X_laser_given;y_las=Y_laser_given;middleAngle=A_laser_given;pattern_radius=R_pattern_given;pattern_aux=A_pattern_given;
 }
 
 
@@ -972,11 +950,11 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle){
 
         //To program the long formula to combine both answers
 
-        if (prog_mode==1||prog_mode==5)
+        if (prog_mode==MODE_FB||prog_mode==MODE_SHIELDING)
         {
             u_Final = u_0;                  //NOTE this should be u_feedforward + u_feedback TO CODE LATER
             theta_corr_Final = theta_corr_FB;   //NOTE this should be theta_corr_FB + theta_corr_FF TO CODE LATER
-        }else if (prog_mode==2){
+        }else if (prog_mode==MODE_FF){
              qDebug()<<"FB "<< u_0 <<"  FF  "<<u_0_FF;
             //Use equations 5.12 a and b to compose the final U and Theta_corr to send to the controller
             u_Final = sqrt(u_0*u_0 + u_0_FF*u_0_FF + 2*u_0*u_0_FF*cos(theta_corr_FF-theta_corr_FB));
@@ -1024,8 +1002,6 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle){
 
 void Regulation::get_Laser_Position_vel(float x_particle, float y_particle)
 {
-    if (true)               //Desired velocity
-    {
         //float u_Final, theta_corr_Final;
 
         //To program the long formula to combine both answers
@@ -1044,24 +1020,12 @@ void Regulation::get_Laser_Position_vel(float x_particle, float y_particle)
         x_las = x_particle + r_las_part * cos(middleAngle) /Factor_pixTOmm  ;               //Compute the laser position using the formula and converting to Pixels
         y_las = y_particle + r_las_part * sin(middleAngle) /Factor_pixTOmm ;                 //NOTE x_particle is in [pixel] and r_las_part [mm]. X_las must be in PIXELS
 
-    }
-    else
-    {
-        if (pattern_type==0)
-        {
-        x_las = 0.0;     y_las = 0.0;       //Put the laser as far away as possible from the target if the particle is inside the tolerance region OR draw the circular pattern
-        } else if (pattern_type==1)
-        {
-            //DRAW the circular pattern
-        }
-    }
-
-
 }
 
 
 
-void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given){
+void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given)
+{
     //If we are in Manual mode, assign the given laser position to the regulator object
     double angle_laser;
     double radius_pattern;
@@ -1069,11 +1033,10 @@ void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, flo
     double var_aux1;
     double var_aux2;
     double var_aux3;
-    angle_laser=A_laser_given;
+    angle_laser=A_laser_given+M_PI;
     if (patterntype != 1)
         A_pattern_given=abs(A_pattern_given);
     radius_pattern=R_pattern_given;
-    x_las = X_laser_given; y_las = Y_laser_given; middleAngle=A_laser_given-M_PI; pattern_radius=R_pattern_given; pattern_aux=A_pattern_given;
 
     //If Pattern type is arc+Circle then define the vector of components required to draw it
     if (patterntype == 1){
@@ -1146,6 +1109,11 @@ void Regulation::compute_Laser_Pattern(int patterntype, float X_laser_given, flo
     }
 }
 
+void Regulation::compute_Laser_Pattern_INT()
+{
+    compute_Laser_Pattern(pattern_type,x_las,y_las,middleAngle,pattern_radius,pattern_aux);
+}
+
 void Regulation::resetIntegratorVariables()
 {
 //    qDebug()<<"Reset regulator";
@@ -1175,7 +1143,7 @@ void Regulation::demultiplexLAserPosition(int index)
 
 void Regulation::computeClosedPath()
 {
-    qDebug()<<"Path Creation";
+    qDebug()<<"Closed Path Creation";
     path_totD=0;
     for (int i=0; i<path_N; i++){
         path_x[i]=20/Factor_pixTOmm*cos(2*M_PI*i/path_N)+512;
@@ -1198,8 +1166,8 @@ void Regulation::computeClosedPath()
         float angdiff=abs(path_A[i]-path_A[im]);
         if (angdiff>M_PI/2)
             angdiff=abs(angdiff-M_PI);
-//        path_K[i]=2*angdiff/(path_D[i]+path_D[im]);
-        qDebug()<<path_K[i];
+        path_K[i]=2*angdiff/(path_D[i]+path_D[im]);
+//        qDebug()<<path_K[i];
     }
     path_meanD=path_totD/path_N;
     path_PrevIndex=-1;
@@ -1208,10 +1176,11 @@ void Regulation::computeClosedPath()
 void Regulation::computeOpenPath()
 {
     path_totD=0;
-    for (int i=0; i<path_N; i++){
-        path_x[i]=20/Factor_pixTOmm*i/(path_N-1)+512-10/Factor_pixTOmm;
-        path_y[i]=10/Factor_pixTOmm*sin(5*M_PI*i/(path_N-1))+512;
-    }
+//    qDebug()<<"Open Path computation";
+//    for (int i=0; i<path_N; i++){
+//        path_x[i]=20/Factor_pixTOmm*i/(path_N-1)+512-10/Factor_pixTOmm;
+//        path_y[i]=10/Factor_pixTOmm*sin(5*M_PI*i/(path_N-1))+512;
+//    }
     for (int i=0; i<path_N-1; i++){
         int ip=i+1;
         path_A[i]=atan2(path_y[ip]-path_y[i],path_x[ip]-path_x[i]);
@@ -1316,10 +1285,10 @@ void Regulation::run_ClosedPath_Following(float x_particle, float y_particle)
     path_PrevIndex=indexmin;
 }
 
-void Regulation::run_openPath_Following(float x_particle, float y_particle)
+void Regulation::run_OpenPath_Following(float x_particle, float y_particle)
 {
     int indexmin;
-    int space=50;
+    int space=20;
     float dxmin, dymin, d2min;
     if (path_PrevIndex<0){
         indexmin=0;
@@ -1397,4 +1366,71 @@ void Regulation::run_openPath_Following(float x_particle, float y_particle)
     u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm)*(1-exp(-path_Dac[indexmin]*Factor_pixTOmm/2.0));
 
     path_PrevIndex=indexmin;
+}
+
+void Regulation::FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart)
+{
+    if (Nrpart<1)
+        return;
+    if (firstpath){
+        qDebug()<<"First path finding";
+        PathFinding_sendPosI(partX[0],partY[0]);
+        PathFinding_sendTarget(xtarg,ytarg);
+//        PathFinding_addObs(partX[1],partY[1]);
+        for (int i=1;i<Nrpart;i++){
+            PathFinding_addObs(partX[i],partY[i]);
+//            qDebug()<<"Added Obstacle: "<<partX[i]<<partY[i];
+        }
+        pathready=PathFinding_run();
+        if (pathready)
+            firstpath=false;
+    }
+    if (pathready){
+        if (pathisvalid){
+            for (int i=0; i<200; i++){
+                path_x[i]=myPathFinding.PathX_B[i];
+                path_y[i]=myPathFinding.PathY_B[i];
+            }
+            path_PrevIndex=0;
+            computeOpenPath();
+        }
+        PathFinding_sendPosI(partX[0],partY[0]);
+        PathFinding_sendTarget(xtarg,ytarg);
+//        PathFinding_addObs(partX[1],partY[1]);
+        for (int i=1;i<Nrpart;i++){
+            PathFinding_addObs(partX[i],partY[i]);
+//            qDebug()<<"Added obstacle: "<<partX[i]<<partY[i];
+        }
+        pathready=false;
+        qDebug()<<"New Path Calculation";
+        Path_future = QtConcurrent::run(this,&Regulation::PathFinding_run);
+        Path_watcher.setFuture(Path_future);
+    }else{
+        qDebug()<<"Path searching in process";
+    }
+}
+
+bool Regulation::PathFinding_run()
+{
+    return myPathFinding.run();
+}
+
+void Regulation::PathFinding_sendPosI(float x, float y)
+{
+    myPathFinding.sendPosI(x,y);
+}
+
+void Regulation::PathFinding_sendTarget(float x, float y)
+{
+    myPathFinding.sendTarget(x,y);
+}
+
+void Regulation::PathFinding_addObs(float x, float y)
+{
+    myPathFinding.addObs(x,y);
+}
+
+void Regulation::PathFinding_clearObs()
+{
+    myPathFinding.clearObs();
 }

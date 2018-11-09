@@ -732,6 +732,16 @@
      <widget class="QComboBox" name="cbox_OpMode">
       <item>
        <property name="text">
+        <string>Manual Mode</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Mirror Calibration</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Identification</string>
        </property>
       </item>
@@ -747,27 +757,22 @@
       </item>
       <item>
        <property name="text">
-        <string>Manual Mode</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Mirror Calibration</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>2 Particles Control</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Multiplex test</string>
+        <string>Shielding</string>
        </property>
       </item>
       <item>
        <property name="text">
         <string>Closed Path Following</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Path Finding</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Multiplex test</string>
        </property>
       </item>
      </widget>
@@ -894,7 +899,7 @@
    <property name="flat">
     <bool>false</bool>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>9</x>

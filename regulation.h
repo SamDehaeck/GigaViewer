@@ -1,14 +1,28 @@
 #include <iostream>
 #include <QtCore>
 #include <QObject>
+#include "pathfinding.h"
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
+
 //#include <boost/math/special_functions/bessel.hpp>
 
 #ifndef REGULATION_H
 #define REGULATION_H
 
-class Regulation
-{
+#define MODE_MANUAL 0
+#define MODE_MIRROR 1
+#define MODE_IDENT 2
+#define MODE_FB 3
+#define MODE_FF 4
+#define MODE_SHIELDING 5
+#define MODE_CLOSEDPATH 6
+#define MODE_PATHFIND 7
+#define MODE_MULTIPLEX 8
 
+class Regulation: public QObject
+{
+    Q_OBJECT
 private:
 
     int flag;
@@ -52,36 +66,45 @@ private:
 
 
     int increment;
-    float radius;
 
     float getAlpha (float thing_part_x, float thing_part_y);
     float velocity2distance(float v);
 
+    pathfinding myPathFinding;
+    bool firstpath, pathready, pathisvalid;
+    QFutureWatcher<bool> Path_watcher;
+    QFuture<bool> Path_future;
+
+    float shield_dLim, shield_fHys;
+
+
+
 public:
     Regulation();
-    void Configure (int type_regulation, int type_target, float r); 	//Must be called when "track" is pressed
-    void Configure_FB (int program_ID, float r_Figure, int x_target, int y_target, float kp, float Ti, float Td, float Tt, float Usat, float Tsamp);  //OverCharged Version that accepts more inputs
+    void Configure_Figure(float r_Figure, float a_Figure);
+    void Configure_FB (float kp, float Ti, float Td, float Tt, float Usat, float Tsamp);  //OverCharged Version that accepts more inputs
 
     void Configure_FF(float x_obstacle, float y_obstacle, float Kff);   //To configure the FeedFoward controller only
-    void Regulator2016(float particle_x, float particle_y);             //Must be called when the position of the particule moves...
+//    void Regulator2016(float particle_x, float particle_y);             //Must be called when the position of the particule moves...
                                                                         //Dimitri's version
-    void Regulator2017(float particle_x, float particle_y);             //Must be called when the position of the particule moves
+//    void Regulator2017(float particle_x, float particle_y);             //Must be called when the position of the particule moves
                                                                         //Adrien's version
     void run_Cont_FB(float x_particle, float y_particle, float x_targ, float y_targ);               //General routine to compute the error and the input of the FeedBack controller
     void run_Cont_FB_vel(float x_particle, float y_particle);
     void run_Cont_FF(float x_particle, float y_particle, float x_targ, float y_targ);              //General routine to compute the error and the input of the FeedForward controller
 
-    void run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, float aux_pattern, int direction);
-    void run_Traj_Generator(float x_particle, float y_particle, float x_targ, float y_targ);      //Routine to create and ASSIGN the required points of a trajectory
+    void run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, int direction,float A_pattern_given);
+//    void run_Traj_Generator(float x_particle, float y_particle, float x_targ, float y_targ);      //Routine to create and ASSIGN the required points of a trajectory
+    void run_ManualMode(float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given);
 
-    int distanceComp(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float dlim, float fmin, float fhys);
-    void run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float radius);
-    void run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ, float radius);
+
+    bool run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ);
+    bool run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ);
 
     void get_Laser_Position(float particle_x, float particle_y);
     void get_Laser_Position_vel(float x_particle, float y_particle);
     void compute_Laser_Pattern(int patterntype, float X_laser_given, float Y_laser_given, float A_laser_given, float R_pattern_given, float A_pattern_given);
-
+    void compute_Laser_Pattern_INT();
     void resetIntegratorVariables();
 
     void multiplexLAserPosition(int index);
@@ -91,7 +114,14 @@ public:
     void computeOpenPath();
 
     void run_ClosedPath_Following(float x_particle, float y_particle);
-    void run_openPath_Following(float x_particle, float y_particle);
+    void run_OpenPath_Following(float x_particle, float y_particle);
+
+    void FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart);
+    bool PathFinding_run();
+    void PathFinding_sendPosI(float x, float y);
+    void PathFinding_sendTarget(float x, float y);
+    void PathFinding_addObs(float x, float y);
+    void PathFinding_clearObs();
 
     int regulation_type, pattern_type;                                            //used to define which type of figure is used
     int target_type, prog_mode;                                                //used to define if a step or a traking reference is used (step = 0, tracking = 1)
@@ -145,7 +175,7 @@ public:
 
     double u_Final, theta_corr_Final;   //Final u values to send to the controller
 
-    float path_x[200];                                            //Variables used for the figure drawing
+    float path_x[200];                                            //Variables used for the path following
     float path_y[200];
     int path_N;
     float path_A[200];
@@ -157,6 +187,9 @@ public:
     float path_totD;
     float path_meanD;
     int path_PrevIndex;
+
+public slots:
+    void PathIsReady();
 
 
 };

@@ -42,11 +42,12 @@ private:
     MirrorControl mirCtrl;          //Mirror object used to access to the MirrorControl functions
 #endif
 
-    float Ppoint[2][10], Ppoint_minus_1[2][10];
+    float PpointX[10], PpointY[10];
+    float PpointX_minus_1[10], PpointY_minus_1[10];
     float Pangle[10], Pangle_minus_1[10];
     std::vector<std::vector<cv::Point>> contoursP;
     std::vector<cv::Vec4i> hierachyP;
-    bool orderPart(float point[][10], float point_minus_1[][10], float angle[], float angle_minus_[], int Nro);
+    bool orderPart();
 
     void analizeImage(ImagePacket& currIm);
 
@@ -63,6 +64,8 @@ private:
     bool initializeMirror();       //Used to initialize the MEM
     void closeMirror();            //Must be called when the the experiment is over to close the mirror
 #endif
+
+    void ThreadsTest();
 
 public:
     MarangoniTracking();

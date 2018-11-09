@@ -104,7 +104,7 @@ public:
     QSpacerItem *verticalSpacer;
     QCheckBox *checkBox_orientation;
     QGroupBox *groupBox_3;
-    QWidget *widget;
+    QWidget *layoutWidget1;
     QFormLayout *formLayout;
     QLineEdit *line_PathL;
     QLabel *label_29;
@@ -451,29 +451,29 @@ public:
         groupBox_3->setGeometry(QRect(370, 340, 191, 61));
         groupBox_3->setAlignment(Qt::AlignCenter);
         groupBox_3->setFlat(false);
-        widget = new QWidget(groupBox_3);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(9, 10, 171, 73));
-        formLayout = new QFormLayout(widget);
+        layoutWidget1 = new QWidget(groupBox_3);
+        layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
+        layoutWidget1->setGeometry(QRect(9, 10, 171, 73));
+        formLayout = new QFormLayout(layoutWidget1);
         formLayout->setObjectName(QStringLiteral("formLayout"));
         formLayout->setContentsMargins(0, 0, 0, 0);
-        line_PathL = new QLineEdit(widget);
+        line_PathL = new QLineEdit(layoutWidget1);
         line_PathL->setObjectName(QStringLiteral("line_PathL"));
 
         formLayout->setWidget(0, QFormLayout::FieldRole, line_PathL);
 
-        label_29 = new QLabel(widget);
+        label_29 = new QLabel(layoutWidget1);
         label_29->setObjectName(QStringLiteral("label_29"));
         label_29->setWordWrap(true);
 
         formLayout->setWidget(1, QFormLayout::LabelRole, label_29);
 
-        line_PathA = new QLineEdit(widget);
+        line_PathA = new QLineEdit(layoutWidget1);
         line_PathA->setObjectName(QStringLiteral("line_PathA"));
 
         formLayout->setWidget(1, QFormLayout::FieldRole, line_PathA);
 
-        label_28 = new QLabel(widget);
+        label_28 = new QLabel(layoutWidget1);
         label_28->setObjectName(QStringLiteral("label_28"));
         label_28->setWordWrap(true);
 
@@ -572,14 +572,15 @@ public:
         label_6->setText(QApplication::translate("MarangoniTrackingDialog", "Mode", 0));
         cbox_OpMode->clear();
         cbox_OpMode->insertItems(0, QStringList()
+         << QApplication::translate("MarangoniTrackingDialog", "Manual Mode", 0)
+         << QApplication::translate("MarangoniTrackingDialog", "Mirror Calibration", 0)
          << QApplication::translate("MarangoniTrackingDialog", "Identification", 0)
          << QApplication::translate("MarangoniTrackingDialog", "Control FeedBack", 0)
          << QApplication::translate("MarangoniTrackingDialog", "Control FeedForward", 0)
-         << QApplication::translate("MarangoniTrackingDialog", "Manual Mode", 0)
-         << QApplication::translate("MarangoniTrackingDialog", "Mirror Calibration", 0)
-         << QApplication::translate("MarangoniTrackingDialog", "2 Particles Control", 0)
-         << QApplication::translate("MarangoniTrackingDialog", "Multiplex test", 0)
+         << QApplication::translate("MarangoniTrackingDialog", "Shielding", 0)
          << QApplication::translate("MarangoniTrackingDialog", "Closed Path Following", 0)
+         << QApplication::translate("MarangoniTrackingDialog", "Path Finding", 0)
+         << QApplication::translate("MarangoniTrackingDialog", "Multiplex test", 0)
         );
         label_21->setText(QApplication::translate("MarangoniTrackingDialog", "Nro particles", 0));
         label->setText(QApplication::translate("MarangoniTrackingDialog", "Threshold", 0));
