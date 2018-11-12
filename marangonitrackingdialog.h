@@ -18,6 +18,9 @@ public:
 signals:
     void stateChanged(QMap<QString,QVariant> newSettings);
 
+public slots:
+    void GotnewFps(int fps);
+
 private slots:
     void on_activateBox_stateChanged(int val);
 
@@ -52,6 +55,8 @@ private slots:
     void on_line_PathL_textChanged(const QString &arg1);
 
     void on_line_PathA_textChanged(const QString &arg1);
+
+    void on_line_PathD_textChanged(const QString &arg1);
 
     void on_line_kp_editingFinished();
 

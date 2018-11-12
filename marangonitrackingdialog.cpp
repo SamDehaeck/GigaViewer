@@ -57,6 +57,7 @@ bool MarangoniTrackingDialog::extractData() {
 
     settings["PathL"] = ui->line_PathL->text();
     settings["PathA"] = ui->line_PathA->text();
+    settings["PathD"] = ui->line_PathA->text();
 
     emit stateChanged(settings);
 
@@ -74,6 +75,13 @@ bool MarangoniTrackingDialog::extractData() {
 MarangoniTrackingDialog::~MarangoniTrackingDialog()
 {
     delete ui;
+}
+
+void MarangoniTrackingDialog::GotnewFps(int fps)
+{
+    QString value=QString::number((float)fps/1000.0);
+    ui->line_Tsamp->clear();       ui->line_Tsamp->insert(value);
+    extractData();
 }
 
 void MarangoniTrackingDialog::on_activateBox_stateChanged(int val)
@@ -211,43 +219,33 @@ void MarangoniTrackingDialog::on_cbox_PatternType_currentIndexChanged(int index)
     int Program_Id = ui->cbox_OpMode->currentIndex()*100 + ui->cbox_PatternType->currentIndex();
             ; //By default everything is in the mode Point-wise with FB
 
-    if( Program_Id == 100||Program_Id == 500 )         //Change gains to Point-wise  + FeedBack
+    if( Program_Id == 300||Program_Id == 500||Program_Id == 700||Program_Id == 800 )         //Change gains to Point-wise  + FeedBack
         { ui->line_kp->clear();      ui->line_kp->insert("3.0933");
         ui->line_Ti->clear();       ui->line_Ti->insert("1.8521");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("28.309");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
 
-    } else if( Program_Id == 101||Program_Id == 501 ) //Change gains to Arc/Circle  + FeedBack
+    } else if( Program_Id == 301||Program_Id == 501||Program_Id == 701||Program_Id == 801 ) //Change gains to Arc/Circle  + FeedBack
     {ui->line_kp->clear();      ui->line_kp->insert("0.4558");
         ui->line_Ti->clear();       ui->line_Ti->insert("0.11158");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
 
-    } else if( Program_Id ==200 ) //Change gains to Point-wise  + FeedForward
+    } else if( Program_Id ==400 ) //Change gains to Point-wise  + FeedForward
     {ui->line_kp->clear();      ui->line_kp->insert("2.6653");
         ui->line_Ti->clear();       ui->line_Ti->insert("20.2429");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
-        ui->line_Tt->clear();       ui->line_Tt->insert("305.644");
+        ui->line_Tt->clear();       ui->line_Tt->insert("0.00164");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.7");
 
-    }   else if( Program_Id ==201 ) //Change gains to Arc/Circle + FeedForward
+    }   else if( Program_Id ==401 ) //Change gains to Arc/Circle + FeedForward
     {ui->line_kp->clear();      ui->line_kp->insert("0.0");
         ui->line_Ti->clear();       ui->line_Ti->insert("0.0");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.0");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
-
-    } else if( Program_Id == 700) //Path following
-    {ui->line_kp->clear();      ui->line_kp->insert("0.5603");
-        ui->line_Ti->clear();       ui->line_Ti->insert("0.1267");
-        ui->line_Td->clear();       ui->line_Td->insert("0.0");
-        ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
-        ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
-        ui->line_PathL->clear();    ui->line_PathL->insert("1");
-        ui->line_PathA->clear();    ui->line_PathA->insert("5");
-
     }
 
 
@@ -260,42 +258,33 @@ void MarangoniTrackingDialog::on_cbox_OpMode_currentIndexChanged(int index)
     int Program_Id = ui->cbox_OpMode->currentIndex()*100 + ui->cbox_PatternType->currentIndex();
             ; //By default everything is in the mode Point-wise with FB
 
-    if( Program_Id == 100||Program_Id == 500 )         //Change gains to Point-wise  + FeedBack
+    if( Program_Id == 300||Program_Id == 500||Program_Id == 700||Program_Id == 800 )         //Change gains to Point-wise  + FeedBack
         { ui->line_kp->clear();      ui->line_kp->insert("3.0933");
         ui->line_Ti->clear();       ui->line_Ti->insert("1.8521");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("28.309");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
 
-    } else if( Program_Id == 101||Program_Id == 501 ) //Change gains to Arc/Circle  + FeedBack
+    } else if( Program_Id == 301||Program_Id == 501||Program_Id == 701||Program_Id == 801 ) //Change gains to Arc/Circle  + FeedBack
     {ui->line_kp->clear();      ui->line_kp->insert("0.4558");
         ui->line_Ti->clear();       ui->line_Ti->insert("0.11158");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
 
-    } else if( Program_Id ==200 ) //Change gains to Point-wise  + FeedForward
+    } else if( Program_Id ==400 ) //Change gains to Point-wise  + FeedForward
     {ui->line_kp->clear();      ui->line_kp->insert("2.6653");
         ui->line_Ti->clear();       ui->line_Ti->insert("20.2429");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.00164");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.7");
 
-    }   else if( Program_Id ==201 ) //Change gains to Arc/Circle + FeedForward
+    }   else if( Program_Id ==401 ) //Change gains to Arc/Circle + FeedForward
     {ui->line_kp->clear();      ui->line_kp->insert("0.0");
         ui->line_Ti->clear();       ui->line_Ti->insert("0.0");
         ui->line_Td->clear();       ui->line_Td->insert("0.0");
         ui->line_Tt->clear();       ui->line_Tt->insert("0.0");
         ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
-
-    } else if( Program_Id == 700) //Path following
-    {ui->line_kp->clear();      ui->line_kp->insert("0.5603");
-        ui->line_Ti->clear();       ui->line_Ti->insert("0.1267");
-        ui->line_Td->clear();       ui->line_Td->insert("0.0");
-        ui->line_Tt->clear();       ui->line_Tt->insert("0.37");
-        ui->line_Kff->clear();      ui->line_Kff->insert("0.0");
-        ui->line_PathL->clear();    ui->line_PathL->insert("1");
-        ui->line_PathA->clear();    ui->line_PathA->insert("5");
 
     }
 
@@ -347,6 +336,11 @@ void MarangoniTrackingDialog::on_line_PathL_textChanged(const QString &arg1)
 }
 
 void MarangoniTrackingDialog::on_line_PathA_textChanged(const QString &arg1)
+{
+    extractData();
+}
+
+void MarangoniTrackingDialog::on_line_PathD_textChanged(const QString &arg1)
 {
     extractData();
 }

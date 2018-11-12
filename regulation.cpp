@@ -7,7 +7,7 @@
 float Regulation::velocity2distance(float v)
 {
     float d = (-1/1.433)*log(v/26.086);
-    if (pattern_type==1)
+    if (pattern_type!=PATTERN_POINT)
         d-=pattern_radius*Factor_pixTOmm;
     return d;
 }
@@ -54,6 +54,10 @@ Regulation::Regulation():
 
     firstpath=true;
     pathready=false;
+    path_searchspace=20;
+
+    for (int i=0; i<10; i++)
+        shield_HysFlag[i]=false;
 
     QObject::connect(&Path_watcher, SIGNAL(finished()), this, SLOT(PathIsReady()));
 }
@@ -572,6 +576,55 @@ bool Regulation::run_Shielding(float x_particle, float y_particle, float x_parti
     return true;
 }
 
+bool Regulation::run_Shielding_mult(float partX[], float partY[], float x_targ, float y_targ, int NrPart, int ContPart)
+{
+//    int countpart=0;
+    if (NrPart<2||ContPart>=NrPart)
+        return false;
+    float x_particle = partX[ContPart];
+    float y_particle = partY[ContPart];
+    float dxmin, dymin, dmin;
+    int indexmin=0;
+    dmin=10000;
+    for (int i=0; i<NrPart; i++){
+        if (i!=ContPart){
+            float dx=partX[i]-x_particle;
+            float dy=partY[i]-y_particle;
+            float d=sqrt(dx*dx+dy*dy);
+            float dlim=shield_dLim;
+            if (shield_HysFlag[i])
+                dlim*=shield_fHys;
+            if (d>dlim){
+                shield_HysFlag[i]=false;
+            }else{
+                shield_HysFlag[i]=true;
+//                countpart++;
+            }
+            if (d<dmin&&shield_HysFlag[i]){
+                dxmin=dx;
+                dymin=dy;
+                dmin=d;
+                indexmin=i;
+            }
+        }else{
+            shield_HysFlag[i]=false;
+        }
+    }
+//    qDebug()<<"Particles inside shielding distance: "<<countpart;
+    if (shield_HysFlag[indexmin]==0){
+        return false;
+    }
+    float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
+    float dTx=x_targ-x_particle;
+    float dTy=y_targ-y_particle;
+    float dT=sqrt(dTx*dTx+dTy*dTy);
+
+    x_las=partX[indexmin]-dL*dxmin/dmin;
+    y_las=partY[indexmin]-dL*dymin/dmin;
+    middleAngle=atan2(-dymin,-dxmin);
+    return true;
+}
+
 bool Regulation::run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ)
 {
     static bool hysFlag=1;
@@ -617,6 +670,77 @@ bool Regulation::run_SmartShielding(float x_particle, float y_particle, float x_
     }
     return true;
 }
+
+bool Regulation::run_SmartShielding_mult(float partX[], float partY[], float x_targ, float y_targ, int NrPart, int ContPart)
+{
+//    int countpart=0;
+    if (NrPart<2||ContPart>=NrPart)
+        return false;
+    float x_particle = partX[ContPart];
+    float y_particle = partY[ContPart];
+    float dxmin, dymin, dmin;
+    int indexmin=0;
+    dmin=10000;
+    for (int i=0; i<NrPart; i++){
+        if (i!=ContPart){
+            float dx=partX[i]-x_particle;
+            float dy=partY[i]-y_particle;
+            float d=sqrt(dx*dx+dy*dy);
+            float dlim=shield_dLim;
+            if (shield_HysFlag[i])
+                dlim*=shield_fHys;
+            if (d>dlim){
+                shield_HysFlag[i]=false;
+            }else{
+                shield_HysFlag[i]=true;
+//                countpart++;
+            }
+            if (d<dmin&&shield_HysFlag[i]){
+                dxmin=dx;
+                dymin=dy;
+                dmin=d;
+                indexmin=i;
+            }
+        }else{
+            shield_HysFlag[i]=false;
+        }
+    }
+//    qDebug()<<"Particles inside shielding distance: "<<countpart;
+    if (shield_HysFlag[indexmin]==0){
+        return false;
+    }
+
+    float dL=velocity2distance(U_sat_global)/Factor_pixTOmm;
+    float dTx=x_targ-x_particle;
+    float dTy=y_targ-y_particle;
+    float dT=sqrt(dTx*dTx+dTy*dTy);
+
+    float proj=(dxmin*dTx+dymin*dTy)/dT/dT;
+
+    if (proj<=0){
+        x_las=partX[indexmin]-dL*dxmin/dmin;
+        y_las=partY[indexmin]-dL*dymin/dmin;
+        middleAngle=atan2(-dymin,-dxmin);
+    }else if(proj>=1){
+        float dT2x=x_targ-partX[indexmin];
+        float dT2y=y_targ-partY[indexmin];
+        float dT2=sqrt(dT2x*dT2x+dT2y*dT2y);
+        x_las=partX[indexmin]+dL*dT2x/dT2;
+        y_las=partY[indexmin]+dL*dT2y/dT2;
+        middleAngle=atan2(dT2y,dT2x);
+    }else{
+        float x_aux=x_particle+proj*dTx;
+        float y_aux=y_particle+proj*dTy;
+        float dauxx=x_aux-partX[indexmin];
+        float dauxy=y_aux-partY[indexmin];
+        float daux=sqrt(dauxx*dauxx+dauxy*dauxy);
+        x_las=partX[indexmin]+dL*dauxx/daux;
+        y_las=partY[indexmin]+dL*dauxy/daux;
+        middleAngle=atan2(dauxy,dauxx);
+    }
+    return true;
+}
+
 
 
 
@@ -909,26 +1033,26 @@ void Regulation::run_Cont_FF (float x_particle, float y_particle, float x_targ, 
 void Regulation::run_Ident(float x_particle, float y_particle, float dist_LasPart, float radius_pattern, int direction,float A_pattern_given)
 {
     float dist_LasCent;
-    if (pattern_type==0){
+    if (pattern_type==PATTERN_POINT){
         dist_LasCent=dist_LasPart;
     }else{
         dist_LasCent=dist_LasPart-radius_pattern;
     }
     dist_LasCent/=Factor_pixTOmm;
-    if (direction==0){
+    if (direction==IDENT_BOTTOM){
         x_las=x_particle;
-        y_las=y_particle-dist_LasCent;
+        y_las=y_particle+dist_LasCent;
         middleAngle=-M_PI/2.0;
 
-    }else if(direction==1){
+    }else if(direction==IDENT_RIGHT){
         x_las=x_particle+dist_LasCent;
         y_las=y_particle;
         middleAngle=0.0;
-    }else if(direction==2){
+    }else if(direction==IDENT_TOP){
         x_las=x_particle;
-        y_las=y_particle+dist_LasCent;
+        y_las=y_particle-dist_LasCent;
         middleAngle=M_PI/2.0;
-    }else if(direction==3){
+    }else if(direction==IDENT_LEFT){
         x_las=x_particle-dist_LasCent;
         y_las=y_particle;
         middleAngle=M_PI;
@@ -988,10 +1112,10 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle){
     }
     else
     {
-        if (pattern_type==0)
+        if (pattern_type==PATTERN_POINT)
         {
         x_las = 0.0;     y_las = 0.0;       //Put the laser as far away as possible from the target if the particle is inside the tolerance region OR draw the circular pattern
-        } else if (pattern_type==1)
+        } else if (pattern_type==PATTERN_ARC)
         {
             //DRAW the circular pattern
         }
@@ -1002,11 +1126,7 @@ void Regulation::get_Laser_Position(float x_particle, float y_particle){
 
 void Regulation::get_Laser_Position_vel(float x_particle, float y_particle)
 {
-        //float u_Final, theta_corr_Final;
-
-        //To program the long formula to combine both answers
-
-
+        if (!objectifReached){
         //u_steady-state [mm/s] to r_las-part [mm]
         double r_las_part;
         if (u_0 >= 0){
@@ -1019,7 +1139,15 @@ void Regulation::get_Laser_Position_vel(float x_particle, float y_particle)
 
         x_las = x_particle + r_las_part * cos(middleAngle) /Factor_pixTOmm  ;               //Compute the laser position using the formula and converting to Pixels
         y_las = y_particle + r_las_part * sin(middleAngle) /Factor_pixTOmm ;                 //NOTE x_particle is in [pixel] and r_las_part [mm]. X_las must be in PIXELS
-
+        }else{
+            if (pattern_type==PATTERN_POINT)
+            {
+            x_las = 0.0;     y_las = 0.0;       //Put the laser as far away as possible from the target if the particle is inside the tolerance region OR draw the circular pattern
+            } else if (pattern_type==PATTERN_ARC)
+            {
+                //DRAW the circular pattern
+            }
+        }
 }
 
 
@@ -1208,7 +1336,6 @@ void Regulation::computeOpenPath()
 void Regulation::run_ClosedPath_Following(float x_particle, float y_particle)
 {
     int indexmin;
-    int space=50;
     float dxmin, dymin, d2min;
     if (path_PrevIndex<0){
         indexmin=0;
@@ -1231,30 +1358,21 @@ void Regulation::run_ClosedPath_Following(float x_particle, float y_particle)
         dxmin=x_particle-path_x[indexmin];
         dymin=y_particle-path_y[indexmin];
         d2min=dxmin*dxmin+dymin*dymin;
-        for (int i=1; i<=space; i++){
-            int ip=path_PrevIndex+i;
-            if (ip>=path_N)
-                ip-=path_N;
-            int im=path_PrevIndex-i;
-            if (im<0)
-                im+=path_N;
-            float dx=x_particle-path_x[ip];
-            float dy=y_particle-path_y[ip];
+        for (int i=-path_searchspace/2; i<=path_searchspace; i++){
+            int index=path_PrevIndex+i;
+            if (index>=path_N){
+                index-=path_N;
+            }else if (index<0){
+                index+=path_N;
+            }
+            float dx=x_particle-path_x[index];
+            float dy=y_particle-path_y[index];
             float d2=dx*dx+dy*dy;
             if (d2<d2min){
                 dxmin=dx;
                 dymin=dy;
                 d2min=d2;
-                indexmin=ip;
-            }
-            dx=x_particle-path_x[im];
-            dy=y_particle-path_y[im];
-            d2=dx*dx+dy*dy;
-            if (d2<d2min){
-                dxmin=dx;
-                dymin=dy;
-                d2min=d2;
-                indexmin=im;
+                indexmin=index;
             }
         }
     }
@@ -1281,14 +1399,13 @@ void Regulation::run_ClosedPath_Following(float x_particle, float y_particle)
     float d=-sin(angle)*dxmin+cos(angle)*dymin;
     middleAngle=angle-atan2(d,path_cL/Factor_pixTOmm)+M_PI;
     u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm);
-
+    objectifReached=false;
     path_PrevIndex=indexmin;
 }
 
 void Regulation::run_OpenPath_Following(float x_particle, float y_particle)
 {
     int indexmin;
-    int space=20;
     float dxmin, dymin, d2min;
     if (path_PrevIndex<0){
         indexmin=0;
@@ -1311,31 +1428,19 @@ void Regulation::run_OpenPath_Following(float x_particle, float y_particle)
         dxmin=x_particle-path_x[indexmin];
         dymin=y_particle-path_y[indexmin];
         d2min=dxmin*dxmin+dymin*dymin;
-        for (int i=1; i<=space; i++){
-            int ip=path_PrevIndex+i;
-            int im=path_PrevIndex-i;
-            float dx,dy,d2;
-            if (ip<path_N){
-                dx=x_particle-path_x[ip];
-                dy=y_particle-path_y[ip];
+        for (int i=-path_searchspace/2; i<=path_searchspace; i++){
+            int index=path_PrevIndex+i;
+            if (index>=0 && index<path_N){
+                float dx,dy,d2;
+                dx=x_particle-path_x[index];
+                dy=y_particle-path_y[index];
                 d2=dx*dx+dy*dy;
                 if (d2<d2min){
                     dxmin=dx;
                     dymin=dy;
                     d2min=d2;
-                    indexmin=ip;
+                    indexmin=index;
                 }
-            }
-            if (im>=0){
-            dx=x_particle-path_x[im];
-            dy=y_particle-path_y[im];
-            d2=dx*dx+dy*dy;
-            if (d2<d2min){
-                dxmin=dx;
-                dymin=dy;
-                d2min=d2;
-                indexmin=im;
-            }
             }
         }
     }
@@ -1363,22 +1468,23 @@ void Regulation::run_OpenPath_Following(float x_particle, float y_particle)
 
     float d=-sin(angle)*dxmin+cos(angle)*dymin;
     middleAngle=angle-atan2(d,path_cL/Factor_pixTOmm)+M_PI;
-    u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm)*(1-exp(-path_Dac[indexmin]*Factor_pixTOmm/2.0));
-
+    u_path=U_sat_global/(1+path_cA*path_K[indexmin]/Factor_pixTOmm)*(1-exp(-path_Dac[indexmin]*Factor_pixTOmm/path_cD));
+    objectifReached=path_Dac[indexmin]*Factor_pixTOmm<0.25;
     path_PrevIndex=indexmin;
 }
 
-void Regulation::FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart)
+void Regulation::FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart, int ContPart)
 {
-    if (Nrpart<1)
+    if (Nrpart<1||ContPart>=Nrpart)
         return;
     if (firstpath){
-        qDebug()<<"First path finding";
-        PathFinding_sendPosI(partX[0],partY[0]);
+//        qDebug()<<"First path finding";
+        PathFinding_sendPosI(partX[ContPart],partY[ContPart]);
         PathFinding_sendTarget(xtarg,ytarg);
 //        PathFinding_addObs(partX[1],partY[1]);
-        for (int i=1;i<Nrpart;i++){
-            PathFinding_addObs(partX[i],partY[i]);
+        for (int i=0;i<Nrpart;i++){
+            if (i!=ContPart)
+                PathFinding_addObs(partX[i],partY[i]);
 //            qDebug()<<"Added Obstacle: "<<partX[i]<<partY[i];
         }
         pathready=PathFinding_run();
@@ -1394,20 +1500,22 @@ void Regulation::FindPath(float partX[], float partY[], float xtarg, float ytarg
             path_PrevIndex=0;
             computeOpenPath();
         }
-        PathFinding_sendPosI(partX[0],partY[0]);
+        PathFinding_sendPosI(partX[ContPart],partY[ContPart]);
         PathFinding_sendTarget(xtarg,ytarg);
 //        PathFinding_addObs(partX[1],partY[1]);
-        for (int i=1;i<Nrpart;i++){
-            PathFinding_addObs(partX[i],partY[i]);
+        for (int i=0;i<Nrpart;i++){
+            if (i!=ContPart)
+                PathFinding_addObs(partX[i],partY[i]);
 //            qDebug()<<"Added obstacle: "<<partX[i]<<partY[i];
         }
         pathready=false;
-        qDebug()<<"New Path Calculation";
+//        qDebug()<<"New Path Calculation";
         Path_future = QtConcurrent::run(this,&Regulation::PathFinding_run);
         Path_watcher.setFuture(Path_future);
-    }else{
-        qDebug()<<"Path searching in process";
     }
+//    else{
+//        qDebug()<<"Path searching in process";
+//    }
 }
 
 bool Regulation::PathFinding_run()

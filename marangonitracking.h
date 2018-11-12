@@ -13,6 +13,7 @@
 class MarangoniTracking
 {
 private:
+    QElapsedTimer timer;
     int threshold;
     int nrParts;
     bool checkOrientation;
@@ -65,7 +66,7 @@ private:
     void closeMirror();            //Must be called when the the experiment is over to close the mirror
 #endif
 
-    void ThreadsTest();
+    void ResetLaserPatterns();
 
 public:
     MarangoniTracking();

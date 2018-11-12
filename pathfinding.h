@@ -2,6 +2,7 @@
 #define PATHFINDING_H
 #include <QVector>
 #define MAPSIZE 100
+#define SAMPLESIZEMAX 20
 
 
 
@@ -24,7 +25,8 @@ class pathfinding
     float PosObsY_map[10];
     int Nobs;
 
-    bool Mat_Blocked[MAPSIZE][MAPSIZE];
+//    bool Mat_Blocked[MAPSIZE][MAPSIZE];
+    bool Mat_Opened[MAPSIZE][MAPSIZE];
     bool Mat_Closed[MAPSIZE][MAPSIZE];
     float get_w(int x, int y);
     float get_h(int x, int y);
@@ -39,8 +41,8 @@ class pathfinding
 
     QVector<int> PathX;
     QVector<int> PathY;
-    float PathX_S[20];
-    float PathY_S[20];
+    float PathX_S[SAMPLESIZEMAX];
+    float PathY_S[SAMPLESIZEMAX];
     int Nsamp;
 
     float DobsMin, DobsMax, Wobsmax;

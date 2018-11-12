@@ -3,12 +3,12 @@
 
 pathfinding::pathfinding()
 {
-    qDebug()<<"Path finding object creation";
+    qDebug()<<"Creation of Path Finding object";
     MapSize=MAPSIZE;
     Pixsize=65.0/MapSize;
-    DobsMin=6.0;
+    DobsMin=8.0;
     DobsMax=12.0;
-    Wobsmax=10.0;
+    Wobsmax=20.0;
     Dright=Pixsize;
     Ddiagonal=sqrt(2)*Pixsize;
     D2ndOrder=sqrt(5)*Pixsize;
@@ -50,17 +50,17 @@ float pathfinding::get_h(int x, int y)
     return sqrt(dTx*dTx+dTy*dTy);
 }
 
-bool pathfinding::isBlocked(int x, int y)
-{
-    for (int n=0; n<Nobs; n++){
-        float dOx=Pixsize*(x-PosObsX_map[n]);
-        float dOy=Pixsize*(y-PosObsY_map[n]);
-        float dObs=sqrt(dOx*dOx+dOy*dOy);
-        if (dObs<DobsMin)
-            return true;
-    }
-    return false;
-}
+//bool pathfinding::isBlocked(int x, int y)
+//{
+//    for (int n=0; n<Nobs; n++){
+//        float dOx=Pixsize*(x-PosObsX_map[n]);
+//        float dOy=Pixsize*(y-PosObsY_map[n]);
+//        float dObs=sqrt(dOx*dOx+dOy*dOy);
+//        if (dObs<DobsMin)
+//            return true;
+//    }
+//    return false;
+//}
 
 int pathfinding::get_OpenSetIndex(int x, int y)
 {
@@ -145,10 +145,10 @@ void pathfinding::assignNeighbor(int x, int y, float d, int xparent, int yparent
 {
     if (x<0||x>=MapSize||y<0||y>=MapSize)
         return;
-    if (Mat_Closed[x][y]||Mat_Blocked[x][y])
+    if (Mat_Closed[x][y])//||Mat_Blocked[x][y])
         return;
-    int index=get_OpenSetIndex(x,y);
-    if (index<0){
+    if (!Mat_Opened[x][y]){
+        Mat_Opened[x][y]=true;
         OpenSetX.append(x);
         OpenSetY.append(y);
         Mat_Px[x][y]=xparent;
@@ -159,6 +159,7 @@ void pathfinding::assignNeighbor(int x, int y, float d, int xparent, int yparent
         OpenSetF.append(f);
         return;
     }else{
+        int index=get_OpenSetIndex(x,y);
         float PosG=gparent+get_w(x,y)+d;
 
         if (PosG<OpenSetG[index]){
@@ -201,19 +202,20 @@ void pathfinding::createMatrix()
     for (int i=0; i<MapSize; i++){
         for (int j=0; j<MapSize; j++)
         {
-            Mat_Blocked[i][j]=false;
+//            Mat_Blocked[i][j]=false;
+            Mat_Opened[i][j]=false;
             Mat_Closed[i][j]=false;
             Mat_Px[i][j]=-1;
             Mat_Py[i][j]=-1;
-            for (int n=0; n<Nobs; n++){
-                float dOx=Pixsize*(i-PosObsX_map[n]);
-                float dOy=Pixsize*(j-PosObsY_map[n]);
-                float dObs=sqrt(dOx*dOx+dOy*dOy);
-                if (dObs<DobsMin){
-                    Mat_Blocked[i][j]=true;
-                    break;
-                }
-            }
+//            for (int n=0; n<Nobs; n++){
+//                float dOx=Pixsize*(i-PosObsX_map[n]);
+//                float dOy=Pixsize*(j-PosObsY_map[n]);
+//                float dObs=sqrt(dOx*dOx+dOy*dOy);
+//                if (dObs<DobsMin){
+//                    Mat_Blocked[i][j]=true;
+//                    break;
+//                }
+//            }
         }
     }
 }
@@ -223,6 +225,7 @@ bool pathfinding::PathFind()
 //    qDebug()<<"Searching path, N° Obs: "<<Nobs;
     float g=get_w(PosiX_map,PosiY_map);
     float f=get_h(PosiX_map,PosiY_map)+g;
+    Mat_Opened[PosiX_map][PosiY_map]=true;
     OpenSetX.append(PosiX_map);
     OpenSetY.append(PosiY_map);
     OpenSetG.append(g);
@@ -244,6 +247,7 @@ bool pathfinding::PathFind()
         if (Ximin==targetX_map&&Yimin==targetY_map)
             return 1;
 
+        Mat_Opened[Ximin][Yimin]=false;
         Mat_Closed[Ximin][Yimin]=true;
         OpenSetX.remove(IndexMin);
         OpenSetY.remove(IndexMin);
@@ -273,7 +277,7 @@ void pathfinding::PathReconstruct()
 
 void pathfinding::PathSampling()
 {
-    if (PathX.size()<20){
+    if (PathX.size()<SAMPLESIZEMAX){
         Nsamp=PathX.size();
         for (int i=0; i<Nsamp; i++){
             PathX_S[i]=(float)PathX[i];
@@ -281,7 +285,7 @@ void pathfinding::PathSampling()
         }
 
     }else{
-        Nsamp=20;
+        Nsamp=SAMPLESIZEMAX;
         for (int i=0; i<Nsamp; i++){
             int index=qRound(i*PathX.size()/(Nsamp-1.0));
             PathX_S[i]=(float)PathX[index];

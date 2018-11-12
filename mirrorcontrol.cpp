@@ -21,7 +21,12 @@ MirrorControl::MirrorControl()
     for (int i=0; i<6; i++){
         qDebug() << "CoefY["+QString::number(i)+"]="+QString::number(coefY[i]);
     }
-
+    for (int i=0; i<10; i++)
+        LasPatterns_act[i]=false;
+    LasPatterns_Nact=0;
+    LasPatterns_CurIndex=0;
+    LasPatterns_GenAct=false;
+    LasPatterns_Time=0;
 }
 
 //Initialisation of the mirror
@@ -84,15 +89,15 @@ void MirrorControl::Closing(){
 
 
 //change mirror stream
-void MirrorControl::ChangeMirrorStream (float x_vector[100], float y_vector[100]){
+void MirrorControl::ChangeMirrorStream (float x_vector[100], float y_vector[100], int Npoints){
 	
     //Mapping: conversion from Pixel to mirrorPosition (between -1 and +1)
     float xMirr[100], yMirr[100];                                                     //100 for 180°, 68 for 122.4° and 32 for 57.6°
-    for (int i=0; i<vectorLength ; i++){
+    for (int i=0; i<Npoints ; i++){
         xMirr[i] = Pos2Vx(x_vector[i],y_vector[i]);
         yMirr[i] = Pos2Vy(x_vector[i],y_vector[i]);
     }
-    mti->SendDataStream( xMirr, yMirr, m_stream, vectorLength, 0, false );		// This call will download the buffer of data to the controller and run it when existing frame ends
+    mti->SendDataStream( xMirr, yMirr, m_stream, Npoints, 0, false );		// This call will download the buffer of data to the controller and run it when existing frame ends
 }
 
 void MirrorControl::ResetMirrorStream (){
@@ -103,23 +108,35 @@ void MirrorControl::ResetMirrorStream (){
 }
 
 //change mirror position
-void MirrorControl::ChangeMirrorPosition (float x, float y){
+//void MirrorControl::ChangeMirrorPosition (float x, float y){
 
-    double data[1] = {0.0};
-    double data2[1] = {0.0};
-    float aux= 0.0;
-    float aux2 = 0.0;
+//    double data[1] = {0.0};
+//    double data2[1] = {0.0};
+//    float aux= 0.0;
+//    float aux2 = 0.0;
 
-    data[0] =  Pos2Vx(x,y);
-    data2[0] =  Pos2Vy(x,y);
+//    data[0] =  Pos2Vx(x,y);
+//    data2[0] =  Pos2Vy(x,y);
 
-    aux = float(data[0]);		aux2= float(data2[0]);
+//    aux = float(data[0]);		aux2= float(data2[0]);
 
-    mti->SetDeviceParam( MTIParam::OutputOffsets,    aux, aux2 );
+//    mti->SetDeviceParam( MTIParam::OutputOffsets,    aux, aux2 );
+//}
+
+void MirrorControl::ChangeMirrorPosition (float x, float y)
+{
+    float xMirr=Pos2Vx(x,y);
+    float yMirr=Pos2Vy(x,y);
+    mti->SendDataStream( &xMirr, &yMirr, m_stream, 1, 0, false );
 }
 
+
+//void MirrorControl::ChangeMirrorVoltage (float x, float y){
+//    mti->SetDeviceParam( MTIParam::OutputOffsets,x,y );
+//}
+
 void MirrorControl::ChangeMirrorVoltage (float x, float y){
-    mti->SetDeviceParam( MTIParam::OutputOffsets,x,y );
+    mti->SendDataStream( &x, &y, m_stream, 1, 0, false );
 }
 
 void MirrorControl::SetSampleRate(int rate)
@@ -127,9 +144,68 @@ void MirrorControl::SetSampleRate(int rate)
     mti->SetDeviceParam(MTIParam::SampleRate, rate);
 }
 
-void MirrorControl::ResetMirrorVoltage()
+void MirrorControl::ResetMirrorOffset()
 {
     mti->SetDeviceParam( MTIParam::OutputOffsets,0.0,0.0 );
+}
+
+void MirrorControl::SetLasPattern(float xPos[], float yPos[], int NroPos, int Index, bool act)
+{
+//    qDebug()<<"New laser pos:\t"<<Index<<NroPos<<act<<xPos[0]<<yPos[0];
+    if (act && !LasPatterns_act[Index]){
+        LasPatterns_Nact++;
+    }
+    if (!act && LasPatterns_act[Index]){
+        LasPatterns_Nact--;
+    }
+    LasPatterns_act[Index]=act;
+    if (act){
+        LasPatterns_N[Index]=NroPos;
+        for (int i=0; i<NroPos; i++){
+            LasPatterns_X[Index][i]=xPos[i];
+            LasPatterns_Y[Index][i]=yPos[i];
+        }
+    }
+}
+
+void MirrorControl::SetActivate(bool act)
+{
+    LasPatterns_GenAct=act;
+}
+
+void MirrorControl::ResetLaserPatterns()
+{
+    for (int i=0; i<10; i++)
+        LasPatterns_act[i]=false;
+    LasPatterns_Nact=0;
+}
+
+void MirrorControl::RunMirror_EXT()
+{
+    Mirror_future = QtConcurrent::run(this,&MirrorControl::RunMirror_INT);
+}
+
+void MirrorControl::RunMirror_INT()
+{
+    while (LasPatterns_GenAct){
+//        qDebug()<<"Nro laser points:\t"<<LasPatterns_Nact;
+        if (LasPatterns_Nact>0){
+            while (!LasPatterns_act[LasPatterns_CurIndex]){
+                AdvanceCurrentIndex();
+            }
+//            qDebug()<<"Treating position:\t"<<LasPatterns_CurIndex;
+            ChangeMirrorStream(LasPatterns_X[LasPatterns_CurIndex],LasPatterns_Y[LasPatterns_CurIndex],LasPatterns_N[LasPatterns_CurIndex]);
+#ifdef Q_OS_WIN32
+            Sleep(LasPatterns_Time);
+#else
+            usleep(LasPatterns_Time*1000);  /* sleep for 100 milliSeconds */
+#endif
+            AdvanceCurrentIndex();
+        }else{
+            ChangeMirrorPosition(0,0);
+        }
+    }
+
 }
 
 
@@ -167,4 +243,12 @@ double MirrorControl::Pos2Vy(double x, double y){
     Vy=coefY[0] + coefY[1]*x + coefY[2]*y + coefY[3]*x*x + coefY[4]*x*y + coefY[5]*y*y;
     //+ coefY[6]*x*x*x + coefY[7]*x*x*y + coefY[8]*x*y*y + coefY[9]*y*y*y;
     return Vy;
+}
+
+void MirrorControl::AdvanceCurrentIndex()
+{
+    LasPatterns_CurIndex++;
+    if (LasPatterns_CurIndex>=10){
+        LasPatterns_CurIndex-=10;
+    }
 }

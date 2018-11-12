@@ -47,6 +47,9 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
             myRegulator.Configure_Figure(radius,0.5);
         if (myRegulator.prog_mode==MODE_CLOSEDPATH)
             myRegulator.computeClosedPath();
+        if (myRegulator.prog_mode==MODE_MIRROR)
+            mirCtrl.SetActivate(false);
+        ResetLaserPatterns();
     }
 
     myRegulator.pattern_type = settings["Program_ID"].toInt()%100;     // 0 for point-wise pattern     1 for arc+circle pattern
@@ -76,6 +79,7 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     if (myRegulator.prog_mode == MODE_CLOSEDPATH||myRegulator.prog_mode==MODE_PATHFIND){
         myRegulator.path_cL=settings["PathL"].toFloat();
         myRegulator.path_cA=settings["PathA"].toFloat();
+        myRegulator.path_cD=settings["PathD"].toFloat();
     }
 
     //Activation of the tracking
@@ -89,6 +93,11 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
 #ifdef Q_OS_WIN32
         if (!initializeMirror()){                                         //Initialisation of the mirror and...
             qDebug() << "Problem with the MEM connection";                //...verification that the connection with the MEMs is ok
+        }
+        if (myRegulator.prog_mode!=MODE_MIRROR){
+            mirCtrl.SetActivate(true);
+            ResetLaserPatterns();
+            mirCtrl.RunMirror_EXT();
         }
 #endif
 
@@ -105,6 +114,8 @@ void MarangoniTracking::ChangeSettings(QMap<QString,QVariant> settings) {
     if (activated&&(!settings["activated"].toBool())) {
         qDebug()<<"Desactivation of the tracking";
         activated=settings["activated"].toBool();                               //Update and sleep to avoid conflict with the MEM:...
+        mirCtrl.SetActivate(false);
+        ResetLaserPatterns();
 #ifdef Q_OS_WIN32
         Sleep(1000);
 #else
@@ -134,97 +145,113 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
             drawObstacle(currIm.image);
     }
     else {
+        timer.start();
         analizeImage(currIm);
 
 
         QString currentData;
 
-        if (myRegulator.prog_mode == MODE_IDENT){
+        if (myRegulator.prog_mode == MODE_MANUAL){
+        //MANUAL MODE The laser position is already stored in PIXELS in the global variables X_las_manual, Y_las_manual
+        myRegulator.run_ManualMode(X_las_manual, Y_las_manual, (A_las_manual*M_PI)/180.0-M_PI, R_pat_manual*1024.0/65.0, SampleSense*Aux_pat_manual);
+        myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
+        }else if (myRegulator.prog_mode == MODE_MIRROR){
+            currentData=runMirrorCalibration();
+        }else if (myRegulator.prog_mode == MODE_IDENT){
             myRegulator.run_Ident(PpointX[0], PpointY[0],Ident_dist,Ident_radius,Ident_dir,SampleSense*Ident_aux);
-            myRegulator.compute_Laser_Pattern(myRegulator.pattern_type ,myRegulator.x_las, myRegulator.y_las,myRegulator.middleAngle,Ident_radius, SampleSense*Ident_aux);
+            myRegulator.compute_Laser_Pattern_INT();
         }else if (myRegulator.prog_mode == MODE_FB){
             //Feedback controller compute
             myRegulator.run_Cont_FB(PpointX[0], PpointY[0],targetX, targetY);          //Get feedback controller response
             myRegulator.get_Laser_Position(PpointX[0], PpointY[0]);   //Combine both responses and get the right laser position X_lasD
             myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
-
-
         }else if (myRegulator.prog_mode == MODE_FF){
             //Feedback + Feedforward control        TO BE PROGRAMMED STILL
             myRegulator.run_Cont_FB(PpointX[0], PpointY[0],targetX, targetY);          //Get Feedback controller response
             myRegulator.run_Cont_FF(PpointX[0], PpointY[0],targetX, targetY);          //Get Feedfoward controller response
             myRegulator.get_Laser_Position(PpointX[0], PpointY[0]);   //Combine both responses and get the right laser position X_lasD
             myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
-
-        }else if (myRegulator.prog_mode == MODE_MANUAL){
-            //MANUAL MODE The laser position is already stored in PIXELS in the global variables X_las_manual, Y_las_manual
-            myRegulator.run_ManualMode(X_las_manual, Y_las_manual, (A_las_manual*M_PI)/180.0-M_PI, R_pat_manual*1024.0/65.0, SampleSense*Aux_pat_manual);
-            myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
-            //qDebug()<<myRegulator.x_las << myRegulator.y_las;
-
-        }else if (myRegulator.prog_mode == MODE_MIRROR){
-            currentData=runMirrorCalibration();
         }else if (myRegulator.prog_mode == MODE_SHIELDING){
-            float dlim=160;
-            float fHyst=1.3;
-            if (!myRegulator.run_SmartShielding(PpointX[0],PpointY[0],PpointX[1],PpointY[1],targetX, targetY)){
+//            if (!myRegulator.run_SmartShielding(PpointX[0],PpointY[0],PpointX[1],PpointY[1],targetX, targetY)){
+//                myRegulator.run_Cont_FB(PpointX[0], PpointY[0],targetX, targetY);
+//                myRegulator.get_Laser_Position(PpointX[0], PpointY[0]);
+//            }
+            if (!myRegulator.run_SmartShielding_mult(PpointX, PpointY, targetX, targetY, nrParts, 0)){
                 myRegulator.run_Cont_FB(PpointX[0], PpointY[0],targetX, targetY);
                 myRegulator.get_Laser_Position(PpointX[0], PpointY[0]);
             }
             myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
-        }else if (myRegulator.prog_mode == MODE_MULTIPLEX){
-            bool static flag=1;
-            //MANUAL MODE The laser position is already stored in PIXELS in the global variables X_las_manual, Y_las_manual
-            if (flag){
-                myRegulator.compute_Laser_Pattern(myRegulator.pattern_type ,X_las_manual, Y_las_manual, (A_las_manual*M_PI)/180.0-M_PI, R_pat_manual*1024.0/65.0, SampleSense*Aux_pat_manual);    //Define the pattern
-                flag=0;
-            }else{
-                float xlas=X_las_manual+R_pat_manual*1024.0/65.0*cos((A_las_manual*M_PI)/180.0);
-                float ylas=Y_las_manual+R_pat_manual*1024.0/65.0*sin((A_las_manual*M_PI)/180.0);
-                myRegulator.compute_Laser_Pattern(0 ,xlas, ylas, (A_las_manual*M_PI)/180.0-M_PI, R_pat_manual*1024.0/65.0, SampleSense*Aux_pat_manual);
-                flag=1;
-            }
         }else if (myRegulator.prog_mode == MODE_CLOSEDPATH){
-            myRegulator.run_ClosedPath_Following(PpointX[0], PpointY[0]);
-            myRegulator.run_Cont_FB_vel(PpointX[0], PpointY[0]);
-            myRegulator.get_Laser_Position_vel(PpointX[0], PpointY[0]);
-//            myRegulator.run_ClosedPath_Following(targetX, targetY);
-//            myRegulator.run_Cont_FB_vel(targetX, targetY);
-//            myRegulator.get_Laser_Position_vel(targetX, targetY);
+            if (!myRegulator.run_Shielding_mult(PpointX, PpointY, targetX, targetY, nrParts, 0)){
+                myRegulator.run_ClosedPath_Following(PpointX[0], PpointY[0]);
+                myRegulator.run_Cont_FB_vel(PpointX[0], PpointY[0]);
+                myRegulator.get_Laser_Position_vel(PpointX[0], PpointY[0]);
+            }
             myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
         }else if (myRegulator.prog_mode == MODE_PATHFIND){
-            myRegulator.FindPath(PpointX,PpointY,targetX, targetY, nrParts);
-//            myRegulator.run_ClosedPath_Following(PpointX[0], PpointY[0]);
-            myRegulator.run_OpenPath_Following(PpointX[0], PpointY[0]);
-            myRegulator.run_Cont_FB_vel(PpointX[0], PpointY[0]);
-            myRegulator.get_Laser_Position_vel(PpointX[0], PpointY[0]);
+            if (!myRegulator.run_Shielding_mult(PpointX, PpointY, targetX, targetY, nrParts, 0)){
+                myRegulator.FindPath(PpointX,PpointY,targetX, targetY, nrParts,0);
+                myRegulator.run_OpenPath_Following(PpointX[0], PpointY[0]);
+                myRegulator.run_Cont_FB_vel(PpointX[0], PpointY[0]);
+                myRegulator.get_Laser_Position_vel(PpointX[0], PpointY[0]);
+            }
+            myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
+        }else if (myRegulator.prog_mode == MODE_MULTIPLEX){
+//            p0
+            float xlas=X_las_manual;
+            float ylas=Y_las_manual;
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,0,myRegulator.pattern_type==PATTERN_POINT||myRegulator.pattern_type==PATTERN_LINE);
+//            p1
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*cos((A_las_manual*M_PI)/180.0);
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*sin((A_las_manual*M_PI)/180.0);
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,1,myRegulator.pattern_type==PATTERN_ELLIPSE || myRegulator.pattern_type==PATTERN_LINE);
+//            p2
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*(cos((A_las_manual*M_PI)/180.0)-sin((A_las_manual*M_PI)/180.0)*Aux_pat_manual);
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*(sin((A_las_manual*M_PI)/180.0)+cos((A_las_manual*M_PI)/180.0)*Aux_pat_manual);
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,2,myRegulator.pattern_type==PATTERN_RECTANGLE);
+//            p3
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*cos((A_las_manual*M_PI)/180.0+M_PI/2)*Aux_pat_manual;
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*sin((A_las_manual*M_PI)/180.0+M_PI/2)*Aux_pat_manual;
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,3,myRegulator.pattern_type==PATTERN_ARC || myRegulator.pattern_type==PATTERN_ELLIPSE);
+//            p6
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*(cos((A_las_manual*M_PI)/180.0+M_PI/2)*Aux_pat_manual-sin((A_las_manual*M_PI)/180.0+M_PI/2));
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*(sin((A_las_manual*M_PI)/180.0+M_PI/2)*Aux_pat_manual+cos((A_las_manual*M_PI)/180.0+M_PI/2));
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,4,myRegulator.pattern_type==PATTERN_RECTANGLE);
+//            p5
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*cos((A_las_manual*M_PI)/180.0+M_PI);
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*sin((A_las_manual*M_PI)/180.0+M_PI);
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,5,myRegulator.pattern_type==PATTERN_ARC || myRegulator.pattern_type==PATTERN_ELLIPSE);
+//            p6
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*(cos((A_las_manual*M_PI)/180.0+M_PI)-sin((A_las_manual*M_PI)/180.0+M_PI)*Aux_pat_manual);
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*(sin((A_las_manual*M_PI)/180.0+M_PI)+cos((A_las_manual*M_PI)/180.0+M_PI)*Aux_pat_manual);
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,6,myRegulator.pattern_type==PATTERN_RECTANGLE);
+//            p7
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*cos((A_las_manual*M_PI)/180.0+3*M_PI/2)*Aux_pat_manual;
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*sin((A_las_manual*M_PI)/180.0+3*M_PI/2)*Aux_pat_manual;
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,7,myRegulator.pattern_type==PATTERN_ARC || myRegulator.pattern_type==PATTERN_ELLIPSE);
+//            p8
+            xlas=X_las_manual+R_pat_manual*1024.0/65.0*(cos((A_las_manual*M_PI)/180.0+3*M_PI/2)*Aux_pat_manual-sin((A_las_manual*M_PI)/180.0+3*M_PI/2));
+            ylas=Y_las_manual+R_pat_manual*1024.0/65.0*(sin((A_las_manual*M_PI)/180.0+3*M_PI/2)*Aux_pat_manual+cos((A_las_manual*M_PI)/180.0+3*M_PI/2));
+            mirCtrl.SetLasPattern(&xlas,&ylas,1,8,myRegulator.pattern_type==PATTERN_RECTANGLE);
+
+            myRegulator.run_ManualMode(X_las_manual, Y_las_manual, (A_las_manual*M_PI)/180.0-M_PI, R_pat_manual*1024.0/65.0, SampleSense*Aux_pat_manual);
             myRegulator.compute_Laser_Pattern_INT();    //Define the pattern
         }
 
-
 #ifdef Q_OS_WIN32
-//            //Transfer new data stream to the mirror
-//            if ((regulation_type == 1) || (regulation_type == 2)) {
-//                mirCtrl.ChangeMirrorStream(myRegulator.x_vector,myRegulator.y_vector);
-//            }
-//            else {
-//                mirCtrl.ChangeMirrorPosition(myRegulator.laser_x,myRegulator.laser_y);
-//            }
+
         //Transfer new data stream to the mirror        USING RONALD VARIABLES
-        if (myRegulator.prog_mode == MODE_MANUAL||myRegulator.prog_mode == MODE_IDENT){
-            mirCtrl.SetSampleRate(SampleRate);
-        }
-        if (myRegulator.prog_mode != MODE_MIRROR){
-                    if (myRegulator.pattern_type == 0){
-                        mirCtrl.ResetMirrorStream();
-                        mirCtrl.ChangeMirrorPosition(myRegulator.x_las,myRegulator.y_las);  //Point-wise control strategy send point
+//        if (myRegulator.prog_mode == MODE_MANUAL||myRegulator.prog_mode == MODE_IDENT){
+//            mirCtrl.SetSampleRate(SampleRate);
+//        }
+        if (myRegulator.prog_mode != MODE_MIRROR && myRegulator.prog_mode != MODE_MULTIPLEX){
+                    if (myRegulator.pattern_type == PATTERN_POINT){
+                        mirCtrl.SetLasPattern(&myRegulator.x_las,&myRegulator.y_las,1,0,true);  //Point-wise control strategy send point
                     }
                     else{
-                        mirCtrl.ResetMirrorVoltage();
-                        mirCtrl.ChangeMirrorStream(myRegulator.x_vector,myRegulator.y_vector);  //Pattern type ARC+Circle control strategy send pattern
+                        mirCtrl.SetLasPattern(myRegulator.x_vector,myRegulator.y_vector,100,0,true);
                     }
         }
-
 #endif
 
 //            //Adding figures on screen
@@ -232,23 +259,28 @@ bool MarangoniTracking::processImage(ImagePacket& currIm) {
 
         if (myRegulator.prog_mode==MODE_FB||myRegulator.prog_mode==MODE_FF||myRegulator.prog_mode==MODE_SHIELDING||myRegulator.prog_mode==MODE_PATHFIND)
             drawTarget(currIm.image);
-        drawParticles(currIm.image);
+
+        if (myRegulator.prog_mode!=MODE_MULTIPLEX){
+            drawParticles(currIm.image);
+        }
         drawLaser(currIm.image);
         if (myRegulator.prog_mode==MODE_FF)
             drawObstacle(currIm.image);
-
-        //Adding all parameters in the 'dataToSave' vector
-        if (myRegulator.prog_mode != MODE_MIRROR)
-            currentData=setdata();
-
         if (myRegulator.prog_mode == MODE_CLOSEDPATH)
             drawPath(currIm.image,true);
         if(myRegulator.prog_mode ==MODE_PATHFIND)
             drawPath(currIm.image,false);
 
+        //Adding all parameters in the 'dataToSave' vector
+        if (myRegulator.prog_mode != MODE_MIRROR)
+            currentData=setdata();
+
+
+
 
         dataToSave.append(currentData);
-        //qDebug()<<currentData;  //To ch
+//        qDebug()<<"Total process time:\t"<<timer.elapsed()<<" ms";
+
     }
 
     //Process to stop the controller once all the points of the trajectory have been given
@@ -436,23 +468,30 @@ void MarangoniTracking::drawLaser(Mat outImage)
 {
     cv::Point figureCenter(myRegulator.x_las, myRegulator.y_las);
 
-    if (myRegulator.pattern_type == 0){
+    if (myRegulator.pattern_type == PATTERN_POINT){
         cv::circle(outImage, figureCenter, radius*0.1, cv::Scalar( 0, 0, 255 ), 2, 8, 0);       //DRAW LASER point on the Screen
-    } else if (myRegulator.pattern_type == 1){                                                  //DRAW LASER PATTERN on the Screen TO CHECK
-                        if (abs(myRegulator.pattern_aux) < 1.0){
-                            cv::Size size(myRegulator.pattern_radius, myRegulator.pattern_radius);                                                        //regulation with a arc circle
-                            int middleAngle = myRegulator.middleAngle*180/M_PI;
-                            int patternAngle = abs(myRegulator.pattern_aux)*180;
-                            cv::ellipse(outImage, figureCenter, size, 0, middleAngle - patternAngle, middleAngle + patternAngle, cv::Scalar( 0, 0, 255 ), 2, 8, 0);
-                        }
-                        else{
-                            cv::circle(outImage, figureCenter, myRegulator.pattern_radius, cv::Scalar( 0, 0, 255 ), 2, 8, 0);       //objective reached. Stabilisation with circle
-                        }
-    }else if (myRegulator.pattern_type == 2){
+    } else if (myRegulator.pattern_type == PATTERN_ARC){                                                  //DRAW LASER PATTERN on the Screen TO CHECK                
+        if (myRegulator.prog_mode==MODE_MULTIPLEX){
+            cv::Size size(myRegulator.pattern_radius, myRegulator.pattern_radius*abs(myRegulator.pattern_aux));                                                        //regulation with a arc circle
+            int middleAngle = myRegulator.middleAngle*180/M_PI;
+            int patternAngle = 90;
+            cv::ellipse(outImage, figureCenter, size, middleAngle, -patternAngle, patternAngle, cv::Scalar( 0, 0, 255 ), 2, 8, 0);
+        }else{
+            if (abs(myRegulator.pattern_aux) < 1.0){
+                cv::Size size(myRegulator.pattern_radius, myRegulator.pattern_radius);                                                        //regulation with a arc circle
+                int middleAngle = myRegulator.middleAngle*180/M_PI;
+                int patternAngle = abs(myRegulator.pattern_aux)*180;
+                cv::ellipse(outImage, figureCenter, size, 0, middleAngle - patternAngle, middleAngle + patternAngle, cv::Scalar( 0, 0, 255 ), 2, 8, 0);
+            }
+            else{
+                cv::circle(outImage, figureCenter, myRegulator.pattern_radius, cv::Scalar( 0, 0, 255 ), 2, 8, 0);       //objective reached. Stabilisation with circle
+            }
+        }
+    }else if (myRegulator.pattern_type == PATTERN_ELLIPSE){
         cv::Size size(myRegulator.pattern_radius, myRegulator.pattern_radius*myRegulator.pattern_aux);
         int middleAngle = myRegulator.middleAngle*180/M_PI+180;
         cv::ellipse(outImage, figureCenter, size, middleAngle, 0, 360, cv::Scalar( 0, 0, 255 ), 2, 8, 0);
-    }else if (myRegulator.pattern_type == 3){
+    }else if (myRegulator.pattern_type == PATTERN_RECTANGLE){
         cv::Size size(2.0*myRegulator.pattern_radius, 2.0*myRegulator.pattern_radius*myRegulator.pattern_aux);
         int middleAngle = myRegulator.middleAngle*180/M_PI+180;
         RotatedRect rRect = RotatedRect(figureCenter, size, middleAngle);
@@ -460,7 +499,7 @@ void MarangoniTracking::drawLaser(Mat outImage)
         rRect.points(vertices);
         for (int i = 0; i < 4; i++)
             line(outImage, vertices[i], vertices[(i+1)%4],cv::Scalar( 0, 0, 255 ), 2, 8, 0);
-    }else if (myRegulator.pattern_type == 4){
+    }else if (myRegulator.pattern_type == PATTERN_LINE){
         cv::Point P2 (myRegulator.x_las-myRegulator.pattern_radius*cos(myRegulator.middleAngle),myRegulator.y_las-myRegulator.pattern_radius*sin(myRegulator.middleAngle));
         cv::line(outImage, figureCenter, P2, cv::Scalar( 0, 0, 255 ), 2, 8, 0);
     }
@@ -626,6 +665,7 @@ QString MarangoniTracking::runMirrorCalibration()
 }
 
 
+
 #ifdef Q_OS_WIN32
 bool MarangoniTracking::initializeMirror(){
     bool properConnection = mirCtrl.Initialisation(SampleRate);                        //initialisation of the mirror
@@ -637,15 +677,9 @@ void MarangoniTracking::closeMirror() {
     mirCtrl.Closing();                                                  //Close the mirror
 }
 
-void MarangoniTracking::ThreadsTest()
+
+void MarangoniTracking::ResetLaserPatterns()
 {
-    while (true){
-    qDebug()<<"Threads Test";
-#ifdef Q_OS_WIN32
-        Sleep(500);
-#else
-        usleep(500*1000);  /* sleep for 300 milliSeconds */                     //... No new postion of the laser is required when closing connection...
-#endif
-    }
+    mirCtrl.ResetLaserPatterns();
 }
 #endif

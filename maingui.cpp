@@ -52,6 +52,7 @@ MainGui::MainGui(QWidget *parent) :
     connect(fileDialog,SIGNAL(CloseApp()),this,SIGNAL(closeApplic()));
     connect(playDialog,SIGNAL(stopPlayback()),this,SLOT(stopButtonPressed()));
     connect(playDialog,SIGNAL(newFps(int)),this,SLOT(gotNewFps(int)));
+    connect(playDialog,SIGNAL(newFps(int)),trackDialog,SLOT(GotnewFps(int)));
     connect(playDialog,SIGNAL(recordNow(bool,QString,QString)),this,SIGNAL(startRecording(bool,QString,QString)));
     connect(playDialog,SIGNAL(jumpFrames(bool)),this,SIGNAL(skipFrames(bool)));
     connect(camDialog,SIGNAL(NeedNewSample()),this,SLOT(needNewSample()));

@@ -20,6 +20,17 @@
 #define MODE_PATHFIND 7
 #define MODE_MULTIPLEX 8
 
+#define PATTERN_POINT 0
+#define PATTERN_ARC 1
+#define PATTERN_ELLIPSE 2
+#define PATTERN_RECTANGLE 3
+#define PATTERN_LINE 4
+
+#define IDENT_BOTTOM 0
+#define IDENT_RIGHT 1
+#define IDENT_TOP 2
+#define IDENT_LEFT 3
+
 class Regulation: public QObject
 {
     Q_OBJECT
@@ -75,7 +86,10 @@ private:
     QFutureWatcher<bool> Path_watcher;
     QFuture<bool> Path_future;
 
-    float shield_dLim, shield_fHys;
+    float shield_dLim, shield_fHys;    
+    bool shield_HysFlag[10];
+
+    int path_searchspace;
 
 
 
@@ -99,7 +113,9 @@ public:
 
 
     bool run_Shielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ);
+    bool run_Shielding_mult(float partX[], float partY[], float x_targ, float y_targ, int NrPart, int ContPart);
     bool run_SmartShielding(float x_particle, float y_particle, float x_particle2, float y_particle2, float x_targ, float y_targ);
+    bool run_SmartShielding_mult(float partX[], float partY[], float x_targ, float y_targ, int NrPart, int ContPart);
 
     void get_Laser_Position(float particle_x, float particle_y);
     void get_Laser_Position_vel(float x_particle, float y_particle);
@@ -116,7 +132,7 @@ public:
     void run_ClosedPath_Following(float x_particle, float y_particle);
     void run_OpenPath_Following(float x_particle, float y_particle);
 
-    void FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart);
+    void FindPath(float partX[], float partY[], float xtarg, float ytarg, int Nrpart, int ContPart);
     bool PathFinding_run();
     void PathFinding_sendPosI(float x, float y);
     void PathFinding_sendTarget(float x, float y);
@@ -184,6 +200,7 @@ public:
     float path_K[200];
     float path_cA;
     float path_cL;
+    float path_cD;
     float path_totD;
     float path_meanD;
     int path_PrevIndex;
