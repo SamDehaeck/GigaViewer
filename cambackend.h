@@ -16,13 +16,15 @@ class CamBackend : public QThread
 {
     Q_OBJECT
 public:
-    explicit CamBackend(QObject *parent = 0);
+    explicit CamBackend(QObject *parent = nullptr);
     bool StartAcquisition(QString dev="0");
     void StopAcquisition();
     void ReleaseCamera();
     void SetInterval(double newInt);
     void SetShutter(int shut);
     void SetAutoShutter(bool fitRange);
+    void setRoiRows(int rows);
+    void setRoiCols(int cols);
     void AdaptForDisplay(ImagePacket& newIm);
     bool initProcPlugin();
     bool endProcPlugin();
@@ -30,6 +32,8 @@ public:
     bool startRecPlugin(QString RecName);
     bool endRecPlugin();
     bool setSettingsPlugin(ImagePacket& newIm,QStringList settings);
+    void skipForwardBackward(bool forward);
+    void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
 
 signals:
     void NewImageReady(ImagePacket im);
@@ -39,13 +43,10 @@ signals:
     void stopTheTimer();
 
 public slots:
-    void GrabFrame();
-    void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
-    void skipForwardBackward(bool forward);
+    void GrabFrame();    
     void willStartTheTimer(int interval);
     void willStopTheTimer();
-    void setRoiRows(int rows);
-    void setRoiCols(int cols);
+
 #ifdef TRACKING
     void changedPluginSettings(QMap<QString,QVariant> settings);
 #endif

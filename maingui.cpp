@@ -1,7 +1,7 @@
 #include "maingui.h"
 #include <QList>
 
-MainGui::MainGui(QWidget *parent) :
+MainGui::MainGui(Coordinator *boss,QWidget *parent) :
     QGraphicsView(parent)
 {
     setWindowTitle(tr("Gige Viewer"));
@@ -81,6 +81,28 @@ MainGui::MainGui(QWidget *parent) :
     connect(camDialog,SIGNAL(SetAutoShutter(bool)),this,SIGNAL(setAutoShutter(bool)));
     connect(camDialog,SIGNAL(SetRoiRows(int)),this,SIGNAL(setRoiRows(int)));
     connect(camDialog,SIGNAL(SetRoiCols(int)),this,SIGNAL(setRoiCols(int)));
+
+    // now connect coordinator signals/slots
+    // signals to start a new camera Thread
+    connect(this,SIGNAL(newMovieNeeded(QString)),boss,SLOT(LoadNewMovie(QString)));
+    connect(this,SIGNAL(newOpencvFeedNeeded(bool)),boss,SLOT(controlCameraThread(bool)));
+    connect(this,SIGNAL(newAvtFeedNeeded(bool)),boss,SLOT(StartNewAVT(bool)));
+    connect(this,SIGNAL(newVimbaFeedNeeded(bool)),boss,SLOT(StartNewVimba(bool)));
+    connect(this,SIGNAL(newIdsFeedNeeded(bool)),boss,SLOT(StartNewIds(bool)));
+    // signals to modify the parameters of the running camera
+    connect(this,SIGNAL(implementNewFps(double)),boss,SLOT(changeFps(double)));
+    connect(this,SIGNAL(setShutter(int)),boss,SLOT(changeShutter(int)));
+    connect(this,SIGNAL(setAutoShutter(bool)),boss,SLOT(setAutoShutter(bool)));
+    connect(this,SIGNAL(setRoiRows(int)),boss,SLOT(setRoiRows(int)));
+    connect(this,SIGNAL(setRoiCols(int)),boss,SLOT(setRoiCols(int)));
+    connect(this,SIGNAL(skipFrames(bool)),boss,SLOT(skipForwardBackward(bool)));
+    connect(this,SIGNAL(startRecording(bool,QString,QString,int)),boss,SLOT(StartRecording(bool,QString,QString,int)));
+    // now connect signals coming from the coordinator
+    connect(boss,SIGNAL(NewImageReady(ImagePacket)),this,SLOT(newImageReceived(ImagePacket)));
+    connect(boss,SIGNAL(shutterChanged(int)),this,SLOT(gotNewShutSpeed(int)));
+    connect(boss,SIGNAL(fpsChanged(double)),this,SLOT(gotNewFpsFromBackend(double)));
+
+
 
 #ifdef TRACKING
     connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));

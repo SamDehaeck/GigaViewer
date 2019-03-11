@@ -177,7 +177,7 @@ bool Hdf5SourceSink::StartAcquisition(QString dev)
 
 bool Hdf5SourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
 {
-    if ((static_cast<int>(index)+indexIncrement >= static_cast<int>(dims[0]))||(static_cast<int>(index)+indexIncrement <-1)) { // watch out for conversion
+    if ((static_cast<int>(index)+indexIncrement >= static_cast<int>(dims[0]))||(static_cast<int>(index)+indexIncrement <0)) { // watch out for conversion
         return true;
     }
     try {

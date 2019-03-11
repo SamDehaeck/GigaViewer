@@ -23,7 +23,10 @@ bool RegexSourceSink::StartAcquisition(QString dev)
 
 //    qDebug()<<dir<<basename<<rt.cap(1)<<extension;
 
+    basename.replace("(","\\(");  //note that the basename cannot contain brackets or other special characters..
+    basename.replace(")","\\)");
     QString regexString=basename+"(\\d+)"+extension;
+
 
 //    qDebug()<<"Will load files that match"<<regexString;
     QRegExp movieRegex(regexString);
@@ -39,7 +42,9 @@ bool RegexSourceSink::StartAcquisition(QString dev)
 
 
     for (int i=0;i<files.count();i++) {
+//        qDebug()<<"Trying file: "<<files.at(i);
         if (movieRegex.indexIn(files.at(i))!=-1) {
+//            qDebug()<<"Got here";
             int newnr=movieRegex.cap(1).toInt();
             map.insert(newnr,files.at(i));
         }
@@ -188,15 +193,15 @@ bool RegexSourceSink::StopRecording()
 
         if (pixFormat=="BAYERRG8") {
             cv::Mat dummy(temp.rows,temp.cols,CV_8UC3);
-            cv::cvtColor(temp,dummy,CV_BayerRG2RGB);
+            cv::cvtColor(temp,dummy,cv::COLOR_BayerRG2RGB);
             temp=dummy;
         } else if (pixFormat=="BAYERGB8") {
             cv::Mat dummy(temp.rows,temp.cols,CV_8UC3);
-            cv::cvtColor(temp,dummy,CV_BayerGB2RGB);
+            cv::cvtColor(temp,dummy,cv::COLOR_BayerGB2RGB);
             temp=dummy;
         } else if (pixFormat=="BAYERRG12") {
             cv::Mat dummy(temp.rows,temp.cols,CV_16UC3);
-            cv::cvtColor(temp,dummy,CV_BayerRG2RGB);
+            cv::cvtColor(temp,dummy,cv::COLOR_BayerRG2RGB);
             temp=dummy;
         }
 

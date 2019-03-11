@@ -15,7 +15,7 @@ bool OpencvSourceSink::StartAcquisition(QString dev) {
 #else
         camera.open(dev.toUtf8().data());
 #endif
-        nFrames=static_cast<int>(round(camera.get(CV_CAP_PROP_FRAME_COUNT))); // not sure about the round
+        nFrames=static_cast<int>(round(camera.get(cv::CAP_PROP_FRAME_COUNT))); // not sure about the round
         liveFeed=false;
     }
     return camera.isOpened();
@@ -26,9 +26,9 @@ bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,in
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".avi";
     int fourcc=0;
     if (codec=="MSMPEG4V2") {
-        fourcc=CV_FOURCC('M','P','4','2'); // for mpeg4 from windows
+        fourcc=cv::VideoWriter::fourcc('M','P','4','2'); // for mpeg4 from windows
     } else if (codec=="XVID") {
-        fourcc=CV_FOURCC('F','M','P','4'); //for xvid
+        fourcc=cv::VideoWriter::fourcc('F','M','P','4'); //for xvid
     } else {
         fourcc=0;// uncompressed raw format
     }
@@ -58,7 +58,7 @@ bool OpencvSourceSink::ReleaseCamera() {
 bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
     if (source.image.channels()==1) {
         cv::Mat dummy;
-        cv::cvtColor(source.image,dummy,CV_GRAY2RGB);
+        cv::cvtColor(source.image,dummy,cv::COLOR_GRAY2RGB);
         recFile<<dummy;
     } else {
         recFile<<source.image;
@@ -70,16 +70,16 @@ bool OpencvSourceSink::RecordFrame(ImagePacket &source) {
 bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     if (!camera.isOpened()) return false;
     if (indexIncrement==-1) {
-        double newpos=camera.get(CV_CAP_PROP_POS_FRAMES)-2;
+        double newpos=camera.get(cv::CAP_PROP_POS_FRAMES)-2;
 //        qDebug()<<"calculated:"<<newpos;
         if (newpos>=0) {
-            camera.set(CV_CAP_PROP_POS_FRAMES,newpos);
+            camera.set(cv::CAP_PROP_POS_FRAMES,newpos);
         }
     }
 //    qDebug()<<camera.get(CV_CAP_PROP_POS_FRAMES);
 
     if (!liveFeed) {
-        target.seqNumber=static_cast<int>(round(camera.get(CV_CAP_PROP_POS_FRAMES)));
+        target.seqNumber=static_cast<int>(round(camera.get(cv::CAP_PROP_POS_FRAMES)));
     } else {
         target.seqNumber=target.seqNumber+1;
     }
@@ -103,7 +103,7 @@ bool OpencvSourceSink::SkipFrames(bool forward)
 {
 //    qDebug()<<"Number of frames"<<nFrames;
     if (!liveFeed) {
-        int currPos=static_cast<int>(round(camera.get(CV_CAP_PROP_POS_FRAMES)));
+        int currPos=static_cast<int>(round(camera.get(cv::CAP_PROP_POS_FRAMES)));
         int skipping = 0;
         if (forward) {
             skipping=nFrames/10;
@@ -118,7 +118,7 @@ bool OpencvSourceSink::SkipFrames(bool forward)
         }
 
 
-        camera.set(CV_CAP_PROP_POS_FRAMES,currPos+skipping);
+        camera.set(cv::CAP_PROP_POS_FRAMES,currPos+skipping);
         currPos+=skipping;
     }
     return true;

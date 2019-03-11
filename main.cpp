@@ -8,15 +8,33 @@
 #include "coordinator.h"
 #include "imagepacket.h"
 
+#ifdef KAFKA
+#include "kafkafrontend.h"
+#endif
+
+
 int main(int argc, char *argv[])
 {
+    Coordinator theBoss;
+#ifdef KAFKA
+   if (argc>1) {
+       QCoreApplication a(argc,argv);
+       qRegisterMetaType<ImagePacket>("ImagePacket");
+       QString subCommand=QString::fromUtf8(argv[1]);
+       if (subCommand==QString("kafka")) {
+           qInfo("Should start Kafka frontend!");
+       }
+       KafkaFrontend kafka(&theBoss);
+       theBoss.controlCameraThread(true);
+
+       return a.exec();
+   }
+#endif
+    // fall through to original gui if second argument is not kafka
     QApplication a(argc, argv);
-
     qRegisterMetaType<ImagePacket>("ImagePacket");
-
     MainWindow win;
-    MainGui view;
-    Coordinator theBoss(&view);
+    MainGui view(&theBoss);
     win.setCentralWidget(&view);
 
     QShortcut *fullToggle = new QShortcut(QKeySequence(Qt::Key_F),&win);
@@ -35,6 +53,5 @@ int main(int argc, char *argv[])
             view.newMoviePressed(theFile);
         }
     }
-
     return a.exec();
 }

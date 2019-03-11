@@ -415,7 +415,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         if (currImage.image.channels()==1) {
             if (!recording) {  // when recording, don't bother doing interpolation only for display
                 cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+                cv::cvtColor(currImage.image,dummy,cv::COLOR_BayerRG2RGB);
                 currImage.image=dummy;
             }
         }
@@ -423,7 +423,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         if (currImage.image.channels()==1) {
             if (!recording) {
                 cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_8UC3);
-                cv::cvtColor(currImage.image,dummy,CV_BayerGB2RGB);
+                cv::cvtColor(currImage.image,dummy,cv::COLOR_BayerGB2RGB);
                 currImage.image=dummy;
             }
         }
@@ -435,7 +435,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
         if (currImage.image.channels()==1) {
             if (!recording) {  // when recording, don't bother doing interpolation only for display
                 cv::Mat dummy(currImage.image.rows,currImage.image.cols,CV_16UC3);
-                cv::cvtColor(currImage.image,dummy,CV_BayerRG2RGB);
+                cv::cvtColor(currImage.image,dummy,cv::COLOR_BayerRG2RGB);
                 currImage.image=dummy;
             }
         }

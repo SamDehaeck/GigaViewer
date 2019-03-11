@@ -10,15 +10,17 @@ TARGET = GigaViewer
 TEMPLATE = app
 
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
-#CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
-#CONFIG += ELLIPSE
-CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
+#CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+#CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
-#CONFIG += IDS PVAPI VIMBA HDF5
-# uncomment the CONFIG lines for the camera modules you want compiled, available options: IDS PVAPI VIMBA
-# when you want no cameras, comment al camera related CONFIG lines above (IDS PVAPI VIMBA)
+
+#CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
+#CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image
+CONFIG += KAFKA        # enable the kafka frontend option
+
+
+
 
 #CONFIG += console
 
@@ -47,6 +49,10 @@ TRACKING {
 
 ELLIPSE {
     DEFINES *= ELLIPSE
+}
+
+KAFKA {
+    DEFINES *= KAFKA
 }
 
 #message(The Defines are $$DEFINES)
@@ -101,7 +107,9 @@ unix:!macx {
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
 
-    LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+    #LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+    LIBS += `pkg-config --libs opencv4`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+    QMAKE_INCDIR += /usr/include/opencv4
 #    LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
 #    LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 
@@ -113,6 +121,9 @@ unix:!macx {
     }
     IDS {
         LIBS += -lueye_api
+    }
+    KAFKA {
+        LIBS += -lrdkafka -lz -lpthread
     }
 }
 macx {
@@ -195,6 +206,11 @@ ELLIPSE {
         ellipsedetectiondialog.h
 
     FORMS += ellipsedetectiondialog.ui
+}
+
+KAFKA {
+    SOURCES += kafkafrontend.cpp
+    HEADERS += kafkafrontend.h
 }
 
 HEADERS  += \

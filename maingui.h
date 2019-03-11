@@ -12,6 +12,7 @@
 #include "cameracontrolsdialog.h"
 #include "playbackdialog.h"
 #include "fileinputdialog.h"
+#include "coordinator.h"
 
 #ifdef TRACKING
 #include "marangonitrackingdialog.h"
@@ -25,7 +26,7 @@ class MainGui : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit MainGui(QWidget *parent = 0);
+    explicit MainGui(Coordinator *boss,QWidget *parent = nullptr);
     void returnToStart();
 
 signals:
@@ -81,6 +82,7 @@ protected:
 #endif
 
 private:
+    Coordinator myBoss;
     VideoGlScene* theScene;
     FileInputDialog* fileDialog;
     PlaybackDialog* playDialog;

@@ -1,36 +1,26 @@
 #include "coordinator.h"
 
-Coordinator::Coordinator(MainGui* theGivenGui, QObject *parent) :
-    QObject(parent),theGui(theGivenGui),guiMode(true),picBack(parent),camBack(parent)
+Coordinator::Coordinator(QObject *parent) :
+    QObject(parent),picBack(parent),camBack(parent)
   ,opencvRunning(false),avtRunning(false)
 {
-    if (guiMode) {
-        connect(theGui,SIGNAL(newPicNeeded(QString)),&picBack,SLOT(LoadNewImage(QString)));
-        connect(&picBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
-        connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),theGui,SLOT(newImageReceived(ImagePacket)));
+    //propagate the signals coming from the backend
+    connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),this,SIGNAL(NewImageReady(ImagePacket)));
+    connect(&camBack,SIGNAL(shutterChanged(int)),this,SIGNAL(shutterChanged(int)));
+    connect(&camBack,SIGNAL(fpsChanged(double)),this,SIGNAL(fpsChanged(double)));
+}
+/*
+void Coordinator::setGui(MainGui *myGui) {
 
-        connect(theGui,SIGNAL(newMovieNeeded(QString)),this,SLOT(LoadNewMovie(QString)));
-        connect(theGui,SIGNAL(newOpencvFeedNeeded(bool)),this,SLOT(controlCameraThread(bool)));
-        connect(theGui,SIGNAL(implementNewFps(double)),this,SLOT(changeFps(double)));
-        connect(theGui,SIGNAL(startRecording(bool,QString,QString,int)),&camBack,SLOT(StartRecording(bool,QString,QString,int)));
-        connect(theGui,SIGNAL(newAvtFeedNeeded(bool)),this,SLOT(StartNewAVT(bool)));
-        connect(theGui,SIGNAL(newVimbaFeedNeeded(bool)),this,SLOT(StartNewVimba(bool)));
-        connect(theGui,SIGNAL(newIdsFeedNeeded(bool)),this,SLOT(StartNewIds(bool)));
-        connect(theGui,SIGNAL(setShutter(int)),this,SLOT(changeShutter(int)));
-        connect(theGui,SIGNAL(setAutoShutter(bool)),this,SLOT(setAutoShutter(bool)));
-        connect(&camBack,SIGNAL(shutterChanged(int)),theGui,SLOT(gotNewShutSpeed(int)));
-        connect(&camBack,SIGNAL(fpsChanged(double)),theGui,SLOT(gotNewFpsFromBackend(double)));
-        connect(theGui,SIGNAL(skipFrames(bool)),&camBack,SLOT(skipForwardBackward(bool)));
-        connect(theGui,SIGNAL(setRoiRows(int)),&camBack,SLOT(setRoiRows(int)));
-        connect(theGui,SIGNAL(setRoiCols(int)),&camBack,SLOT(setRoiCols(int)));
+// THIS NOT YET FIXED!!!
 #ifdef TRACKING
-        connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
+    connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
 #endif
 #ifdef ELLIPSE
-        connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
+    connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
 #endif
-    }
 }
+*/
 
 void Coordinator::controlCameraThread(bool startNew,QString dev)
 {
@@ -40,7 +30,8 @@ void Coordinator::controlCameraThread(bool startNew,QString dev)
             opencvRunning=true;
         } else {
             //reset gui buttons
-            theGui->returnToStart();
+            // FIX THIS!!!!
+            //theGui->returnToStart();
         }
     } else {
         if (camBack.isRunning()) {
@@ -58,12 +49,7 @@ void Coordinator::controlCameraThread(bool startNew,QString dev)
     }
 }
 
-void Coordinator::changeFps(double newFps)
-{
-    if (camBack.isRunning()) {
-        camBack.SetInterval(newFps);
-    }
-}
+
 
 void Coordinator::LoadNewMovie(QString theMovie)
 {
@@ -106,4 +92,37 @@ void Coordinator::setAutoShutter(bool fitRange)
     }
 }
 
+void Coordinator::changeFps(double newFps)
+{
+    if (camBack.isRunning()) {
+        camBack.SetInterval(newFps);
+    }
+}
 
+void Coordinator::setRoiCols(int cols)
+{
+    if (camBack.isRunning()) {
+        camBack.setRoiCols(cols);
+    }
+}
+
+void Coordinator::setRoiRows(int rows)
+{
+    if (camBack.isRunning()) {
+        camBack.setRoiRows(rows);
+    }
+}
+
+void Coordinator::skipForwardBackward(bool forward)
+{
+    if (camBack.isRunning()) {
+        camBack.skipForwardBackward(forward);
+    }
+}
+
+void Coordinator::StartRecording(bool start, QString recFold, QString codec,int skip)
+{
+    if (camBack.isRunning()) {
+        camBack.StartRecording(start,recFold,codec,skip);
+    }
+}
