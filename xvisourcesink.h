@@ -7,7 +7,7 @@
 class XviSourceSink : public ImageSourceSink
 {
 public:
-    bool Init();
+    bool Init(QString params="");
     bool StartAcquisition(QString dev="0");
     bool StopAcquisition();
     bool ReleaseCamera();

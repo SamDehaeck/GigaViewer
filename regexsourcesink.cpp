@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <QVector>
 
-bool RegexSourceSink::Init()
+bool RegexSourceSink::Init(QString params)
 {
     return true;
 }
@@ -136,7 +136,7 @@ bool RegexSourceSink::RecordFrame(ImagePacket &source)
 
 }
 
-bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
+QString RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, int)
 {
     QDir basedir(recFold);
     if (basedir.exists()) {
@@ -169,7 +169,8 @@ bool RegexSourceSink::StartRecording(QString recFold, QString codec, int , int, 
     timestamps.clear();
     frames.clear();
     startTime=-1;
-    return true;
+    QString recString=QString(dir+"/"+basename+"%1"+extension).arg('*',8,10,QLatin1Char('0'));
+    return recString;
 }
 
 bool RegexSourceSink::StopRecording()

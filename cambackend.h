@@ -74,6 +74,8 @@ private:
     int skipImages;
     int recSkip;
     bool stoppingRecording;
+    QString recFileName;
+    QString origin;
 
 
 #ifdef TRACKING

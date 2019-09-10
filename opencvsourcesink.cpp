@@ -1,6 +1,6 @@
 #include "opencvsourcesink.h"
 
-bool OpencvSourceSink::Init() {
+bool OpencvSourceSink::Init(QString params) {
     return true;
 }
 
@@ -21,7 +21,7 @@ bool OpencvSourceSink::StartAcquisition(QString dev) {
     return camera.isOpened();
 }
 
-bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,int cols,int rows) {
+QString OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,int cols,int rows) {
     QDateTime mom = QDateTime::currentDateTime();
     QString filenam=recFold+"/"+mom.toString("yyyyMMdd-hhmmss")+".avi";
     int fourcc=0;
@@ -37,7 +37,7 @@ bool OpencvSourceSink::StartRecording(QString recFold, QString codec, int fps,in
 #else
     recFile=cv::VideoWriter(filenam.toUtf8().data(),fourcc,fps,cv::Size(cols,rows));
 #endif
-    return true;
+    return filenam;
 }
 
 bool OpencvSourceSink::StopRecording() {
@@ -89,8 +89,8 @@ bool OpencvSourceSink::GrabFrame(ImagePacket &target,int indexIncrement) {
     } else {
         target.pixFormat="MONO8";
     }
-    target.timeStamp=QDateTime::currentMSecsSinceEpoch();
-
+    double timetime=QDateTime::currentMSecsSinceEpoch();
+    target.timeStamp=timetime;
 
     return true;
 }

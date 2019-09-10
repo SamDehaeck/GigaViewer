@@ -92,6 +92,10 @@ void CamBackend::GrabFrame()
     //        StopAcquisition();
             return;
         }
+        //currImage.fileName=recFileName.toStdString();
+        //qInfo(recFileName.toLocal8Bit());
+        //qInfo("Received cambackend: %s",currImage.fileName.data());
+        //qInfo("Want to insert: %s",recFileName.toStdString().data());
         if (format!=currImage.pixFormat) {
     //        qInfo()<<"Switching data format";
             format=currImage.pixFormat;
@@ -113,6 +117,22 @@ void CamBackend::GrabFrame()
         } else {
             if (recording && currSink) currSink->RecordFrame(currImage);
         }
+
+        // now set common properties for the image message
+        currImage.message.insert("origin",origin);
+        currImage.message.insert("@timestamp",currImage.timeStamp);
+        currImage.message.insert("seqnumber",currImage.seqNumber);
+        currImage.message.insert("pixformat",currImage.pixFormat);
+        if (recording && currSink) {
+            currImage.message.insert("recording","True");
+            currImage.message.insert("recfilename",recFileName);
+            currImage.message.insert("recskip",recSkip);
+        } else {
+            currImage.message.insert("recording","False");
+            currImage.message.insert("recfilename","");
+            currImage.message.insert("recskip",0);
+        }
+        if (needTimer) currImage.message.insert("interval",timer.interval());  //not really usefull in this case..
 
 #ifdef TRACKING
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
@@ -142,6 +162,7 @@ void CamBackend::GrabFrame()
 // make new source
 bool CamBackend::StartAcquisition(QString dev)
 {
+    origin=dev;
     if (dev.contains(".h5")) {
 #ifdef ENABLE_HDF5
         currSource=new Hdf5SourceSink();
@@ -176,7 +197,7 @@ bool CamBackend::StartAcquisition(QString dev)
         qDebug()<<"AVT source not compiled";
         return false;
 #endif
-    } else if (dev=="Vimba") {
+    } else if (dev.contains("Vimba")) {
 #ifdef VIMBA
         currSource=new VimbaSourceSink(this); //vimba needs the current object to connect the grabFrame signal
         needTimer=false;
@@ -185,8 +206,9 @@ bool CamBackend::StartAcquisition(QString dev)
         qDebug()<<"Vimba source not compiled";
         return false;
 #endif
-    } else if (dev=="IDS") {
+    } else if (dev.contains("IDS")) {
 #ifdef IDS
+        qDebug()<<"Will use IDS";
         currSource=new IdsSourceSink();
         needTimer=false;
         doesCallBack=false;
@@ -195,12 +217,13 @@ bool CamBackend::StartAcquisition(QString dev)
         return false;
 #endif
     } else {
+        if (dev=="0") origin="opencv-camera";
         currSource=new OpencvSourceSink();
         needTimer=true;
         doesCallBack=false;
     }
 
-    if (currSource->Init()) {
+    if (currSource->Init(dev)) {
         if (currSource->StartAcquisition(dev)) {
             running=true;
             return true;
@@ -256,7 +279,7 @@ void CamBackend::SetInterval(double newInt) {
             timer.setInterval(static_cast<int>(round(std::abs(newNewInt))));  // cannot do better here than integer accuracy
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
-            int newFps=currSource->SetInterval(std::abs(newNewInt));
+            double newFps=currSource->SetInterval(std::abs(newNewInt));
             if (abs(newFps-newNewInt)<1e-5) {
                 emit fpsChanged(newFps);
             }
@@ -320,12 +343,14 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
             qInfo()<<"Hdf5 source/sink not compiled in";
 #endif
         } else {
+            qInfo()<<"Am here, not sure what to do...";
             currSink=new OpencvSourceSink();
         }
         int fps=timer.interval()/10;
-        bool succ=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
-        if (!succ) {
-            qDebug()<<"Start recording failed!";
+        recFileName=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
+        //qInfo("This is the recFile: %s",recFileName.toLocal8Bit().data());
+        if (recFileName=="") {
+            qDebug()<<"Starting recording failed!";
             delete currSink;
             currSink=nullptr;
             recording=false;

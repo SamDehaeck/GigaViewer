@@ -1,6 +1,6 @@
 #include "imagesourcesink.h"
 
-bool ImageSourceSink::Init() {
+bool ImageSourceSink::Init(QString params) {
     return false;
 }
 
@@ -20,8 +20,8 @@ bool ImageSourceSink::ReleaseCamera() {
     return false;
 }
 
-bool ImageSourceSink::StartRecording(QString,QString,int,int,int) {
-    return false;
+QString ImageSourceSink::StartRecording(QString,QString,int,int,int) {
+    return QString("");
 }
 
 bool ImageSourceSink::RecordFrame(ImagePacket&) {
@@ -37,6 +37,7 @@ bool ImageSourceSink::IsOpened() {
 }
 
 double ImageSourceSink::SetInterval(double) {
+    qInfo("Setting fps not supported for this source.");
     return 0;
 }
 
@@ -49,6 +50,7 @@ bool ImageSourceSink::SetRoiCols(int) {
 }
 
 bool ImageSourceSink::SetShutter(int) {
+    qInfo("Setting shutter not supported for this source.");
     return false;
 }
 

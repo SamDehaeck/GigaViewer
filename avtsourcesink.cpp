@@ -5,7 +5,7 @@ bool AvtSourceSink::IsOpened()
     return true;
 }
 
-bool AvtSourceSink::Init()
+bool AvtSourceSink::Init(QString params)
 {
     tPvErr errCode;
 

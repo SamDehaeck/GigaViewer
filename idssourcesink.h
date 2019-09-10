@@ -11,8 +11,8 @@
 class IdsSourceSink : public ImageSourceSink
 {
 public:
-    bool Init();
-    bool StartAcquisition(QString dev="0");
+    bool Init(QString params="");
+    bool StartAcquisition(QString dev="-1");
     bool StopAcquisition();
     bool ReleaseCamera();
     bool GrabFrame(ImagePacket& target,int indexIncrement=1);
@@ -23,7 +23,7 @@ public:
     bool SetRoiRows(int rows);
     bool SetRoiCols(int cols);
     bool SetColourMode(bool useHighQuality);  // quality mode for debayering
-    bool SetPixelClock();
+    bool SetPixelClock(int selection);
 
 private:
     HIDS hCam;

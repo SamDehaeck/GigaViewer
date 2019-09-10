@@ -27,7 +27,7 @@ class VimbaSourceSink : public ImageSourceSink
 {
 public:
     VimbaSourceSink(CamBackend* parent);
-    bool Init();
+    bool Init(QString params="");
     bool StartAcquisition(QString dev="0");
     bool StopAcquisition();
     bool ReleaseCamera();

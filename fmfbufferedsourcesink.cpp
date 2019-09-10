@@ -1,7 +1,7 @@
 #include "fmfbufferedsourcesink.h"
 #include "opencv2/opencv.hpp"
 
-bool FmfBufferedSourceSink::Init()
+bool FmfBufferedSourceSink::Init(QString params)
 {
     return true;
 }
@@ -49,7 +49,7 @@ bool FmfBufferedSourceSink::RecordFrame(ImagePacket &source)
     return true;
 }
 
-bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, int reccols, int recrows)
+QString FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, int reccols, int recrows)
 {
     uint32_t version = 3;
     uint32_t formatlen;
@@ -86,7 +86,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
         bitsperpixel=8;
         dataformat="RGB8";
     } else {
-        return false;
+        return QString("");
     }
     rows=recrows;
     cols=reccols;
@@ -108,7 +108,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
         } else {
             qDebug()<<"Recording Folder does not exist";
             QDateTime mom = QDateTime::currentDateTime();
-            basename=recFold+"/"+mom.toString("yyyyMMdd-hhmmss");
+            basename=mom.toString("yyyyMMdd-hhmmss");
         }
 //        qInfo()<<"recFold"<<dir<<" basename "<<basename;
     }
@@ -128,25 +128,25 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
 
     if(fwrite(&version,sizeof(uint32_t),1,fmfrec) < 1){
         fprintf(stderr,"Error writing version number of input fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
     // format length
     if(fwrite(&formatlen,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing format length to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
     // format string
     if(fwrite(dataformat.toStdString().c_str(),sizeof(char),formatlen,fmfrec)<formatlen){
         fprintf(stderr,"Error writing format string to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
     // bits per pixel
     if(fwrite(&bitsperpixel,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing bits per pixel to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
 //    uint32_t rowsRead;
@@ -154,13 +154,13 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
       // height of the frame
     if(fwrite(&rows,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing frame height to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
     // width of the frame
     if(fwrite(&cols,sizeof(uint32_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing frame width to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 
 
@@ -172,7 +172,7 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
     // bytes encoding a frame
     if(fwrite(&bytesperchunk,sizeof(uint64_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing bytes per chunk to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
 //    qInfo()<<"bytesperchunk will be: "<<bytesperchunk;
 
@@ -182,14 +182,14 @@ bool FmfBufferedSourceSink::StartRecording(QString recFold, QString codec, int, 
     uint64_t nRead=0; //will have to write this when closing the recording
     if(fwrite(&nRead,sizeof(uint64_t),1,fmfrec)<1){
         fprintf(stderr,"Error writing number of frames to output fmf file.\n");
-        exit(1);
+        return(QString(""));
     }
     recheadersize = ftell(fmfrec);
 
 
     recording=true;
 
-    return true;
+    return filenam;
 }
 
 bool FmfBufferedSourceSink::StopRecording()

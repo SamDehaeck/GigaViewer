@@ -13,13 +13,13 @@ class ImageSourceSink
 {
 public:
 
-    virtual bool Init();
+    virtual bool Init(QString params="");
     virtual bool StartAcquisition(QString dev="0");
     virtual bool StopAcquisition();
     virtual bool ReleaseCamera();
     virtual bool GrabFrame(ImagePacket& target,int indexIncrement=1);
     virtual bool RecordFrame(ImagePacket& source);
-    virtual bool StartRecording(QString recFold, QString codec,int fps, int cols, int rows);
+    virtual QString StartRecording(QString recFold, QString codec,int fps, int cols, int rows);
     virtual bool StopRecording();
     virtual bool IsOpened();
     virtual double SetInterval(double msec);

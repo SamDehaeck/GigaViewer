@@ -5,7 +5,7 @@
 
 using namespace H5;
 
-bool Hdf5SourceSink::Init()
+bool Hdf5SourceSink::Init(QString params)
 {
     return true;
 }
@@ -238,7 +238,7 @@ bool Hdf5SourceSink::ReleaseCamera()
     return true;
 }
 
-bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
+QString Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int cols, int rows)
 {
     QString basename;
     QDir basedir(recFold);
@@ -293,7 +293,7 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
         dataformat="RGB8";
     } else {
         qDebug()<<"This format not yet implemented: "<<codec;
-        return false;
+        return QString("");
     }
 
 
@@ -365,7 +365,7 @@ bool Hdf5SourceSink::StartRecording(QString recFold, QString codec, int, int col
     }
 
     index=0;
-    return true;
+    return filenam;
 }
 
 bool Hdf5SourceSink::RecordFrame(ImagePacket &source)

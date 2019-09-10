@@ -49,7 +49,7 @@ bool VimbaSourceSink::IsOpened()
     return true;
 }
 
-bool VimbaSourceSink::Init()
+bool VimbaSourceSink::Init(QString params)
 {
     VmbErrorType    err=system.Startup();
     CameraPtrVector cameras;

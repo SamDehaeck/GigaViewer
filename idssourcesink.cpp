@@ -6,9 +6,8 @@ bool IdsSourceSink::IsOpened()
     return true;
 }
 
-bool IdsSourceSink::Init()
+bool IdsSourceSink::Init(QString params)
 {
-
     PUEYE_CAMERA_LIST m_pCamList;
     UEYE_CAMERA_INFO m_CameraInfo;
     // init the internal camera info structure
@@ -17,6 +16,7 @@ bool IdsSourceSink::Init()
     // get the cameralist from SDK
     m_pCamList = new UEYE_CAMERA_LIST;
     m_pCamList->dwCount = 0;
+
 
     if (is_GetCameraList (m_pCamList) == IS_SUCCESS) {
             DWORD dw = m_pCamList->dwCount;
@@ -30,15 +30,67 @@ bool IdsSourceSink::Init()
             if (is_GetCameraList (m_pCamList) != IS_SUCCESS) return false;
     } else return false;
 
+    QStringList extraOptions;
+    if (params.contains('@')) {
+        QRegularExpression re("@(-?[a-zA-Z0-9]*)");
+        QRegularExpressionMatchIterator i = re.globalMatch(params);
+
+        while (i.hasNext()) {
+            QRegularExpressionMatch match = i.next();
+            QString word = match.captured(1);
+            if (word.isEmpty()) word=QString("-1");
+            //qDebug()<<"Matched "<<word;
+            extraOptions<<word;
+        }
+    }
+
+    while (extraOptions.count()<3) {
+        extraOptions<<QString("-1");
+    }
+
+    int deviceNr=extraOptions[0].toInt();
+    long serialNr=extraOptions[1].toLong();
+    int pixelClock=extraOptions[2].toInt();
+    qDebug()<<"Extracted parameters "<<deviceNr<<" - "<<serialNr<<" - "<<pixelClock;
+
     if (m_pCamList->dwCount==0) {
         qDebug()<<"No camera found";
         return false;
-    } else if (m_pCamList->dwCount>1) {
-        qDebug()<<"More than 1 camera: "<<m_pCamList->dwCount;
+    } else {
+        // if deviceNr specified, this takes precedence
+        if (deviceNr!=-1) {
+                if (deviceNr< static_cast<int>(m_pCamList->dwCount)) {
+                    qDebug()<<"Will take camera # "<<deviceNr;
+                    memcpy (&m_CameraInfo, &m_pCamList->uci[deviceNr], sizeof(UEYE_CAMERA_INFO));
+                    qDebug()<<"This is model: "<<m_CameraInfo.FullModelName<<" with serial number "<< (m_CameraInfo.SerNo);
+                } else {
+                    qDebug()<<"DeviceNr is larger than amount of cameras connected.";
+                }
+        } else if (serialNr==-1) {
+            // this is the next case, no options specified => ask (not yet implemented) => just take first camera!
+            memcpy (&m_CameraInfo, &m_pCamList->uci[0], sizeof(UEYE_CAMERA_INFO));
+            qDebug()<<"Taking first camera: "<<m_CameraInfo.FullModelName<<" with serial: "<<m_CameraInfo.SerNo;
+        } else {
+            bool foundCamera=false;
+            for (int i=0;i< static_cast<int>(m_pCamList->dwCount);i++) {
+                memcpy (&m_CameraInfo, &m_pCamList->uci[i], sizeof(UEYE_CAMERA_INFO));
+                QString serial(m_CameraInfo.SerNo);
+                //qDebug()<<"Looking at camera serial no: "<<serial<<" - "<<serial.toLong();
+
+                if (serial.toLong()==serialNr) {
+                    //qDebug()<<"Found the camera with the correct serial number!";
+                    foundCamera=true;
+                    break;
+                }
+            }
+            if (!foundCamera) {
+                qDebug()<<"Could not find the camera with the given serial number: "<<serialNr;
+                return false;
+            }
+        }
     }
 
-    // will use camera 0
-    memcpy (&m_CameraInfo, &m_pCamList->uci[0], sizeof(UEYE_CAMERA_INFO));
+
     hCam = (HIDS) (m_CameraInfo.dwDeviceID | IS_USE_DEVICE_ID);
 
 
@@ -47,7 +99,7 @@ bool IdsSourceSink::Init()
            return false;
     }
 
-    bool succ=SetPixelClock();
+    bool succ=SetPixelClock(pixelClock);
     if (!succ) {
         qWarning()<<"Something went wrong with the Pixel Clock";
     }
@@ -124,7 +176,7 @@ bool IdsSourceSink::Init()
 
 bool IdsSourceSink::StartAcquisition(QString dev)
 {
-    if (dev!="IDS") qDebug()<<"Different devices not yet implemented";
+    //if (!dev!="IDS") qDebug()<<"Different devices not yet implemented";
 
     is_SetExternalTrigger (hCam, IS_SET_TRIGGER_OFF); //This makes that calling freeze image creates a new image
 
@@ -197,7 +249,7 @@ bool IdsSourceSink::ReleaseCamera() {
     return true;
 }
 
-bool IdsSourceSink::SetPixelClock() {
+bool IdsSourceSink::SetPixelClock(int selection) {
     // first set the extended pixelclock range if available to reach higher maximal fps
     /* Enable the extended pixel clock range */
     bool worked=false;
@@ -229,13 +281,22 @@ bool IdsSourceSink::SetPixelClock() {
         items<<QString::number(clockList[i]);
     }
 //    qDebug()<<"Available clock options: "<<items;
-    bool ok;
-    QString item = QInputDialog::getItem(NULL, "Pixel Clock",
-                                        "Selection options:", items, clockN/2, false, &ok);
+    int pixelC;
+    if (selection==-1) {
+        bool ok;
+        QString item = QInputDialog::getItem(NULL, "Pixel Clock",
+                                            "Selection options:", items, clockN/2, false, &ok);
+        if (ok && !item.isEmpty()) pixelC=item.toInt();
+
+    } else {
+        pixelC=selection;
+    }
+
+    qDebug()<<"Will set the following pixelClock "<<pixelC;
 
     // now handle response and set the camera
-    if (ok && !item.isEmpty()) {
-        int pixelC=item.toInt();
+    if (pixelC!=-1) {
+        //int pixelC=item.toInt();
 //        qDebug()<<"Selected: "<<pixelC;
         is_PixelClock(hCam, IS_PIXELCLOCK_CMD_SET, (void*)&pixelC, sizeof(pixelC));
         int clockNow;

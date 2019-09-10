@@ -66,13 +66,14 @@ public slots:
     void gotNewShutSpeed(int shut);
     void needNewSample();
     void getSnapshot(QString location);
+    void showPlaybackControls(bool visible);
+    void showInputControls(bool visible);
+    void showCameraControls(bool visible);
 
 
 protected:
     void resizeEvent(QResizeEvent *event);
-    void showPlaybackControls(bool visible);
-    void showInputControls(bool visible);
-    void showCameraControls(bool visible);
+
 
 #ifdef TRACKING
     void showTrackingDialog(bool visible);
