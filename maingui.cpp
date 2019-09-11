@@ -202,6 +202,9 @@ void MainGui::newMoviePressed(QString theString)
         emit newMovieNeeded(theString);
         showPlaybackControls(true);
         showInputControls(false);        
+        if (theString.contains("IDS") | theString.contains("VIMBA")) {
+            showCameraControls(true);
+        }
 #ifdef TRACKING
         showTrackingDialog(true);
 #endif

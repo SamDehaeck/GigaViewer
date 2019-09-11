@@ -1,7 +1,7 @@
 #include "mrfsourcesink.h"
 #include "opencv2/opencv.hpp"
 
-bool MrfSourceSink::Init(QString params)
+bool MrfSourceSink::Init(QString)
 {
     return true;
 }

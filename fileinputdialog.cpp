@@ -4,7 +4,7 @@
 
 FileInputDialog::FileInputDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::FileInputDialog)
+    ui(new Ui::FileInputDialog),parent(parent)
 {
     ui->setupUi(this);
 
@@ -32,7 +32,7 @@ FileInputDialog::~FileInputDialog()
 // load picture from disk button
 void FileInputDialog::on_filePushButton_clicked()
 {
-    QString resp = QFileDialog::getOpenFileName(this,tr("Open Picture"),
+    QString resp = QFileDialog::getOpenFileName(parent,tr("Open Picture"),
     currentDir.absolutePath(), tr("All files (*.*)") );
     if (resp=="") {
         currentDir=QDir::home();
@@ -50,7 +50,7 @@ void FileInputDialog::on_camButton_clicked() {
 // load movie (from disk) button
 void FileInputDialog::on_MovieButton_clicked()
 {
-    QString resp = QFileDialog::getOpenFileName(this,tr("Open Movie"),
+    QString resp = QFileDialog::getOpenFileName(parent,tr("Open Movie"),
     currentDir.absolutePath(), tr("All files (*.*)") );
     if (resp=="") {
         currentDir=QDir::home();

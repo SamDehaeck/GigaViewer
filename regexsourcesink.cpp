@@ -2,7 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <QVector>
 
-bool RegexSourceSink::Init(QString params)
+bool RegexSourceSink::Init(QString)
 {
     return true;
 }

@@ -5,7 +5,7 @@
 
 using namespace H5;
 
-bool Hdf5SourceSink::Init(QString params)
+bool Hdf5SourceSink::Init(QString)
 {
     return true;
 }

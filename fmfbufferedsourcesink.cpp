@@ -1,7 +1,7 @@
 #include "fmfbufferedsourcesink.h"
 #include "opencv2/opencv.hpp"
 
-bool FmfBufferedSourceSink::Init(QString params)
+bool FmfBufferedSourceSink::Init(QString)
 {
     return true;
 }

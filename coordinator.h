@@ -2,6 +2,7 @@
 #define COORDINATOR_H
 
 #include <QObject>
+#include <QThread>
 //#include "maingui.h"
 #include "picbackend.h"
 #include "cambackend.h"
@@ -42,6 +43,7 @@ private:
     CamBackend camBack;
     bool opencvRunning;
     bool avtRunning;
+    QThread* backendThread;
 
 };
 

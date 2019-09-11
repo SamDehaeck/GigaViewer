@@ -43,7 +43,8 @@ CamBackend::CamBackend(QObject *parent) :
   #endif
 
 {
-    connect(&timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
+    timer=new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
     connect(this,SIGNAL(startTheTimer(int)),this,SLOT(willStartTheTimer(int)));
     connect(this,SIGNAL(stopTheTimer()),this,SLOT(willStopTheTimer()));
     format="MONO8"; //fall back format
@@ -132,7 +133,7 @@ void CamBackend::GrabFrame()
             currImage.message.insert("recfilename","");
             currImage.message.insert("recskip",0);
         }
-        if (needTimer) currImage.message.insert("interval",timer.interval());  //not really usefull in this case..
+        if (needTimer) currImage.message.insert("interval",timer->interval());  //not really usefull in this case..
 
 #ifdef TRACKING
         // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
@@ -276,7 +277,7 @@ void CamBackend::SetInterval(double newInt) {
         }
 
         if (needTimer) {
-            timer.setInterval(static_cast<int>(round(std::abs(newNewInt))));  // cannot do better here than integer accuracy
+            timer->setInterval(static_cast<int>(round(std::abs(newNewInt))));  // cannot do better here than integer accuracy
             // no need to emit fpsChanged(newInt) because interface already updated
         } else {  // the source handles the interval by itself
             double newFps=currSource->SetInterval(std::abs(newNewInt));
@@ -346,7 +347,7 @@ void CamBackend::StartRecording(bool startRec, QString recFold, QString codec, i
             qInfo()<<"Am here, not sure what to do...";
             currSink=new OpencvSourceSink();
         }
-        int fps=timer.interval()/10;
+        int fps=timer->interval()/10;
         recFileName=currSink->StartRecording(recFold,codec,fps,currImage.image.cols,currImage.image.rows);
         //qInfo("This is the recFile: %s",recFileName.toLocal8Bit().data());
         if (recFileName=="") {
@@ -379,13 +380,13 @@ void CamBackend::skipForwardBackward(bool forward)
 
 void CamBackend::willStartTheTimer(int interval)
 {
-    timer.setInterval(interval);
-    timer.start();
+    timer->setInterval(interval);
+    timer->start();
 }
 
 void CamBackend::willStopTheTimer()
 {
-    timer.stop();
+    timer->stop();
 }
 
 void CamBackend::SetShutter(int shut)

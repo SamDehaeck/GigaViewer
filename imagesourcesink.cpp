@@ -1,6 +1,6 @@
 #include "imagesourcesink.h"
 
-bool ImageSourceSink::Init(QString params) {
+bool ImageSourceSink::Init(QString) {
     return false;
 }
 

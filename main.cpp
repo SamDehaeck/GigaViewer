@@ -79,11 +79,11 @@ int main(int argc, char *argv[])
 
                             if (kkSett.contains("connectParams")) {
                                 host=ooSett["connectParams"].toObject()["bootstrap.servers"].toString();
-                                qInfo("Found the host %s",host.toLatin1().data());
+                                //qInfo("Found the host %s",host.toLatin1().data());
                             }
                             if (kkSett.contains("topicBasename")) {
                                 topicBasename=ooSett["topicBasename"].toString() + QString(".");
-                                qInfo("Found a topicBasename %s",topicBasename.toLatin1().data());
+                                //qInfo("Found a topicBasename %s",topicBasename.toLatin1().data());
                             }
                         }
                     }
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
                     showGuiControls=controls["showguicontrols"].toBool(true);
                     remoteLog=controls["remotelog"].toBool(false);
                     remoteControls=controls["remotecontrols"].toBool(false);
-                    qInfo("Found settings: %i, %i, %i, %i",showGui,showGuiControls,remoteLog,remoteControls);
+                    //qInfo("Found settings: %i, %i, %i, %i",showGui,showGuiControls,remoteLog,remoteControls);
                 }
                 if (kk.contains("camera")) {
                     QJsonObject camera=oo["camera"].toObject();
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
                     // now combine all these parameters into driver
                     driver=driver+QString("@")+devicenumber+QString("@")+serial+QString("@")+pixelclock;
-                    qInfo()<<"The full driver name will be "<<driver;
+                    //qInfo()<<"The full driver name will be "<<driver;
 
                     autostartCam=camera["autostart"].toBool(false);
                 }
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
         }
         if (remoteControls) {
             kafka.makeConsumers(cfgTopic,cmdTopic,groupid,host);
-            qInfo("Doing the remote control %s",cmdTopic.toLatin1().data());
+            qInfo("Doing the remote control %s and configuration %s",qUtf8Printable(cmdTopic),qUtf8Printable(cfgTopic));
         }
     }
     if (autostartCam) {

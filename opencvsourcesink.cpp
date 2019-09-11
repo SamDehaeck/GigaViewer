@@ -1,11 +1,11 @@
 #include "opencvsourcesink.h"
 
-bool OpencvSourceSink::Init(QString params) {
+bool OpencvSourceSink::Init(QString) {
     return true;
 }
 
 bool OpencvSourceSink::StartAcquisition(QString dev) {
-    if (dev=="0") {
+    if (dev.startsWith("0")) {
         camera.open(0);
         nFrames=0;
         liveFeed=true;

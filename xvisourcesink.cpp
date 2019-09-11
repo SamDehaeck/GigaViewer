@@ -1,7 +1,7 @@
 #include "xvisourcesink.h"
 #include "opencv2/opencv.hpp"
 
-bool XviSourceSink::Init(QString params)
+bool XviSourceSink::Init(QString)
 {
     return true;
 }

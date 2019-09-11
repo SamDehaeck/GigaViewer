@@ -4,10 +4,16 @@ Coordinator::Coordinator(QObject *parent) :
     QObject(parent),picBack(parent),camBack(parent)
   ,opencvRunning(false),avtRunning(false)
 {
+//    backendThread=new QThread();
+//    backendThread->start();
+//    camBack.moveToThread(backendThread);
+
     //propagate the signals coming from the backend
     connect(&camBack,SIGNAL(NewImageReady(ImagePacket)),this,SIGNAL(NewImageReady(ImagePacket)));
     connect(&camBack,SIGNAL(shutterChanged(int)),this,SIGNAL(shutterChanged(int)));
     connect(&camBack,SIGNAL(fpsChanged(double)),this,SIGNAL(fpsChanged(double)));
+
+
 }
 /*
 void Coordinator::setGui(MainGui *myGui) {

@@ -3,13 +3,12 @@
 
 #include <QObject>
 #include <QJsonDocument>
+#include <QThread>
 
 #include "imagepacket.h"
 #include "coordinator.h"
 #include "librdkafka/rdkafka.h"
-
-
-//static void msgDeliveryCB (rd_kafka_t *rk, const rd_kafka_message_t *rkmessage, void *opaque);
+#include "kafkacontroller.h"
 
 class KafkaFrontend : public QObject
 {
@@ -31,26 +30,23 @@ signals:
 
 public slots:
     void newImageReceived(ImagePacket theMatrix);
-    void timedConsumption();
-    void willStartTheTimer(int interval);
-    void willStopTheTimer();
+    void actOnCommands(QList<QJsonDocument> commands);
+    void actOnConfig(QList<QJsonDocument> configs);
 
 private:
     void publishMsg(QString key, QJsonDocument value);    
-    QList<QJsonDocument> consumeMsg(rd_kafka_t* handle,int timeout,int maxMessages=100);
-    void actOnCommands(QList<QJsonDocument> commands);
-    void actOnConfig(QList<QJsonDocument> configs);
     void changeParameters(QJsonObject instructs);
     void changeRecording(bool start,QJsonObject parameters);
-    rd_kafka_t* makeConsumerHandle(QString topic,QString groupId,QString host,QString earliestLatest,bool randomId);
 
     // producer vars
     rd_kafka_t *prodHndl;
     rd_kafka_topic_t *prodTopicHndl;
     // consumer vars
-    rd_kafka_t *consCmdHndle;
-    rd_kafka_t *consCfgHndle;
-    QTimer timer;
+    KafkaController *cmdPointer;
+    KafkaController *cfgPointer;
+    QThread* cmdThread;
+    QThread* cfgThread;
+
     int timeout;
     // camera parameters
     bool isRecording;

@@ -42,6 +42,7 @@ private slots:
 private:
     Ui::FileInputDialog *ui;
     QDir currentDir;
+    QWidget* parent;
 };
 
 #endif // FILEINPUTDIALOG_H

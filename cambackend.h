@@ -63,7 +63,7 @@ private:
     bool liveMode;
     bool recording;
     double timerInterval;
-    QTimer timer;
+    QTimer* timer;
     bool reversePlay;
     bool isPaused;
     bool needTimer;

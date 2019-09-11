@@ -107,9 +107,10 @@ unix:!macx {
         LIBS += -lhdf5 -lhdf5_hl -lhdf5_cpp
     }
 
-    LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+
     #LIBS += `pkg-config --libs opencv4`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
     #QMAKE_INCDIR += /usr/include/opencv4
+    LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
     LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
     LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 
@@ -209,8 +210,10 @@ ELLIPSE {
 }
 
 KAFKA {
-    SOURCES += kafkafrontend.cpp
-    HEADERS += kafkafrontend.h
+    SOURCES += kafkafrontend.cpp \
+                kafkacontroller.cpp
+    HEADERS += kafkafrontend.h \
+                kafkacontroller.h
 }
 
 HEADERS  += \
