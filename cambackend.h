@@ -5,11 +5,11 @@
 #include <QtGui>
 #include "imagepacket.h"
 #include "imagesourcesink.h"
-#ifdef TRACKING
-#include "marangonitracking.h"
-#endif
 #ifdef ELLIPSE
 #include "ellipsedetection.h"
+#endif
+#ifdef INTERFERO
+#include "interferoplugin.h"
 #endif
 
 class CamBackend : public QThread
@@ -26,15 +26,10 @@ public:
     void setRoiRows(int rows);
     void setRoiCols(int cols);
     void AdaptForDisplay(ImagePacket& newIm);
-/*    bool initProcPlugin();
-    bool endProcPlugin();
-    bool DoProcPlugin(ImagePacket& newIm);
-    bool startRecPlugin(QString RecName);
-    bool endRecPlugin();
-    bool setSettingsPlugin(ImagePacket& newIm,QStringList settings);  */
     void skipForwardBackward(bool forward);
     void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
     void changedPluginSettings(QMap<QString,QVariant> settings);
+    void doPlugin(ImagePacket& currIm);
 
 
 signals:
@@ -75,11 +70,12 @@ private:
     QString origin;
 
 
-#ifdef TRACKING
-    MarangoniTracking tracker;
-#endif
+
 #ifdef ELLIPSE
-    EllipseDetection tracker;
+    EllipseDetection ellipse;
+#endif
+#ifdef INTERFERO
+    InterferoPlugin interfero;
 #endif
 
 

@@ -1,19 +1,19 @@
-#include "ellipsedetectiondialog.h"
-#include "ui_ellipsedetectiondialog.h"
+#include "interferoplugindialog.h"
+#include "ui_interferoplugindialog.h"
 #include <QDebug>
 
 
-EllipseDetectionDialog::EllipseDetectionDialog(QWidget *parent) :
+InterferoPluginDialog::InterferoPluginDialog(QWidget *parent) :
     QDialog(parent),tSliderPressed(false),xSliderPressed(false),ySliderPressed(false),
-    ui(new Ui::EllipseDetectionDialog)
+    ui(new Ui::InterferoPluginDialog)
 {
     ui->setupUi(this);
     extractData();
 }
 
-bool EllipseDetectionDialog::extractData() {
+bool InterferoPluginDialog::extractData() {
     QMap<QString,QVariant> settings;
-    settings["pluginName"]="EllipseDetection";
+    settings["pluginName"]="InterferoPlugin";
     settings["activated"]=ui->activateBox->isChecked();
     settings["threshold"]=ui->thresholdSlider->value();
     settings["MinD"]=ui->MinDiameter->value();
@@ -33,17 +33,17 @@ bool EllipseDetectionDialog::extractData() {
     return true;
 }
 
-EllipseDetectionDialog::~EllipseDetectionDialog()
+InterferoPluginDialog::~InterferoPluginDialog()
 {
     delete ui;
 }
 
-void EllipseDetectionDialog::on_activateBox_stateChanged(int val)
+void InterferoPluginDialog::on_activateBox_stateChanged(int val)
 {
     extractData();
 }
 
-void EllipseDetectionDialog::on_feedbackButton_clicked(bool checked)
+void InterferoPluginDialog::on_feedbackButton_clicked(bool checked)
 {
     feedback=checked;
     extractData();
@@ -51,54 +51,54 @@ void EllipseDetectionDialog::on_feedbackButton_clicked(bool checked)
 
 
 
-void EllipseDetectionDialog::on_thresholdSlider_sliderPressed()
+void InterferoPluginDialog::on_thresholdSlider_sliderPressed()
 {
     tSliderPressed=true;
 }
 
-void EllipseDetectionDialog::on_thresholdSlider_sliderReleased()
+void InterferoPluginDialog::on_thresholdSlider_sliderReleased()
 {
     tSliderPressed=false;
     extractData();
 }
 
-void EllipseDetectionDialog::on_thresholdSlider_valueChanged(int)
+void InterferoPluginDialog::on_thresholdSlider_valueChanged(int)
 {
     if (!tSliderPressed) {
         extractData();
     }
 }
 
-void EllipseDetectionDialog::on_MinDiameter_sliderPressed()
+void InterferoPluginDialog::on_MinDiameter_sliderPressed()
 {
     xSliderPressed=true;
 }
 
-void EllipseDetectionDialog::on_MinDiameter_sliderReleased()
+void InterferoPluginDialog::on_MinDiameter_sliderReleased()
 {
     xSliderPressed=false;
     extractData();
 }
 
-void EllipseDetectionDialog::on_MinDiameter_valueChanged(int)
+void InterferoPluginDialog::on_MinDiameter_valueChanged(int)
 {
     if (!xSliderPressed) {
         extractData();
     }
 }
 
-void EllipseDetectionDialog::on_MaxDiameter_sliderPressed()
+void InterferoPluginDialog::on_MaxDiameter_sliderPressed()
 {
     ySliderPressed=true;
 }
 
-void EllipseDetectionDialog::on_MaxDiameter_sliderReleased()
+void InterferoPluginDialog::on_MaxDiameter_sliderReleased()
 {
     ySliderPressed=false;
     extractData();
 }
 
-void EllipseDetectionDialog::on_MaxDiameter_valueChanged(int)
+void InterferoPluginDialog::on_MaxDiameter_valueChanged(int)
 {
     if (!ySliderPressed) {
         extractData();

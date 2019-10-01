@@ -25,21 +25,21 @@
 #include "hdf5sourcesink.h"
 #endif
 
-#ifdef TRACKING
-#include "marangonitracking.h"
-#endif
-
 #ifdef ELLIPSE
 #include "ellipsedetection.h"
 #endif
 
+#ifdef INTERFERO
+#include "interferoplugin.h"
+#endif
+
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(nullptr),currSource(nullptr), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0),stoppingRecording(false)
-#ifdef TRACKING
-  ,tracker(50,1)
-#endif
   #ifdef ELLIPSE
-    ,tracker(50)
+    ,ellipse(50)
+  #endif
+  #ifdef INTERFERO
+    ,interfero(50)
   #endif
 
 {
@@ -135,15 +135,7 @@ void CamBackend::GrabFrame()
         }
         if (needTimer) currImage.message.insert("interval",timer->interval());  //not really usefull in this case..
 
-#ifdef TRACKING
-        // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
-        tracker.processImage(currImage);
-#endif
-
-#ifdef ELLIPSE
-        // ADD IMAGE PROCESSING STEP HERE IF NECESSARY, ADJUST pixFormat if necessary to fit with display modifs
-        tracker.processImage(currImage);
-#endif
+        doPlugin(currImage);  // will perform post-processing if necessary.
 
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
@@ -492,38 +484,25 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
     }
 }
 
-/*
-bool CamBackend::initProcPlugin() {
-    doPluginProcessing=true; // if init successfull, switch on the processing
-    return true;
-}
-
-bool CamBackend::endProcPlugin() {
-    return true;
-}
-
-bool CamBackend::DoProcPlugin(ImagePacket& ) {
-    return true;
-}
-
-bool CamBackend::startRecPlugin(QString ) {
-    return true;
-}
-
-bool CamBackend::endRecPlugin() {
-    return true;
-}
-
-bool CamBackend::setSettingsPlugin(ImagePacket& ,QStringList ) {
-    return true;
-}
-*/
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
 #ifdef ELLIPSE
     if (settings["pluginName"]=="EllipseDetection") {
-//        qInfo()<<"should inform marangoni";
-        tracker.ChangeSettings(settings);
+        ellipse.ChangeSettings(settings);
     }
+#endif
+#ifdef INTERFERO
+    if (settings["pluginName"]=="InterferoPlugin") {
+        interfero.ChangeSettings(settings);
+    }
+#endif
+}
+
+void CamBackend::doPlugin(ImagePacket& currIm) {
+#ifdef ELLIPSE
+    ellipse.processImage(currIm);
+#endif
+#ifdef INTERFERO
+    interfero.processImage(currIm);
 #endif
 }
 

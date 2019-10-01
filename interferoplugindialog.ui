@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MarangoniTrackingDialog</class>
- <widget class="QDialog" name="MarangoniTrackingDialog">
+ <class>InterferoPluginDialog</class>
+ <widget class="QDialog" name="InterferoPluginDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Tracking</string>
+   <string>Ellipse Detection</string>
   </property>
   <property name="windowOpacity">
    <double>0.800000000000000</double>
@@ -29,7 +29,7 @@
     <item row="4" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
-       <string>Y-Position</string>
+       <string>Max Diameter</string>
       </property>
      </widget>
     </item>
@@ -50,12 +50,12 @@
     <item row="2" column="0" colspan="3" alignment="Qt::AlignHCenter">
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>Target Location</string>
+       <string>Fit parameters</string>
       </property>
      </widget>
     </item>
     <item row="3" column="2">
-     <widget class="QSlider" name="horPosition">
+     <widget class="QSlider" name="MinDiameter">
       <property name="value">
        <number>50</number>
       </property>
@@ -65,12 +65,12 @@
      </widget>
     </item>
     <item row="5" column="0" colspan="3">
-     <widget class="QPushButton" name="trackButton">
+     <widget class="QPushButton" name="feedbackButton">
       <property name="focusPolicy">
        <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
-       <string>Track</string>
+       <string>Take new reference</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -78,7 +78,7 @@
      </widget>
     </item>
     <item row="4" column="2">
-     <widget class="QSlider" name="vertPosition">
+     <widget class="QSlider" name="MaxDiameter">
       <property name="value">
        <number>50</number>
       </property>
@@ -90,7 +90,7 @@
     <item row="3" column="0">
      <widget class="QLabel" name="label_3">
       <property name="text">
-       <string>X-Position</string>
+       <string>Min Diameter</string>
       </property>
      </widget>
     </item>

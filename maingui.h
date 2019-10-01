@@ -14,12 +14,12 @@
 #include "fileinputdialog.h"
 #include "coordinator.h"
 
-#ifdef TRACKING
-#include "marangonitrackingdialog.h"
-#endif
-
 #ifdef ELLIPSE
 #include "ellipsedetectiondialog.h"
+#endif
+
+#ifdef INTERFERO
+#include "interferoplugindialog.h"
 #endif
 
 class MainGui : public QGraphicsView
@@ -47,12 +47,9 @@ signals:
     void skipFrames(bool forward);
     void setRoiRows(int rows);
     void setRoiCols(int cols);
-#ifdef TRACKING
+
     void pluginSettingsChanged(QMap<QString,QVariant> settings);
-#endif
-#ifdef ELLIPSE
-    void pluginSettingsChanged(QMap<QString,QVariant> settings);
-#endif
+
 public slots:
     void newImageReceived(ImagePacket theMatrix);
     void openCvFeedPressed();
@@ -74,13 +71,8 @@ public slots:
 protected:
     void resizeEvent(QResizeEvent *event);
 
+    void showPluginDialogs(bool visible);
 
-#ifdef TRACKING
-    void showTrackingDialog(bool visible);
-#endif
-#ifdef ELLIPSE
-    void showTrackingDialog(bool visible);
-#endif
 
 private:
     Coordinator myBoss;
@@ -94,11 +86,11 @@ private:
 
     bool saveSnapshot(ImagePacket theImage);
 
-#ifdef TRACKING
-    MarangoniTrackingDialog* trackDialog;
-#endif
 #ifdef ELLIPSE
-    EllipseDetectionDialog* trackDialog;
+    EllipseDetectionDialog* ellipseDialog;
+#endif
+#ifdef INTERFERO
+    InterferoPluginDialog* interferoDialog;
 #endif
 };
 

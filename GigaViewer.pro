@@ -14,9 +14,9 @@ CONFIG += HDF5       # enable HDF5 format for storing and reading files
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
 #CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
-
-#CONFIG += TRACKING   # enable tracking of Marangoni-driven particles (work-in-progress option  demonstrating real-time processing)
 CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image
+CONFIG += INTERFERO  # enable real-time analysis of interferograms
+
 CONFIG += KAFKA        # enable the kafka frontend option
 
 
@@ -29,31 +29,33 @@ HDF5 {
 }
 IDS {
     DEFINES *= IDS
-    TARGET = GigaViewer_Ids
+#    TARGET = GigaViewer_Cams
 }
 PVAPI {
     DEFINES *= PVAPI
+#    TARGET = GigaViewer_Cams
 }
 VIMBA {
     DEFINES *= VIMBA
-    TARGET = GigaViewer_Vimba
-    IDS {
-        TARGET = GigaViewer_Cams
-    }
+#    TARGET = GigaViewer_Cams
+#    IDS {
+#        TARGET = GigaViewer_Cams
+#    }
 
-}
-
-TRACKING {
-    DEFINES *= TRACKING
 }
 
 ELLIPSE {
     DEFINES *= ELLIPSE
+    TARGET = GigaViewer_Plugins
+}
+
+INTERFERO {
+    DEFINES *= INTERFERO
+    TARGET = GigaViewer_Plugins
 }
 
 KAFKA {
     DEFINES *= KAFKA
-    TARGET = GigaViewer_Kafka
 }
 
 #message(The Defines are $$DEFINES)
@@ -190,16 +192,6 @@ SOURCES += main.cpp \
     fmfbufferedsourcesink.cpp \
     fmfsourcesink.cpp
 
-TRACKING {
-    SOURCES += marangonitracking.cpp \
-        marangonitrackingdialog.cpp
-
-    HEADERS += marangonitracking.h \
-        marangonitrackingdialog.h
-
-    FORMS += marangonitrackingdialog.ui
-}
-
 ELLIPSE {
     SOURCES += ellipsedetection.cpp \
         ellipsedetectiondialog.cpp
@@ -208,6 +200,16 @@ ELLIPSE {
         ellipsedetectiondialog.h
 
     FORMS += ellipsedetectiondialog.ui
+}
+
+INTERFERO {
+    SOURCES += interferoplugin.cpp \
+        interferoplugindialog.cpp
+
+    HEADERS += interferoplugin.h \
+        interferoplugindialog.h
+
+    FORMS += interferoplugindialog.ui
 }
 
 KAFKA {

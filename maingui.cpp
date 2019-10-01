@@ -22,23 +22,18 @@ MainGui::MainGui(Coordinator *boss,QWidget *parent) :
     fileDialog = new FileInputDialog;
     playDialog = new PlaybackDialog;
     camDialog = new CameraControlsDialog;
-#ifdef TRACKING
-    trackDialog = new MarangoniTrackingDialog;
-#endif
-#ifdef ELLIPSE
-    trackDialog = new EllipseDetectionDialog;
-#endif
-
 
     QList<QDialog*> controlDialogs;
     controlDialogs.append(fileDialog);
     controlDialogs.append(playDialog);
     controlDialogs.append(camDialog);
-#ifdef TRACKING
-    controlDialogs.append(trackDialog);
-#endif
 #ifdef ELLIPSE
-    controlDialogs.append(trackDialog);
+    ellipseDialog = new EllipseDetectionDialog;
+    controlDialogs.append(ellipseDialog);
+#endif
+#ifdef INTERFERO
+    interferoDialog = new InterferoPluginDialog;
+    controlDialogs.append(interferoDialog);
 #endif
 
 //    const QSize rect =parent->frameSize();
@@ -104,11 +99,11 @@ MainGui::MainGui(Coordinator *boss,QWidget *parent) :
 
 
 
-#ifdef TRACKING
-    connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
-#endif
 #ifdef ELLIPSE
-    connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
+    connect(ellipseDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
+#endif
+#ifdef INTERFERO
+    connect(interferoDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
 #endif
     setScene(theScene);
     getNewSample=false;
@@ -120,12 +115,7 @@ void MainGui::returnToStart()
     showPlaybackControls(false);
     showCameraControls(false);
     showInputControls(true);
-#ifdef TRACKING
-    showTrackingDialog(false);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(false);
-#endif
+    showPluginDialogs(false);
 }
 
 void MainGui::resizeEvent(QResizeEvent *event)
@@ -155,13 +145,8 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 void MainGui::openCvFeedPressed()
 {
     showPlaybackControls(true);
-#ifdef TRACKING
-    showTrackingDialog(true);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(true);
-#endif
     showInputControls(false);
+    showPluginDialogs(true);
     emit newOpencvFeedNeeded(true);
     this->parentWidget()->setWindowTitle("OpenCV Feed");
 }
@@ -172,12 +157,7 @@ void MainGui::stopButtonPressed()
     showPlaybackControls(false);
     showCameraControls(false);
     showInputControls(true);
-#ifdef TRACKING
-    showTrackingDialog(false);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(false);
-#endif
+    showPluginDialogs(false);
     this->parentWidget()->setWindowTitle("GigaViewer");
 }
 
@@ -205,12 +185,7 @@ void MainGui::newMoviePressed(QString theString)
         if (theString.contains("IDS") | theString.contains("VIMBA")) {
             showCameraControls(true);
         }
-#ifdef TRACKING
-        showTrackingDialog(true);
-#endif
-#ifdef ELLIPSE
-        showTrackingDialog(true);
-#endif
+        showPluginDialogs(true);
         this->parentWidget()->setWindowTitle(theString);
     }
 }
@@ -241,37 +216,21 @@ void MainGui::showCameraControls(bool visible)
         }
     }
 }
-#ifdef TRACKING
-void MainGui::showTrackingDialog(bool visible) {
-    foreach (QGraphicsItem *item,theScene->items()) {
-        if (item->data(0)=="PLUGIN") {
-            item->setVisible(visible);
-        }
-    }
-}
-#endif
 
-#ifdef ELLIPSE
-void MainGui::showTrackingDialog(bool visible) {
+void MainGui::showPluginDialogs(bool visible) {
     foreach (QGraphicsItem *item,theScene->items()) {
         if (item->data(0)=="PLUGIN") {
             item->setVisible(visible);
         }
     }
 }
-#endif
 
 void MainGui::AVTFeedPressed()
 {
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
-#ifdef TRACKING
-    showTrackingDialog(true);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(true);
-#endif
+    showPluginDialogs(true);
     emit newAvtFeedNeeded(true);
     this->parentWidget()->setWindowTitle("AVT Live Camera Feed");
 }
@@ -282,12 +241,7 @@ void MainGui::VimbaFeedPressed()
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
-#ifdef TRACKING
-    showTrackingDialog(true);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(true);
-#endif
+    showPluginDialogs(true);
     this->parentWidget()->setWindowTitle("Vimba Live Camera Feed");
 }
 
@@ -297,12 +251,7 @@ void MainGui::IdsFeedPressed()
     showPlaybackControls(true);
     showInputControls(false);
     showCameraControls(true);
-#ifdef TRACKING
-    showTrackingDialog(true);
-#endif
-#ifdef ELLIPSE
-    showTrackingDialog(true);
-#endif
+    showPluginDialogs(true);
     this->parentWidget()->setWindowTitle("Ids Live Camera Feed");
 }
 

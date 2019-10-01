@@ -26,7 +26,7 @@ VideoGlScene::VideoGlScene(QList<QDialog*> controlDialogs, QObject *parent) :
             case 2:
                 proxy->setData(0,"CAMERA");
                 break;
-            case 3:
+            default:                             // all the others are plugins
                 proxy->setData(0,"PLUGIN");
                 break;
         }
