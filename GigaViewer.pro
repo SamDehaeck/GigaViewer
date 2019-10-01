@@ -53,6 +53,7 @@ ELLIPSE {
 
 KAFKA {
     DEFINES *= KAFKA
+    TARGET = GigaViewer_Kafka
 }
 
 #message(The Defines are $$DEFINES)

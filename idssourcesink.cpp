@@ -174,7 +174,7 @@ bool IdsSourceSink::Init(QString params)
     return true;
 }
 
-bool IdsSourceSink::StartAcquisition(QString dev)
+bool IdsSourceSink::StartAcquisition(QString)
 {
     //if (!dev!="IDS") qDebug()<<"Different devices not yet implemented";
 
