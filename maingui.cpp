@@ -108,7 +108,7 @@ MainGui::MainGui(Coordinator *boss,QWidget *parent) :
     connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
 #endif
 #ifdef ELLIPSE
-    connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),this,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)));
+    connect(trackDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
 #endif
     setScene(theScene);
     getNewSample=false;

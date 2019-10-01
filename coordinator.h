@@ -32,6 +32,7 @@ public slots:
     void setRoiCols(int cols);
     void skipForwardBackward(bool forward);
     void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
+    void newPluginSettingsReceived(QMap<QString,QVariant> settings);
 
 public:
 //    void setGui(MainGui* myGui);

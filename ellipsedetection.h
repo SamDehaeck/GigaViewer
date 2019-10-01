@@ -9,10 +9,10 @@ class EllipseDetection
 {
 private:
     int threshold;
-    int targetX;
-    int targetY;
+    int minDiameter;
+    int maxDiameter;
     bool activated;
-    bool shouldTrack;
+    bool feedback;
     QStringList dataToSave;
 public:
     EllipseDetection(int thresh);

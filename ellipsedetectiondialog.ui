@@ -55,7 +55,7 @@
      </widget>
     </item>
     <item row="3" column="2">
-     <widget class="QSlider" name="horPosition">
+     <widget class="QSlider" name="MinDiameter">
       <property name="value">
        <number>50</number>
       </property>
@@ -65,12 +65,12 @@
      </widget>
     </item>
     <item row="5" column="0" colspan="3">
-     <widget class="QPushButton" name="trackButton">
+     <widget class="QPushButton" name="feedbackButton">
       <property name="focusPolicy">
        <enum>Qt::NoFocus</enum>
       </property>
       <property name="text">
-       <string>Enable Feedback</string>
+       <string>Show Edges</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -78,7 +78,7 @@
      </widget>
     </item>
     <item row="4" column="2">
-     <widget class="QSlider" name="vertPosition">
+     <widget class="QSlider" name="MaxDiameter">
       <property name="value">
        <number>50</number>
       </property>

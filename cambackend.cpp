@@ -492,6 +492,7 @@ void CamBackend::AdaptForDisplay(ImagePacket& currImage) {
     }
 }
 
+/*
 bool CamBackend::initProcPlugin() {
     doPluginProcessing=true; // if init successfull, switch on the processing
     return true;
@@ -516,22 +517,13 @@ bool CamBackend::endRecPlugin() {
 bool CamBackend::setSettingsPlugin(ImagePacket& ,QStringList ) {
     return true;
 }
-#ifdef TRACKING
+*/
 void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
-    if (settings["pluginName"]=="MarangoniTracking") {
-//        qInfo()<<"should inform marangoni";
-        tracker.ChangeSettings(settings);
-    }
-
-}
-#endif
-
 #ifdef ELLIPSE
-void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
     if (settings["pluginName"]=="EllipseDetection") {
 //        qInfo()<<"should inform marangoni";
         tracker.ChangeSettings(settings);
     }
-
-}
 #endif
+}
+

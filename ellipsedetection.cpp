@@ -3,33 +3,34 @@
 
 using namespace cv;
 
-EllipseDetection::EllipseDetection(int thresh) : threshold(thresh),activated(false),shouldTrack(false){
+EllipseDetection::EllipseDetection(int thresh) : threshold(thresh),activated(false),feedback(false){
 
 }
 
 void EllipseDetection::ChangeSettings(QMap<QString,QVariant> settings) {
-    targetX=settings["targetX"].toInt();
-    targetY=settings["targetY"].toInt();
+    minDiameter=settings["MinD"].toInt();
+    maxDiameter=settings["MaxD"].toInt();
     threshold=settings["threshold"].toInt();
     if ((!activated)&&(settings["activated"].toBool())) {
-       // qDebug()<<"Should initialise";
+        //qDebug()<<"Should initialise";
     }
     if (activated&&(!settings["activated"].toBool())) {
-       // qDebug()<<"Should write to disk";
+        //qDebug()<<"Should write to disk";
     }
 
     activated=settings["activated"].toBool();
-    shouldTrack=settings["shouldTrack"].toBool();
-//    qDebug()<<"threshold="<<threshold;
+    feedback=settings["showFeedback"].toBool();
+    //qDebug()<<"activated="<<activated;
 }
 
 bool EllipseDetection::processImage(ImagePacket& currIm) {
-    if (activated) {
 
+    if (activated) {
+        //qInfo()<<"Received the image";
 
         if (currIm.pixFormat=="RGB8") {
             cv::Mat grayIm;
-            cv::cvtColor(currIm.image,grayIm,CV_RGB2GRAY);
+            cv::cvtColor(currIm.image,grayIm,COLOR_RGB2GRAY);
             currIm.image=grayIm.clone();
             currIm.pixFormat="MONO8";
         }
@@ -51,19 +52,20 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
             Mat centres;
             int nrLabs=connectedComponentsWithStats(edges,labs,stats,centres);
 
-            //            qDebug()<<"Amount of labels: "<<nrLabs;
+            //qDebug()<<"Amount of labels: "<<nrLabs;
             if (nrLabs>1) {
                 // now do single loop over labs to create a vector of vector of points where each subvector contains the coordinates
                 // of that label. Also make a separate vector to contain amount of edge points for each label.
                 // Easier to eliminate too small or too large labels before full loop.
                 int32_t* pixPointer;
-                std::vector<std::vector<Point> > labCont(nrLabs);
-                std::vector<int> counter(nrLabs);
+                size_t nrLabsSize=static_cast<size_t>(nrLabs);
+                std::vector<std::vector<Point> > labCont(nrLabsSize);
+                std::vector<int> counter(nrLabsSize);
 
                 for (int i=0;i<labs.rows;i++) {
                     pixPointer=labs.ptr<int32_t>(i);
                     for (int j=0;j<labs.cols;j++) {
-                        int32_t label=pixPointer[j];
+                        size_t label=static_cast<size_t>(pixPointer[j]);
                         if (label==0) continue;
 
                         labCont[label-1].push_back(Point(j,i));
@@ -81,42 +83,53 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
 //                int resColumns=0;
                 int minContour= 20;
                 int maxSize=max(I.rows,I.cols);
-                float minDiam = targetX/100.0*maxSize;
-                float maxDiam = targetY/100.0*maxSize;
+                double minDiam = minDiameter/100.0*maxSize;
+                double maxDiam = maxDiameter/100.0*maxSize;
                 std::vector<RotatedRect> foundEllipses;
-                for (int i=0;i<nrLabs;i++) {
+                for (size_t i=0;i<nrLabsSize;i++) {
                     if (counter[i]<=minContour) {
                         continue;
                     } else {
                         RotatedRect fEll=cv::fitEllipse(labCont[i]);
-                        float aspRat=fEll.size.width/fEll.size.height;
-                        float minAxis=min(fEll.size.width,fEll.size.height);
-                        float maxAxis=max(fEll.size.width,fEll.size.height);
+                        double aspRat=static_cast<double>(fEll.size.width/fEll.size.height);
+                        double minAxis=static_cast<double>(min(fEll.size.width,fEll.size.height));
+                        double maxAxis=static_cast<double>(max(fEll.size.width,fEll.size.height));
 //                        qDebug()<<"Min and max are: "<<minAxis<<" - "<<maxAxis;
-                        if (aspRat>0.8 && aspRat < 1.2) {
-                            if (minAxis>minDiam && maxAxis<maxDiam) {
+                        if (minAxis>minDiam && maxAxis<maxDiam) {
+                            //if (aspRat>0.8 && aspRat < 1.2) {
                                 cv::ellipse(I,fEll,150,5);
                                 foundEllipses.push_back(fEll);
-                            }
+                            //}
                         }
                     }
 
                 }
 
                 // now calculate mean equivalent diameter
-                double accumMean=0;
-                for (uint i=0;i<foundEllipses.size();i++) {
-                    accumMean=accumMean+sqrt(foundEllipses[i].size.width*foundEllipses[i].size.height);
+                if (foundEllipses.size()>0) {
+                    double accumMean=0;
+                    for (uint i=0;i<foundEllipses.size();i++) {
+                        accumMean=accumMean+sqrt(static_cast<double>(foundEllipses[i].size.width*foundEllipses[i].size.height));
+                    }
+                    double myMean=accumMean/foundEllipses.size();
+                    currIm.message.insert("Ellipse",myMean);  // put the result in the image message.
+                    //qDebug()<<"Mean: "<<myMean;
+                    char str[200];
+                    sprintf(str,"D=%.2f",myMean);
+                    putText(I, str, Point2f(20,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
+                } else {
+                    currIm.message.insert("Ellipse",-1);
+                    char str[200];
+                    sprintf(str,"D=%i",-1);
+                    putText(I, str, Point2f(20,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
                 }
-                double myMean=accumMean/foundEllipses.size();
-                //qDebug()<<"Mean: "<<myMean;
-                char str[200];
-                sprintf(str,"D=%.2f",myMean);
-                putText(I, str, Point2f(20,100), FONT_HERSHEY_PLAIN, 2,  Scalar(0,0,255,255));
 
 
-
-                currIm.image=I;
+                if (feedback) {
+                    currIm.image=edges;
+                } else {
+                    currIm.image=I;
+                }
             } else {
                 currIm.image=edges;
             }
@@ -144,7 +157,11 @@ bool EllipseDetection::processImage(ImagePacket& currIm) {
 //            dataToSave.append(outst);
 
 
+        } else {
+            qDebug()<<"Image format not yet supported! "<<currIm.pixFormat;
         }
+    } else {
+        currIm.message.insert("Ellipse",-1);
     }
     return true;
 }

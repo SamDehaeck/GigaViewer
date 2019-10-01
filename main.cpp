@@ -181,6 +181,7 @@ int main(int argc, char *argv[])
             qInfo("Doing the remote control %s and configuration %s",qUtf8Printable(cmdTopic),qUtf8Printable(cfgTopic));
         }
     }
+
     if (autostartCam) {
         //theBoss.controlCameraThread(true);
         view.newMoviePressed(driver);

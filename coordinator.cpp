@@ -13,20 +13,7 @@ Coordinator::Coordinator(QObject *parent) :
     connect(&camBack,SIGNAL(shutterChanged(int)),this,SIGNAL(shutterChanged(int)));
     connect(&camBack,SIGNAL(fpsChanged(double)),this,SIGNAL(fpsChanged(double)));
 
-
 }
-/*
-void Coordinator::setGui(MainGui *myGui) {
-
-// THIS NOT YET FIXED!!!
-#ifdef TRACKING
-    connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
-#endif
-#ifdef ELLIPSE
-    connect(theGui,SIGNAL(pluginSettingsChanged(QMap<QString,QVariant>)),&camBack,SLOT(changedPluginSettings(QMap<QString,QVariant>)));
-#endif
-}
-*/
 
 void Coordinator::controlCameraThread(bool startNew,QString dev)
 {
@@ -130,5 +117,11 @@ void Coordinator::StartRecording(bool start, QString recFold, QString codec,int 
 {
     if (camBack.isRunning()) {
         camBack.StartRecording(start,recFold,codec,skip);
+    }
+}
+
+void Coordinator::newPluginSettingsReceived(QMap<QString,QVariant> settings) {
+    if (camBack.isRunning()) {
+        camBack.changedPluginSettings(settings);
     }
 }

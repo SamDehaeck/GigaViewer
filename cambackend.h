@@ -26,14 +26,16 @@ public:
     void setRoiRows(int rows);
     void setRoiCols(int cols);
     void AdaptForDisplay(ImagePacket& newIm);
-    bool initProcPlugin();
+/*    bool initProcPlugin();
     bool endProcPlugin();
     bool DoProcPlugin(ImagePacket& newIm);
     bool startRecPlugin(QString RecName);
     bool endRecPlugin();
-    bool setSettingsPlugin(ImagePacket& newIm,QStringList settings);
+    bool setSettingsPlugin(ImagePacket& newIm,QStringList settings);  */
     void skipForwardBackward(bool forward);
     void StartRecording(bool start, QString recFold="", QString codec="",int skip=0);
+    void changedPluginSettings(QMap<QString,QVariant> settings);
+
 
 signals:
     void NewImageReady(ImagePacket im);
@@ -47,12 +49,7 @@ public slots:
     void willStartTheTimer(int interval);
     void willStopTheTimer();
 
-#ifdef TRACKING
-    void changedPluginSettings(QMap<QString,QVariant> settings);
-#endif
-#ifdef ELLIPSE
-    void changedPluginSettings(QMap<QString,QVariant> settings);
-#endif
+
 private:
     void run();
     void record();
