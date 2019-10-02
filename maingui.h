@@ -22,6 +22,10 @@
 #include "interferoplugindialog.h"
 #endif
 
+#ifdef AMPLI
+#include "ampliplugindialog.h"
+#endif
+
 class MainGui : public QGraphicsView
 {
     Q_OBJECT
@@ -91,6 +95,9 @@ private:
 #endif
 #ifdef INTERFERO
     InterferoPluginDialog* interferoDialog;
+#endif
+#ifdef AMPLI
+    AmpliPluginDialog* ampliDialog;
 #endif
 };
 

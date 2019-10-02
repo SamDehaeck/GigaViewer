@@ -122,7 +122,7 @@ void Coordinator::StartRecording(bool start, QString recFold, QString codec,int 
 
 void Coordinator::newPluginSettingsReceived(QMap<QString,QVariant> settings) {
     if (camBack.isRunning()) {
-        qInfo()<<"Should check the following plugin "<<settings["pluginName"].toString();
+        //qInfo()<<"Should check the following plugin "<<settings["pluginName"].toString();
         camBack.changedPluginSettings(settings);
     }
 }

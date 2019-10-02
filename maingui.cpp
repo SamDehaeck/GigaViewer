@@ -35,6 +35,10 @@ MainGui::MainGui(Coordinator *boss,QWidget *parent) :
     interferoDialog = new InterferoPluginDialog;
     controlDialogs.append(interferoDialog);
 #endif
+#ifdef AMPLI
+    ampliDialog = new AmpliPluginDialog;
+    controlDialogs.append(ampliDialog);
+#endif
 
 //    const QSize rect =parent->frameSize();
 //    qDebug()<<"Frame size: "<<rect.height()<<" "<<rect.width();
@@ -127,6 +131,12 @@ void MainGui::resizeEvent(QResizeEvent *event)
 
 void MainGui::newImageReceived(ImagePacket theMatrix)
 {
+// frontend plugins will only act on the images at this stage!
+// backend plugins will act in cambackend; need to emit signals from gui-settings to backend
+#ifdef AMPLI
+    ampliDialog->processImage(theMatrix);
+#endif
+
     theScene->imageBuff=theMatrix.image;
     theScene->update();
     emit newFrameNrShowing(theMatrix.seqNumber);

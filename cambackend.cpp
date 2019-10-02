@@ -39,7 +39,7 @@ CamBackend::CamBackend(QObject *parent) :
     ,ellipse(50)
   #endif
   #ifdef INTERFERO
-    ,interfero(50)
+    ,interfero()
   #endif
 
 {
@@ -135,16 +135,18 @@ void CamBackend::GrabFrame()
         }
         if (needTimer) currImage.message.insert("interval",timer->interval());  //not really usefull in this case..
 
-        doPlugin(currImage);  // will perform post-processing if necessary.
-
+        doPlugin(currImage);  // will perform post-processing if necessary => on all images.
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         if (!stoppingRecording) {  // stopping a recording can block the queue and overflow the buffers
-            AdaptForDisplay(currImage);
             if (timerInterval<10) {
                 int skipShows=static_cast<int>(round(15.0/timerInterval));
-                if (currImage.seqNumber%skipShows==0) emit NewImageReady(currImage);
+                if (currImage.seqNumber%skipShows==0) {
+                    AdaptForDisplay(currImage);
+                    emit NewImageReady(currImage);
+                }
             } else {
+                AdaptForDisplay(currImage);
                 emit NewImageReady(currImage);
             }
         }

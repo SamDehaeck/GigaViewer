@@ -8,6 +8,8 @@ InterferoPluginDialog::InterferoPluginDialog(QWidget *parent) :
     ui(new Ui::InterferoPluginDialog)
 {
     ui->setupUi(this);
+
+
     extractData();
 }
 

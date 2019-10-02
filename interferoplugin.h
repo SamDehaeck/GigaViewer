@@ -8,14 +8,11 @@
 class InterferoPlugin
 {
 private:
-    int threshold;
-    int minDiameter;
-    int maxDiameter;
     bool activated;
     bool feedback;
-    QStringList dataToSave;
+
 public:
-    InterferoPlugin(int thresh);
+    InterferoPlugin();
     void ChangeSettings(QMap<QString,QVariant> settings);
     bool processImage(ImagePacket& currIm);
 };
