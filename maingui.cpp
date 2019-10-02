@@ -106,9 +106,7 @@ MainGui::MainGui(Coordinator *boss,QWidget *parent) :
 #ifdef ELLIPSE
     connect(ellipseDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
 #endif
-#ifdef INTERFERO
-    connect(interferoDialog,SIGNAL(stateChanged(QMap<QString,QVariant>)),boss,SLOT(newPluginSettingsReceived(QMap<QString,QVariant>)));
-#endif
+
     setScene(theScene);
     getNewSample=false;
     recordSnapshot=false;
@@ -133,6 +131,9 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 {
 // frontend plugins will only act on the images at this stage!
 // backend plugins will act in cambackend; need to emit signals from gui-settings to backend
+#ifdef INTERFERO
+    interferoDialog->processImage(theMatrix);
+#endif
 #ifdef AMPLI
     ampliDialog->processImage(theMatrix);
 #endif

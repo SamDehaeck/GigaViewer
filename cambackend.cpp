@@ -29,19 +29,11 @@
 #include "ellipsedetection.h"
 #endif
 
-#ifdef INTERFERO
-#include "interferoplugin.h"
-#endif
-
 CamBackend::CamBackend(QObject *parent) :
     QThread(parent),currSink(nullptr),currSource(nullptr), recording(false),timerInterval(100),reversePlay(false),isPaused(false),needTimer(true),running(false),doPluginProcessing(false),skipImages(0),recSkip(0),stoppingRecording(false)
   #ifdef ELLIPSE
     ,ellipse(50)
   #endif
-  #ifdef INTERFERO
-    ,interfero()
-  #endif
-
 {
     timer=new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(GrabFrame()));
@@ -492,19 +484,11 @@ void CamBackend::changedPluginSettings(QMap<QString,QVariant> settings) {
         ellipse.ChangeSettings(settings);
     }
 #endif
-#ifdef INTERFERO
-    if (settings["pluginName"]=="InterferoPlugin") {
-        interfero.ChangeSettings(settings);
-    }
-#endif
 }
 
 void CamBackend::doPlugin(ImagePacket& currIm) {
 #ifdef ELLIPSE
     ellipse.processImage(currIm);
-#endif
-#ifdef INTERFERO
-    interfero.processImage(currIm);
 #endif
 }
 

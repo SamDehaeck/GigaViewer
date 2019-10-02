@@ -14,9 +14,9 @@ CONFIG += HDF5       # enable HDF5 format for storing and reading files
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
 #CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
-CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image (backend-plugin)
-#CONFIG += INTERFERO  # enable real-time analysis of interferograms (not yet working!)
-#CONFIG += AMPLI      # enable gui-plotting of a line for amplitude optimisation (frontend-only plugin)
+#CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image (backend-plugin)
+CONFIG += INTERFERO  # enable real-time analysis of interferograms (not yet working!)
+CONFIG += AMPLI      # enable gui-plotting of a line for amplitude optimisation (frontend-only plugin)
 
 CONFIG += KAFKA        # enable the kafka frontend option
 
@@ -210,10 +210,10 @@ ELLIPSE {
 }
 
 INTERFERO {
-    SOURCES += interferoplugin.cpp \
+    SOURCES += \
         interferoplugindialog.cpp
 
-    HEADERS += interferoplugin.h \
+    HEADERS += \
         interferoplugindialog.h
 
     FORMS += interferoplugindialog.ui

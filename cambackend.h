@@ -8,9 +8,6 @@
 #ifdef ELLIPSE
 #include "ellipsedetection.h"
 #endif
-#ifdef INTERFERO
-#include "interferoplugin.h"
-#endif
 
 class CamBackend : public QThread
 {
@@ -73,9 +70,6 @@ private:
 
 #ifdef ELLIPSE
     EllipseDetection ellipse;
-#endif
-#ifdef INTERFERO
-    InterferoPlugin interfero;
 #endif
 
 

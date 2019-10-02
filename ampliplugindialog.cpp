@@ -39,7 +39,7 @@ bool AmpliPluginDialog::processImage(ImagePacket& currIm) {
                 myChart->legend()->hide();
                 myChart->addSeries(series);
                 myChart->createDefaultAxes();
-                myChart->setTitle("Simple line chart example");
+                myChart->setTitle("Extracted gray scale value");
                 ui->pluginChart->setChart(myChart);
                 axisDefined=true;
             } else {
@@ -49,7 +49,9 @@ bool AmpliPluginDialog::processImage(ImagePacket& currIm) {
             }
 
             // now indicate line in figure
-            cv::line(currIm.image,cv::Point(0,line),cv::Point(currIm.image.cols,line),125,3);
+            //if (tSliderPressed) {
+                cv::line(currIm.image,cv::Point(0,line),cv::Point(currIm.image.cols,line),125,3);
+            //}
 
         } else {
             qDebug()<<"Image format not yet supported! "<<currIm.pixFormat;
@@ -73,6 +75,7 @@ void AmpliPluginDialog::on_activateBox_stateChanged(int)
 void AmpliPluginDialog::on_rowSlider_sliderPressed()
 {
     tSliderPressed=true;
+//    extractData();
 }
 
 void AmpliPluginDialog::on_rowSlider_sliderReleased()
@@ -83,7 +86,7 @@ void AmpliPluginDialog::on_rowSlider_sliderReleased()
 
 void AmpliPluginDialog::on_rowSlider_valueChanged(int)
 {
-    if (!tSliderPressed) {
+//    if (!tSliderPressed) {
         extractData();
-    }
+//    }
 }

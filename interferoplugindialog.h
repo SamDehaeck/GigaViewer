@@ -2,6 +2,9 @@
 #define INTERFEROPLUGINDIALOG_H
 #include <QtCore>
 #include <QDialog>
+#include <opencv2/opencv.hpp>
+
+#include "imagepacket.h"
 
 namespace Ui {
 class InterferoPluginDialog;
@@ -13,6 +16,7 @@ class InterferoPluginDialog : public QDialog
 
 public:
     explicit InterferoPluginDialog(QWidget *parent = nullptr);
+    bool processImage(ImagePacket& currIm);
     ~InterferoPluginDialog();
 
 signals:
@@ -20,7 +24,7 @@ signals:
 
 private slots:
     void on_activateBox_stateChanged(int val);
-    void on_feedbackButton_clicked(bool checked);
+    void on_newReferenceButton_clicked();
 
     void on_thresholdSlider_sliderPressed();
     void on_thresholdSlider_sliderReleased();
@@ -36,8 +40,15 @@ private slots:
 
 private:
     bool extractData();
+    void fftshift(cv::Mat& I,bool forward);
+    void filterDft(cv::Mat& I,int startC,int stopC);
+    void PeakFinder(cv::Mat input,int* rowPos,int* colPos);
+    void centrePeak(cv::Mat I,int rowPeak,int colPeak);
+    void adaptForScreen(cv::Mat& I);
+
     bool tSliderPressed,xSliderPressed,ySliderPressed;
-    bool feedback;
+    bool activated,newReference;
+    int rowPeak,colPeak;
 
 
 
