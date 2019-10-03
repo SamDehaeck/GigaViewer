@@ -4,7 +4,7 @@
 
 
 InterferoPluginDialog::InterferoPluginDialog(QWidget *parent) :
-    QDialog(parent),tSliderPressed(false),xSliderPressed(false),ySliderPressed(false),newReference(true),rowPeak(-1),colPeak(-1),
+    QDialog(parent),ssSliderPressed(false),skSliderPressed(false),newReference(true),rowPeak(-1),colPeak(-1),subsample(1),skip(0),fringePeriod(0),fringeAngle(0),
     ui(new Ui::InterferoPluginDialog)
 {
     ui->setupUi(this);
@@ -15,17 +15,23 @@ InterferoPluginDialog::InterferoPluginDialog(QWidget *parent) :
 
 bool InterferoPluginDialog::extractData() {
     activated=ui->activateBox->isChecked();
-/*    settings["threshold"]=ui->thresholdSlider->value();
-    settings["MinD"]=ui->MinDiameter->value();
-    settings["MaxD"]=ui->MaxDiameter->value();
-    settings["showFeedback"]=ui->feedbackButton->isChecked();
-    //qInfo()<<"Sending new state"<<settings["activated"];
-    emit stateChanged(settings);*/
+    skip=ui->skipSlider->value();
+    if (subsample!=ui->subsampleSlider->value()) {
+        newReference=true;
+    }
+    subsample=ui->subsampleSlider->value();
     return true;
 }
 
 bool InterferoPluginDialog::processImage(ImagePacket& currIm) {
     if (activated) {
+        // deal with skips here.
+        if (frameCounter%(skip+1)!=0) {
+            frameCounter++;
+            return false;
+        }
+        frameCounter+=1;
+
         if (currIm.pixFormat=="RGB8") {
             cv::Mat grayIm;
             cv::cvtColor(currIm.image,grayIm,cv::COLOR_RGB2GRAY);
@@ -33,16 +39,20 @@ bool InterferoPluginDialog::processImage(ImagePacket& currIm) {
             currIm.pixFormat="MONO8";  // will make it fall through to the next part.
         }
         if (currIm.pixFormat=="MONO8") {
-            // now do the fft to find the pattern frequency
+            // first deal with subsampling
+            cv::Mat subImage;
+            cv::resize(currIm.image,subImage,cv::Size(),1.0/subsample,1.0/subsample,cv::INTER_NEAREST);
+
+            // now do the fft
             cv::Mat padded;                            //expand input image to optimal size
-            int m = cv::getOptimalDFTSize( currIm.image.rows );
-            int n = cv::getOptimalDFTSize( currIm.image.cols ); // on the border add zero values
+            int m = cv::getOptimalDFTSize( subImage.rows );
+            int n = cv::getOptimalDFTSize( subImage.cols ); // on the border add zero values
             if (m<n) {  // not really necessary but done to avoid problems in the analysis of the period and angle
                 m=n;
             } else if (n<m) {
                 n=m;
             }
-            cv::copyMakeBorder(currIm.image, padded, 0, m - currIm.image.rows, 0, n - currIm.image.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+            cv::copyMakeBorder(subImage, padded, 0, m - subImage.rows, 0, n - subImage.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
 
             cv::Mat result= cv::Mat(m,n,CV_32FC2);
             std::vector<cv::Mat> chan;
@@ -59,6 +69,16 @@ bool InterferoPluginDialog::processImage(ImagePacket& currIm) {
 
             if (newReference) {
                 PeakFinder(result,&rowPeak,&colPeak);
+                double newRow=rowPeak;
+                if (result.rows-rowPeak<rowPeak) {
+                    newRow=rowPeak-result.rows;
+                }
+                fringePeriod=(1.0*result.cols)/(sqrt(pow(colPeak,2)+pow(newRow,2)));
+                fringeAngle=atan2(1.0*newRow,colPeak)*180.0/3.1415965359; // type conversion of cy to avoid an error with msvc10, again...
+                //qDebug()<<"Period is "<<fringePeriod<<" angle is "<<fringeAngle;
+                QString newLabel;
+                newLabel.sprintf("Fringe period %.2f and angle %.2f",fringePeriod*subsample,fringeAngle);
+                ui->fringeLabel->setText(newLabel);
                 newReference=false;
             }
             filterDft(result,colPeak-colPeak/2,3*colPeak/2);
@@ -233,56 +253,39 @@ void InterferoPluginDialog::on_newReferenceButton_clicked()
 
 
 
-void InterferoPluginDialog::on_thresholdSlider_sliderPressed()
+void InterferoPluginDialog::on_subsampleSlider_sliderPressed()
 {
-    tSliderPressed=true;
+    ssSliderPressed=true;
 }
 
-void InterferoPluginDialog::on_thresholdSlider_sliderReleased()
+void InterferoPluginDialog::on_subsampleSlider_sliderReleased()
 {
-    tSliderPressed=false;
+    ssSliderPressed=false;
     extractData();
 }
 
-void InterferoPluginDialog::on_thresholdSlider_valueChanged(int)
+void InterferoPluginDialog::on_subsampleSlider_valueChanged(int)
 {
-    if (!tSliderPressed) {
+    if (!ssSliderPressed) {
         extractData();
     }
 }
 
-void InterferoPluginDialog::on_MinDiameter_sliderPressed()
+void InterferoPluginDialog::on_skipSlider_sliderPressed()
 {
-    xSliderPressed=true;
+    skSliderPressed=true;
 }
 
-void InterferoPluginDialog::on_MinDiameter_sliderReleased()
+void InterferoPluginDialog::on_skipSlider_sliderReleased()
 {
-    xSliderPressed=false;
+    skSliderPressed=false;
     extractData();
 }
 
-void InterferoPluginDialog::on_MinDiameter_valueChanged(int)
+void InterferoPluginDialog::on_skipSlider_valueChanged(int)
 {
-    if (!xSliderPressed) {
+    if (!skSliderPressed) {
         extractData();
     }
 }
 
-void InterferoPluginDialog::on_MaxDiameter_sliderPressed()
-{
-    ySliderPressed=true;
-}
-
-void InterferoPluginDialog::on_MaxDiameter_sliderReleased()
-{
-    ySliderPressed=false;
-    extractData();
-}
-
-void InterferoPluginDialog::on_MaxDiameter_valueChanged(int)
-{
-    if (!ySliderPressed) {
-        extractData();
-    }
-}

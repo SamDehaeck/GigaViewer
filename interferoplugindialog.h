@@ -26,17 +26,13 @@ private slots:
     void on_activateBox_stateChanged(int val);
     void on_newReferenceButton_clicked();
 
-    void on_thresholdSlider_sliderPressed();
-    void on_thresholdSlider_sliderReleased();
-    void on_thresholdSlider_valueChanged(int value);
+    void on_subsampleSlider_sliderPressed();
+    void on_subsampleSlider_sliderReleased();
+    void on_subsampleSlider_valueChanged(int value);
 
-    void on_MinDiameter_sliderPressed();
-    void on_MinDiameter_sliderReleased();
-    void on_MinDiameter_valueChanged(int value);
-
-    void on_MaxDiameter_sliderPressed();
-    void on_MaxDiameter_sliderReleased();
-    void on_MaxDiameter_valueChanged(int value);
+    void on_skipSlider_sliderPressed();
+    void on_skipSlider_sliderReleased();
+    void on_skipSlider_valueChanged(int value);
 
 private:
     bool extractData();
@@ -46,9 +42,12 @@ private:
     void centrePeak(cv::Mat I,int rowPeak,int colPeak);
     void adaptForScreen(cv::Mat& I);
 
-    bool tSliderPressed,xSliderPressed,ySliderPressed;
+    bool tSliderPressed,ssSliderPressed,skSliderPressed;
     bool activated,newReference;
     int rowPeak,colPeak;
+    int subsample,skip;
+    int frameCounter;
+    double fringePeriod,fringeAngle;
 
 
 

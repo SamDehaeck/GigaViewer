@@ -131,16 +131,30 @@ void MainGui::newImageReceived(ImagePacket theMatrix)
 {
 // frontend plugins will only act on the images at this stage!
 // backend plugins will act in cambackend; need to emit signals from gui-settings to backend
+    bool pluginNoSkip=true;
+    bool updatedFrameNr=false;
 #ifdef INTERFERO
-    interferoDialog->processImage(theMatrix);
+    pluginNoSkip=interferoDialog->processImage(theMatrix);
+    if (not pluginNoSkip) {
+        if (not updatedFrameNr) emit newFrameNrShowing(theMatrix.seqNumber);
+        updatedFrameNr=true;
+        return; // if plugin returns false => skip image
+    }
 #endif
 #ifdef AMPLI
-    ampliDialog->processImage(theMatrix);
+    pluginNoSkip=ampliDialog->processImage(theMatrix);
+    if (not pluginNoSkip) {
+        if (not updatedFrameNr) emit newFrameNrShowing(theMatrix.seqNumber);
+        updatedFrameNr=true;
+        return; // if plugin returns false => skip image
+    }
 #endif
+
 
     theScene->imageBuff=theMatrix.image;
     theScene->update();
-    emit newFrameNrShowing(theMatrix.seqNumber);
+    if (not updatedFrameNr) emit newFrameNrShowing(theMatrix.seqNumber);
+    updatedFrameNr=true;
     if (getNewSample) {
         emit newSampleReady(theMatrix);
         getNewSample=false;
