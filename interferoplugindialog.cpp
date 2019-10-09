@@ -96,9 +96,13 @@ bool InterferoPluginDialog::processImage(ImagePacket& currIm) {
                 cv::split(result, chan);                   // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
                 cv::Mat phaseI;
                 cv::phase(chan[0], chan[1], phaseI);// planes[0] = magnitude
-                adaptForScreen(phaseI);
-                currIm.image=phaseI.clone();
+
+                cv::Mat phaseCrop=phaseI(cv::Rect(0,0,subImage.cols,subImage.rows));
+
+                adaptForScreen(phaseCrop);
+                currIm.image=phaseCrop.clone();
             }
+            //currIm.image=padded.clone();
 
             bool showFourierPlane=false;
 
