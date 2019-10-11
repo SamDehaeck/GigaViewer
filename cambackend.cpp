@@ -122,7 +122,7 @@ void CamBackend::GrabFrame()
             currImage.message.insert("recskip",recSkip);
         } else {
             currImage.message.insert("recording","False");
-            currImage.message.insert("recfilename","");
+            currImage.message.insert("recfilename","-");
             currImage.message.insert("recskip",0);
         }
         if (needTimer) currImage.message.insert("interval",timer->interval());  //not really usefull in this case..

@@ -10,9 +10,9 @@ TARGET = GigaViewer
 TEMPLATE = app
 
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
-#CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
+CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-#CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
 #CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image (backend-plugin)
 CONFIG += INTERFERO  # enable real-time analysis of interferograms (frontend-only plugin)
@@ -118,9 +118,9 @@ unix:!macx {
     }
 
 
-    LIBS += `pkg-config --libs opencv4`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
-    QMAKE_INCDIR += /usr/include/opencv4
-    #LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+    #LIBS += `pkg-config --libs opencv4`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
+    #QMAKE_INCDIR += /usr/include/opencv4
+    LIBS += `pkg-config --libs opencv`  # this command should handle opencv 2.4 and 3.0. If not, use lines below
     #LIBS += -pthread -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_video
     #LIBS += -lopencv_imgcodecs -lopencv_videoio  # for opencv 3.0 these packages are necessary
 

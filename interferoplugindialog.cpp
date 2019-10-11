@@ -74,7 +74,7 @@ bool InterferoPluginDialog::processImage(ImagePacket& currIm) {
                     newRow=rowPeak-result.rows;
                 }
                 fringePeriod=(1.0*result.cols)/(sqrt(pow(colPeak,2)+pow(newRow,2)));
-                fringeAngle=atan2(1.0*newRow,colPeak)*180.0/3.1415965359; // type conversion of cy to avoid an error with msvc10, again...
+                fringeAngle=atan2(1.0*newRow,colPeak)*180.0/3.1415965359;
                 //qDebug()<<"Period is "<<fringePeriod<<" angle is "<<fringeAngle;
                 QString newLabel;
                 newLabel.sprintf("Fringe period %.2f and angle %.2f",fringePeriod*subsample,fringeAngle);
