@@ -112,16 +112,16 @@ void CamBackend::GrabFrame()
         }
 
         // now set common properties for the image message
-        currImage.message.insert("origin",origin);
+        if (!currImage.message.contains("origin")) currImage.message.insert("origin",origin);
         currImage.message.insert("@timestamp",currImage.timeStamp);
         currImage.message.insert("seqnumber",currImage.seqNumber);
         currImage.message.insert("pixformat",currImage.pixFormat);
         if (recording && currSink) {
-            currImage.message.insert("recording","True");
+            currImage.message.insert("recording",1);
             currImage.message.insert("recfilename",recFileName);
             currImage.message.insert("recskip",recSkip);
         } else {
-            currImage.message.insert("recording","False");
+            currImage.message.insert("recording",0);
             currImage.message.insert("recfilename","-");
             currImage.message.insert("recskip",0);
         }

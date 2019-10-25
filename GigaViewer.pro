@@ -12,7 +12,7 @@ TEMPLATE = app
 CONFIG += HDF5       # enable HDF5 format for storing and reading files
 CONFIG += IDS        # use GigE and USB3 cameras from IDS: https://en.ids-imaging.com/
 #CONFIG += PVAPI     # use GigE cameras from Prosilica (now AVT). Available on Windows/Mac/Linux: https://www.alliedvision.com
-CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
+#CONFIG += VIMBA     # use GigE and USB3 cameras from AVT (newer version of above). For now only Windows/Linux: https://www.alliedvision.com
                      # on Windows also support for Firewire cameras
 #CONFIG += ELLIPSE    # enable real-time detection of ellipses in the image (backend-plugin)
 CONFIG += INTERFERO  # enable real-time analysis of interferograms (frontend-only plugin)

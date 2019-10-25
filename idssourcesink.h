@@ -45,6 +45,7 @@ private:
     double timeOffset;
 //    QVector<cv::Mat> matFrames;
     QString format;
+    QString source;
 
 };
 

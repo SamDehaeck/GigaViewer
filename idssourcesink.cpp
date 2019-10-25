@@ -63,6 +63,7 @@ bool IdsSourceSink::Init(QString params)
                     qDebug()<<"Will take camera # "<<deviceNr;
                     memcpy (&m_CameraInfo, &m_pCamList->uci[deviceNr], sizeof(UEYE_CAMERA_INFO));
                     qDebug()<<"This is model: "<<m_CameraInfo.FullModelName<<" with serial number "<< (m_CameraInfo.SerNo);
+                    //source=QString("IDS@")<<deviceNr<<QString("@")<<m_CameraInfo.SerNo<<QString("@");
                 } else {
                     qDebug()<<"DeviceNr is larger than amount of cameras connected.";
                 }
@@ -91,6 +92,8 @@ bool IdsSourceSink::Init(QString params)
     }
 
 
+
+
     hCam = (HIDS) (m_CameraInfo.dwDeviceID | IS_USE_DEVICE_ID);
 
 
@@ -103,6 +106,9 @@ bool IdsSourceSink::Init(QString params)
     if (!succ) {
         qWarning()<<"Something went wrong with the Pixel Clock";
     }
+
+    QString serial(m_CameraInfo.SerNo);
+    source=QString("IDS@%1@").arg(deviceNr)+serial+QString("@%1").arg(pixelClock);
 
     //Configuration section: very important to match the img_bpp=8 with the chacracteristics of the CV::MAT image to use
     //weird results like cropping or black lines can be obtained if not changed accordingly
@@ -222,9 +228,10 @@ bool IdsSourceSink::GrabFrame(ImagePacket &target, int indexIncrement)
             target.timeStamp=tis+timeOffset;
         }
         target.seqNumber=ImageInfo.u64FrameNumber;
-
         target.pixFormat=format;
 
+        target.message.insert("origin",source);
+        target.message.insert("interval",camTimeStep);
     }
 
     return true;
