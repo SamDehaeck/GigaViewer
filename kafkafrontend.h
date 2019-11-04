@@ -46,6 +46,7 @@ private:
     KafkaController *cfgPointer;
     QThread* cmdThread;
     QThread* cfgThread;
+    int skipLogging;
 
     int timeout;
     // camera parameters

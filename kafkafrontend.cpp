@@ -18,7 +18,7 @@ static void msgDeliveryCB (rd_kafka_t *,
     }
 }
 
-KafkaFrontend::KafkaFrontend(Coordinator *boss,QObject *parent) : QObject(parent),prodHndl(nullptr),cmdPointer(nullptr),cfgPointer(nullptr),timeout(100),isRecording(false) {
+KafkaFrontend::KafkaFrontend(Coordinator *boss,QObject *parent) : QObject(parent),prodHndl(nullptr),cmdPointer(nullptr),cfgPointer(nullptr),skipLogging(5),timeout(100),isRecording(false) {
     connect(boss,SIGNAL(NewImageReady(ImagePacket)),this,SLOT(newImageReceived(ImagePacket)));
     connect(this,SIGNAL(startRecording(bool,QString,QString,int)),boss,SLOT(StartRecording(bool,QString,QString,int)));
     connect(this,SIGNAL(implementNewFps(double)),boss,SLOT(changeFps(double)));
@@ -36,7 +36,10 @@ void KafkaFrontend::newImageReceived(ImagePacket theMatrix) {
     //    qInfo("Was contacted for a new image!");
         QJsonDocument qjson=QJsonDocument::fromVariant(theMatrix.message);
     //    qInfo("Want to publish %s",qjson.toJson().data());
-        publishMsg(QString("GigaViewer"),qjson);
+        //qInfo("skipLogging=%i",skipLogging);
+        if (theMatrix.seqNumber%skipLogging==0) {
+            publishMsg(QString("GigaViewer"),qjson);
+        }
     }
 }
 
@@ -114,8 +117,25 @@ void KafkaFrontend::changeParameters(QJsonObject newconfig) {
     qInfo("Want to set shutter to: %i",sshut);
     emit setShutter(sshut);
 
+    //double fps=newconfig["fps"].toDouble();
+    //if (fps>2) {
+    //    skipLogging=static_cast<int>(floor(fps/2)); // half of the framerate should lead to 2 kafka-logs per second..
+    //} else {
+    //    skipLogging=1;
+    //}
+    //skipLogging=1;
+
     double newDelay=1000.0/newconfig["fps"].toDouble();
-    qInfo("Want to set delay to: %f",newDelay);
+
+    int emitSkipped=static_cast<int>(floor(25.0/newDelay)+1); // recalculate this value
+    if (newDelay>100) {
+        skipLogging=emitSkipped;
+    } else {
+        skipLogging=emitSkipped*10;
+    }
+    qInfo("Found delay %f and emitSkipped %i setting skipLogging to %i",newDelay,emitSkipped,skipLogging);
+
+    //qInfo("Want to set delay to: %f",newDelay);
     emit implementNewFps(newDelay);
     /*int ccols=newconfig["roicols"].toInt();
     emit setRoiCols(ccols);

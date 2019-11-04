@@ -94,13 +94,14 @@ void CamBackend::GrabFrame()
             format=currImage.pixFormat;
         }
 
-        // RECORD FRAME TO DISC
+
         if (skipImages>0) {
             if (currImage.seqNumber%skipImages!=0) {
                 return; // skip recording and showing the image
             }
         }
 
+        // RECORD FRAME TO DISC
         if (recSkip>0) {
             int newSkip=recSkip;
             if (skipImages>0) newSkip=newSkip*skipImages;
@@ -131,8 +132,9 @@ void CamBackend::GrabFrame()
 
         // ADAPT IMAGE FOR DISPLAY PURPOSES IF NECESSARY
         if (!stoppingRecording) {  // stopping a recording can block the queue and overflow the buffers
-            if (timerInterval<10) {
-                int skipShows=static_cast<int>(round(15.0/timerInterval));
+            if (timerInterval<25.0) {
+                int skipShows=static_cast<int>(floor(25.0/timerInterval)+1);
+                //qInfo("TimerInterval %f Skipshows %i",timerInterval,skipShows);
                 if (currImage.seqNumber%skipShows==0) {
                     AdaptForDisplay(currImage);
                     emit NewImageReady(currImage);
@@ -261,7 +263,7 @@ void CamBackend::SetInterval(double newInt) {
         } else {
             skipImages=0;
         }
-
+        timerInterval=newNewInt;
         if (needTimer) {
             timer->setInterval(static_cast<int>(round(std::abs(newNewInt))));  // cannot do better here than integer accuracy
             // no need to emit fpsChanged(newInt) because interface already updated
